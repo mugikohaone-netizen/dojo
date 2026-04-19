@@ -5,2230 +5,1074 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#ff6b35">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>AIアプリ道場</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap" rel="stylesheet">
-<!-- Cloudflare Turnstile（ボット対策） -->
-<!-- サイトキー設定後にコメントアウトを外す：-->
-<!-- <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
-<!-- 設定済みの場合はこちら（コメントを外す）: -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
-@keyframes fadeUp  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-@keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
-@keyframes slideUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
-@keyframes pulse   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
-@keyframes blink   { 0%,100%{opacity:1} 50%{opacity:0} }
-@keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
+/* アニメーション */
+@keyframes fadeUp  { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:translateY(0) } }
+@keyframes slideUp { from { opacity:0; transform:translateY(22px) } to { opacity:1; transform:translateY(0) } }
+@keyframes pulse   { 0%,100% { transform:scale(1) } 50% { transform:scale(1.1) } }
+@keyframes blink   { 0%,100% { opacity:1 } 50% { opacity:0 } }
+@keyframes shimmer { 0% { background-position:200% center } 100% { background-position:-200% center } }
+@keyframes slideIn { from { opacity:0; transform:translateX(-10px) } to { opacity:1; transform:translateX(0) } }
+
 * { box-sizing:border-box; margin:0; padding:0; }
 html,body { height:100%; background:#0a0a0a; color:#f0f0f0; font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif; }
-::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-track{background:#0a0a0a} ::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px}
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:#2a2a2a; border-radius:2px; }
+
 #app { display:flex; flex-direction:column; min-height:100vh; max-width:480px; margin:0 auto; }
 
 /* ヘッダー */
-#header { position:sticky; top:0; z-index:100; background:#0d0d0d; border-bottom:1px solid #161616; padding:13px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
-#header-left { font-weight:900; font-size:16px; letter-spacing:0.5px; }
-#header-right { display:flex; align-items:center; gap:8px; }
+#hdr { position:sticky; top:0; z-index:100; background:#0d0d0d; border-bottom:1px solid #161616; padding:13px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+#hdr-left { font-weight:900; font-size:16px; letter-spacing:0.5px; }
+#hdr-right { display:flex; align-items:center; gap:8px; }
 .badge { background:#ff6b35; color:#fff; font-size:9px; font-weight:700; padding:2px 7px; border-radius:3px; letter-spacing:1.5px; }
-#back-btn,#lang-btn { background:transparent; border:1px solid #252525; border-radius:8px; padding:5px 12px; font-size:11px; color:#555; cursor:pointer; font-family:inherit; }
+#lang-btn, #back-btn { background:transparent; border:1px solid #252525; border-radius:8px; padding:5px 12px; font-size:11px; cursor:pointer; font-family:inherit; }
 #lang-btn { color:#ff6b35; font-weight:700; background:#1a1a1a; }
+#back-btn { color:#555; display:none; }
 
 /* PWAバナー */
-#pwa-banner { background:#1a0f00; border-bottom:1px solid #ff6b3544; padding:10px 16px; display:none; align-items:center; gap:10px; animation:fadeUp 0.3s ease; }
+#pwa-banner { display:none; background:#1a0f00; border-bottom:1px solid #ff6b3544; padding:10px 16px; align-items:center; gap:10px; animation:fadeUp 0.3s ease; }
 #pwa-banner.show { display:flex; }
-#pwa-banner span { flex:1; font-size:12px; color:#ccc; line-height:1.5; }
-#pwa-install-btn { background:#ff6b35; color:#fff; border:none; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; font-family:inherit; }
-#pwa-dismiss-btn { background:transparent; color:#555; border:none; font-size:11px; cursor:pointer; white-space:nowrap; font-family:inherit; }
+#pwa-banner-text { flex:1; font-size:12px; color:#ccc; line-height:1.5; }
+#pwa-add-btn { background:#ff6b35; color:#fff; border:none; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; font-family:inherit; }
+#pwa-dismiss { background:transparent; color:#555; border:none; font-size:11px; cursor:pointer; font-family:inherit; }
 
-/* メインコンテンツ */
+/* メイン */
 #content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 
-/* ボタン共通 */
-.btn-primary { background:#ff6b35; color:#fff; border:none; border-radius:12px; padding:13px 0; font-size:15px; font-weight:700; cursor:pointer; width:100%; font-family:inherit; transition:opacity 0.2s; }
-.btn-primary:active { opacity:0.8; }
-.btn-ghost  { background:transparent; border:1px solid #242424; border-radius:12px; padding:12px 0; font-size:13.5px; cursor:pointer; width:100%; color:#555; font-family:inherit; transition:color 0.3s; }
-.btn-small  { background:#ff6b35; color:#fff; border:none; border-radius:8px; padding:7px 13px; font-size:12.5px; cursor:pointer; font-weight:600; font-family:inherit; }
-.btn-send   { background:#ff6b35; color:#fff; border:none; border-radius:10px; padding:10px 15px; font-weight:700; cursor:pointer; font-size:13.5px; white-space:nowrap; font-family:inherit; }
+/* ボタン */
+.btn-p { background:#ff6b35; color:#fff; border:none; border-radius:12px; padding:13px 0; font-size:15px; font-weight:700; cursor:pointer; width:100%; font-family:inherit; transition:opacity 0.2s; }
+.btn-p:active { opacity:0.8; }
+.btn-g { background:transparent; border:1px solid #242424; border-radius:12px; padding:12px 0; font-size:13.5px; cursor:pointer; width:100%; font-family:inherit; color:#555; }
+.btn-s { background:#ff6b35; color:#fff; border:none; border-radius:8px; padding:7px 13px; font-size:12.5px; cursor:pointer; font-weight:600; font-family:inherit; }
+.btn-send { background:#ff6b35; color:#fff; border:none; border-radius:10px; padding:10px 15px; font-weight:700; cursor:pointer; font-size:13.5px; white-space:nowrap; font-family:inherit; }
 
-/* センター */
+/* センター画面 */
 .center { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
-.center-card { text-align:center; max-width:320px; animation:slideUp 0.5s ease; }
+.center-card { text-align:center; max-width:340px; animation:slideUp 0.5s ease; }
 .big-emoji { font-size:56px; margin-bottom:14px; }
-.center-title { font-size:20px; font-weight:900; margin-bottom:12px; line-height:1.45; }
-.center-desc  { font-size:13px; color:#888; line-height:1.8; margin-bottom:28px; }
-.step-badge   { font-size:11px; color:#ff6b35; font-weight:700; letter-spacing:1.5px; margin-bottom:16px; }
+.c-title { font-size:20px; font-weight:900; margin-bottom:12px; line-height:1.45; }
+.c-desc  { font-size:13px; color:#888; line-height:1.8; margin-bottom:28px; }
+.step-badge { font-size:11px; color:#ff6b35; font-weight:700; letter-spacing:1.5px; margin-bottom:16px; }
 
 /* 記事 */
 #article { flex:1; overflow-y:auto; padding-bottom:32px; }
-.article-header { padding:20px 18px 0; border-bottom:1px solid #181818; }
-.article-tag { display:inline-block; background:#ff6b35; color:#fff; font-size:9px; font-weight:900; letter-spacing:2px; padding:3px 9px; border-radius:3px; margin-bottom:12px; }
-.article-title { font-size:17px; font-weight:900; line-height:1.55; margin-bottom:14px; letter-spacing:0.3px; }
+.art-header { padding:20px 18px 0; border-bottom:1px solid #181818; }
+.art-tag { display:inline-block; background:#ff6b35; color:#fff; font-size:9px; font-weight:900; letter-spacing:2px; padding:3px 9px; border-radius:3px; margin-bottom:12px; }
+.art-title { font-size:17px; font-weight:900; line-height:1.55; margin-bottom:14px; }
 .author-row { display:flex; align-items:center; gap:9px; padding-bottom:16px; }
-.author-avatar { width:32px; height:32px; border-radius:50%; background:#ff6b35; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.author-av { width:32px; height:32px; border-radius:50%; background:#ff6b35; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
 .author-name { font-size:13px; font-weight:700; }
 .author-date { font-size:10px; color:#444; }
-.article-body { padding:18px 18px 0; }
-.article-lead { font-size:13.5px; line-height:1.9; color:#bbb; margin-bottom:14px; }
-.article-hint { background:#111; border:1px solid #ff6b3530; border-radius:9px; padding:10px 13px; margin-bottom:18px; font-size:11.5px; color:#666; display:flex; gap:8px; }
-
-/* ラウンドカード */
+.art-body { padding:18px 18px 0; }
+.art-lead { font-size:13.5px; line-height:1.9; color:#bbb; margin-bottom:14px; }
+.art-hint { background:#111; border:1px solid #ff6b3530; border-radius:9px; padding:10px 13px; margin-bottom:18px; font-size:11.5px; color:#666; display:flex; gap:8px; }
 .rounds { padding:0 18px; display:flex; flex-direction:column; gap:10px; }
 .round-card { background:#0f0f0f; border:1px solid #1c1c1c; border-radius:13px; overflow:hidden; transition:border-color 0.25s; }
 .round-card.open { border-color:#ff6b35; }
-.round-header { padding:14px 16px; cursor:pointer; display:flex; gap:13px; align-items:center; }
-.round-icon { width:42px; height:42px; border-radius:11px; flex-shrink:0; background:#161616; border:1px solid #282828; display:flex; align-items:center; justify-content:center; font-size:19px; transition:background 0.25s; }
-.round-card.open .round-icon { background:#ff6b35; border-color:#ff6b35; animation:pulse 2s infinite; }
-.round-badge { font-size:9.5px; color:#555; font-weight:700; letter-spacing:1.2px; margin-bottom:3px; }
-.round-card.open .round-badge { color:#ff6b35; }
+.round-hdr { padding:14px 16px; cursor:pointer; display:flex; gap:13px; align-items:center; }
+.round-icon-wrap { width:42px; height:42px; border-radius:11px; flex-shrink:0; background:#161616; border:1px solid #282828; display:flex; align-items:center; justify-content:center; font-size:19px; transition:background 0.25s; }
+.round-card.open .round-icon-wrap { background:#ff6b35; border-color:#ff6b35; }
+.round-badge-text { font-size:9.5px; color:#555; font-weight:700; letter-spacing:1.2px; margin-bottom:3px; }
+.round-card.open .round-badge-text { color:#ff6b35; }
 .round-title { font-size:14.5px; font-weight:700; }
 .round-arrow { font-size:18px; color:#383838; transition:transform 0.25s; margin-left:auto; }
 .round-card.open .round-arrow { transform:rotate(90deg); }
 .round-body { padding:0 16px 16px; border-top:1px solid #181818; animation:fadeUp 0.25s ease; }
 .round-quote { font-size:12.5px; color:#555; line-height:1.75; padding:12px 0 14px; border-bottom:1px solid #181818; margin-bottom:14px; font-style:italic; }
-
-/* 進捗 */
-.progress-row { padding:18px 18px 0; display:flex; gap:6px; align-items:center; }
-.progress-bar-item { height:3px; flex:1; border-radius:2px; background:#1c1c1c; transition:background 0.4s; }
-.progress-bar-item.done { background:#ff6b35; }
-.progress-count { font-size:10px; color:#444; margin-left:6px; white-space:nowrap; }
-
-/* CTA */
+.prog-row { padding:18px 18px 0; display:flex; gap:6px; align-items:center; }
+.prog-bar { height:3px; flex:1; border-radius:2px; background:#1c1c1c; transition:background 0.4s; }
+.prog-bar.done { background:#ff6b35; }
+.prog-count { font-size:10px; color:#444; margin-left:6px; white-space:nowrap; }
 .cta-box { margin:20px 18px 0; background:linear-gradient(135deg,#120800,#1e0f00); border:1px solid #ff6b3555; border-radius:16px; padding:22px 18px; animation:fadeUp 0.5s ease; text-align:center; }
 .cta-emoji { font-size:36px; margin-bottom:10px; }
 .cta-title { font-size:16px; font-weight:900; margin-bottom:8px; }
 .cta-desc  { font-size:12.5px; color:#999; line-height:1.75; margin-bottom:18px; }
 .cta-hint  { font-size:11px; color:#555; margin-bottom:14px; }
 .cta-zero  { font-size:10.5px; color:#444; margin-top:10px; }
-#cta-btn { border-radius:12px; padding:14px 0; font-size:15px; font-weight:700; cursor:pointer; width:100%; border:1px solid #2a2a2a; background:#1a1a1a; color:#555; font-family:inherit; transition:all 0.3s; }
+#cta-btn { border-radius:12px; padding:14px 0; font-size:15px; font-weight:700; width:100%; font-family:inherit; cursor:pointer; transition:all 0.3s; border:1px solid #2a2a2a; background:#1a1a1a; color:#555; }
 #cta-btn.ready { background:#ff6b35; color:#fff; border:none; background-image:linear-gradient(90deg,#ff6b35,#ff9055,#ff6b35); background-size:200% auto; animation:shimmer 2s linear infinite; }
+.skip-link { text-align:center; margin-top:10px; }
+.skip-link button { background:transparent; border:none; color:#555; font-size:11.5px; cursor:pointer; font-family:inherit; text-decoration:underline; padding:4px 8px; }
+.art-footer { padding:24px 18px 0; border-top:1px solid #141414; margin-top:24px; }
+.art-footer-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.art-footer-av { width:38px; height:38px; border-radius:50%; background:#ff6b35; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.art-footer-name { font-size:13px; font-weight:700; }
+.art-footer-desc { font-size:10.5px; color:#444; }
+.art-footer-cta { font-size:12px; color:#3a3a3a; line-height:1.75; }
+.support-box { margin-top:14px; background:#111; border:1px solid #ff6b3533; border-radius:10px; padding:12px 14px; }
+.support-box-title { font-size:12px; color:#ff6b35; font-weight:700; margin-bottom:4px; }
+.support-box-desc { font-size:11.5px; color:#666; line-height:1.7; }
+.terms-link { margin-top:12px; font-size:11px; color:#333; }
+.terms-link a { color:#444; text-decoration:none; }
 
-/* 著者フッター */
-.author-footer { padding:24px 18px 0; border-top:1px solid #141414; margin-top:24px; }
-.author-footer-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-.author-footer-avatar { width:38px; height:38px; border-radius:50%; background:#ff6b35; display:flex; align-items:center; justify-content:center; font-size:18px; }
-.author-footer-name { font-size:13px; font-weight:700; }
-.author-footer-desc { font-size:10.5px; color:#444; }
-.author-footer-cta { font-size:12px; color:#3a3a3a; line-height:1.75; }
-
-/* チャットデモ */
-.demo-battle { display:flex; flex-direction:column; gap:10px; }
+/* デモ */
+.demo-chat { display:flex; flex-direction:column; gap:10px; }
 .bubble-row { display:flex; gap:8px; align-items:flex-start; animation:slideIn 0.3s ease; }
 .bubble-row.right { justify-content:flex-end; }
-.bubble-avatar { font-size:20px; flex-shrink:0; }
-.bubble-speaker { font-size:10px; font-weight:700; margin-bottom:2px; }
-.bubble { padding:9px 13px; max-width:250px; font-size:12.5px; line-height:1.65; }
-.bubble.ai   { background:#161616; border-radius:3px 14px 14px 14px; color:#d0d0d0; }
-.bubble.user { background:#ff6b35; border-radius:14px 3px 14px 14px; color:#fff; border:none; }
-.typing-indicator { font-size:11px; color:#444; animation:blink 1s infinite; padding-left:28px; }
-
-/* 仕様書デモ */
-.spec-item { background:#141414; border:1px solid #222; border-radius:10px; padding:11px 13px; display:flex; gap:11px; align-items:center; animation:fadeUp 0.4s ease both; }
+.bubble-av { font-size:20px; flex-shrink:0; }
+.bubble-name { font-size:10px; font-weight:700; margin-bottom:2px; }
+.bubble { padding:9px 13px; max-width:250px; font-size:12.5px; line-height:1.65; border-radius:3px 14px 14px 14px; }
+.bubble.them { background:#161616; color:#d0d0d0; }
+.bubble.me   { background:#ff6b35; color:#fff; border-radius:14px 3px 14px 14px; }
+.typing { font-size:11px; color:#444; animation:blink 1s infinite; padding-left:28px; }
+.spec-item { background:#141414; border:1px solid #222; border-radius:10px; padding:11px 13px; display:flex; gap:11px; align-items:center; margin-bottom:9px; animation:fadeUp 0.4s ease both; }
 .spec-icon { font-size:22px; flex-shrink:0; }
 .spec-label { font-size:10px; color:#555; margin-bottom:2px; }
 .spec-value { font-size:13px; color:#ddd; }
-
-/* コードデモ */
-.code-demo { background:#0d1117; border:1px solid #1e2a1e; border-radius:10px; padding:12px 14px; font-family:'Courier New',monospace; font-size:11.5px; max-height:200px; overflow-y:auto; line-height:1.7; }
-.code-line { animation:slideIn 0.08s ease; }
+.code-box { background:#0d1117; border:1px solid #1e2a1e; border-radius:10px; padding:12px 14px; font-family:monospace; font-size:11.5px; max-height:200px; overflow-y:auto; line-height:1.7; }
 .code-cursor { color:#ff6b35; animation:blink 0.6s infinite; }
 
 /* インタビュー */
 #interview { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-#progress-bar { height:3px; background:#1e1e1e; flex-shrink:0; }
-#progress-fill { height:100%; background:#ff6b35; transition:width 0.5s; width:20%; }
-#step-label { font-size:10px; color:#444; text-align:right; padding:5px 16px; letter-spacing:1px; flex-shrink:0; }
-#messages { flex:1; overflow-y:auto; padding:8px 16px; display:flex; flex-direction:column; gap:14px; }
-.msg-row { animation:fadeUp 0.3s ease; }
-.msg-row.ai   { display:flex; gap:9px; align-items:flex-start; }
-.msg-row.user { display:flex; justify-content:flex-end; }
-.msg-avatar { font-size:26px; flex-shrink:0; margin-top:3px; }
-.msg-bubble { padding:11px 13px; font-size:13.5px; line-height:1.65; }
-.msg-bubble.ai   { background:#151515; border:1px solid #252525; border-radius:3px 14px 14px 14px; color:#ddd; max-width:272px; }
-.msg-bubble.user { background:#ff6b35; border-radius:14px 3px 14px 14px; color:#fff; max-width:272px; }
+#prog-bar  { height:3px; background:#1e1e1e; flex-shrink:0; }
+#prog-fill { height:100%; background:#ff6b35; transition:width 0.5s; }
+#step-lbl  { font-size:10px; color:#444; text-align:right; padding:5px 16px; letter-spacing:1px; flex-shrink:0; }
+#messages  { flex:1; overflow-y:auto; padding:8px 16px; display:flex; flex-direction:column; gap:14px; }
+.msg-ai   { display:flex; gap:9px; align-items:flex-start; animation:fadeUp 0.3s ease; }
+.msg-user { display:flex; justify-content:flex-end; animation:fadeUp 0.3s ease; }
+.msg-av { font-size:26px; flex-shrink:0; margin-top:3px; }
+.msg-bubble-ai   { background:#151515; border:1px solid #252525; border-radius:3px 14px 14px 14px; padding:11px 13px; max-width:272px; font-size:13.5px; line-height:1.65; color:#ddd; }
+.msg-bubble-user { background:#ff6b35; border-radius:14px 3px 14px 14px; padding:11px 13px; max-width:272px; font-size:13.5px; line-height:1.65; color:#fff; }
 .msg-hint { font-size:10.5px; color:#484848; margin-top:5px; margin-left:4px; }
 #input-area { display:flex; gap:8px; padding:11px 16px; border-top:1px solid #181818; background:#0a0a0a; flex-shrink:0; }
-#chat-input { flex:1; background:#161616; border:1px solid #242424; border-radius:10px; color:#f0f0f0; padding:10px 13px; font-size:13.5px; outline:none; font-family:inherit; }
+#chat-inp { flex:1; background:#161616; border:1px solid #242424; border-radius:10px; color:#f0f0f0; padding:10px 13px; font-size:13.5px; outline:none; font-family:inherit; }
 
 /* ローディング */
 #loading { flex:1; display:flex; align-items:center; justify-content:center; }
 #loading-inner { text-align:center; max-width:300px; padding:20px; }
 #loading-emoji { font-size:60px; margin-bottom:18px; display:inline-block; animation:pulse 1s infinite; }
-#loading-text { font-size:15.5px; font-weight:700; margin-bottom:22px; min-height:50px; line-height:1.6; }
-#loading-dots { display:flex; gap:5px; justify-content:center; margin-bottom:18px; }
-.loading-dot { width:7px; height:7px; border-radius:50%; background:#222; transition:background 0.3s; }
-.loading-dot.active { background:#ff6b35; }
+#loading-text  { font-size:15.5px; font-weight:700; margin-bottom:22px; min-height:50px; line-height:1.6; }
+#loading-dots  { display:flex; gap:5px; justify-content:center; margin-bottom:18px; }
+.ldot { width:7px; height:7px; border-radius:50%; background:#222; transition:background 0.3s; }
+.ldot.on { background:#ff6b35; }
 #loading-sub { font-size:11px; color:#383838; }
 
 /* 結果 */
 #result { flex:1; display:flex; flex-direction:column; max-width:400px; margin:0 auto; width:100%; padding:22px 16px; gap:18px; overflow-y:auto; animation:slideUp 0.5s ease; }
-#result-header { text-align:center; }
-#result-emoji { font-size:44px; }
-#result-title { font-size:21px; font-weight:900; margin:8px 0 4px; }
-#result-desc  { color:#666; font-size:12.5px; }
-#result-warnings { margin-top:10px; background:#1a1400; border:1px solid #ff990033; border-radius:8px; padding:8px 12px; font-size:11px; color:#aa8800; text-align:left; display:none; }
-#phone-frame { background:#0f0f0f; border:2px solid #24242433; border-radius:22px; width:276px; overflow:hidden; box-shadow:0 10px 40px #00000044; margin:0 auto; }
-#phone-header { background:#161616; padding:13px 15px; border-bottom:1px solid #1e1e1e; font-weight:700; font-size:14.5px; }
-#phone-body { padding:6px 0; min-height:190px; }
+.result-head { text-align:center; }
+.result-emoji { font-size:44px; }
+.result-title { font-size:21px; font-weight:900; margin:8px 0 4px; }
+.result-desc  { color:#666; font-size:12.5px; }
+.phone-frame { background:#0f0f0f; border:2px solid #24242433; border-radius:22px; width:276px; overflow:hidden; margin:0 auto; }
+.phone-hdr  { background:#161616; padding:13px 15px; border-bottom:1px solid #1e1e1e; font-weight:700; font-size:14.5px; }
+.phone-body { padding:6px 0; min-height:190px; }
 .check-item { display:flex; align-items:center; gap:11px; padding:11px 15px; cursor:pointer; border-bottom:1px solid #131313; transition:background 0.2s; }
 .check-item.done { }
-.check-icon { font-size:17px; }
+.check-icon  { font-size:17px; }
 .check-label { font-size:13.5px; transition:opacity 0.2s; }
 .check-label.done { text-decoration:line-through; opacity:0.38; }
-#all-done-msg { text-align:center; padding:14px; font-weight:700; font-size:12.5px; animation:fadeUp 0.4s ease; display:none; }
-#result-preview-note { text-align:center; font-size:10.5px; color:#333; padding:7px 14px; background:#0f0f0f; border-radius:8px; }
-#download-card { background:#0f1a0f; border-radius:12px; padding:14px 16px; }
-#download-title { font-size:13px; font-weight:700; color:#4caf50; margin-bottom:6px; }
-#download-desc  { font-size:11.5px; color:#666; line-height:1.7; margin-bottom:12px; }
-#download-btn   { border-radius:10px; padding:11px 0; font-size:13.5px; font-weight:700; cursor:pointer; width:100%; border:none; color:#fff; font-family:inherit; transition:background 0.3s; }
-#result-actions { display:flex; flex-direction:column; gap:9px; }
-#retry-btn  { }
-#bug-btn    { }
-#back-btn2  { font-size:12px; color:#3a3a3a; }
+.alldone-msg { text-align:center; padding:14px; font-weight:700; font-size:12.5px; animation:fadeUp 0.4s ease; display:none; }
+.result-note { text-align:center; font-size:10.5px; color:#333; padding:7px 14px; background:#0f0f0f; border-radius:8px; }
+
+/* ダウンロードカード */
+.dl-card { border-radius:14px; padding:16px; }
+.dl-card-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.dl-card-desc  { font-size:11.5px; color:#555; line-height:1.7; margin-bottom:12px; }
+.pro-tag { position:absolute; top:10px; right:12px; background:#ff6b35; color:#fff; font-size:9px; font-weight:900; padding:2px 8px; border-radius:10px; letter-spacing:1px; }
+.pro-feature { display:flex; align-items:center; gap:8px; font-size:12.5px; color:#ccc; margin-bottom:7px; }
+.pro-feature-icon { font-size:16px; width:22px; }
+.share-step { display:flex; gap:10px; align-items:flex-start; font-size:12px; color:#aaa; margin-bottom:6px; }
+.share-step-num { background:#5c9eff22; color:#5c9eff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0; }
+.result-actions { display:flex; flex-direction:column; gap:9px; }
 
 /* エラー系 */
-.error-screen { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
-.error-card { text-align:center; max-width:320px; animation:fadeUp 0.4s ease; }
-.error-emoji { font-size:52px; margin-bottom:14px; }
-.error-title { font-size:17px; font-weight:800; margin-bottom:10px; }
-.error-desc  { font-size:13px; color:#777; line-height:1.75; margin-bottom:24px; }
-.hold-msg-box { background:#1a0f00; border:1px solid #ff6b3544; border-radius:12px; padding:16px; margin-bottom:20px; font-size:13px; color:#ddd; line-height:1.8; text-align:left; }
-
-/* アイコン選択 */
-.icon-section { background:#0f0f0f; border:1px solid #1e1e1e; border-radius:14px; padding:16px; }
-.icon-section-title { font-size:13px; font-weight:700; margin-bottom:4px; }
-.icon-section-desc  { font-size:11px; color:#555; margin-bottom:14px; line-height:1.6; }
-.icon-candidates { display:flex; gap:10px; justify-content:center; margin-bottom:14px; }
-.icon-candidate { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
-.icon-frame { width:64px; height:64px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:32px; border:2px solid transparent; transition:all 0.2s; position:relative; flex-shrink:0; }
-.icon-frame.selected { border-color:#fff; transform:scale(1.08); box-shadow:0 4px 20px rgba(255,255,255,0.2); }
-.icon-label { font-size:10px; color:#555; }
-
-/* ホーム画面追加モーダル */
-#home-modal { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; display:none; align-items:flex-end; justify-content:center; padding:0 0 0 0; }
-#home-modal.show { display:flex; }
-#home-modal-inner { background:#111; border-radius:20px 20px 0 0; padding:24px 20px 40px; width:100%; max-width:480px; animation:slideUp 0.35s ease; max-height:80vh; overflow-y:auto; }
-.home-modal-title { font-size:18px; font-weight:900; margin-bottom:6px; text-align:center; }
-.home-modal-desc  { font-size:13px; color:#888; text-align:center; line-height:1.7; margin-bottom:16px; }
-.os-tabs { display:flex; gap:8px; margin-bottom:16px; }
-.os-tab { flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; border:1px solid #2a2a2a; background:transparent; color:#555; font-family:inherit; transition:all 0.2s; }
-.os-tab.active { background:#ff6b35; color:#fff; border-color:#ff6b35; }
-.home-steps { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
-.home-step { display:flex; gap:12px; align-items:flex-start; background:#1a1a1a; border-radius:10px; padding:12px 14px; }
-.home-step-num { width:24px; height:24px; border-radius:50%; background:#ff6b35; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
-.home-step-text { font-size:13px; line-height:1.65; color:#ccc; }
-.home-step-text strong { color:#fff; }
-
-/* Turnstileコンテナ */
-#turnstile-container { display:flex; justify-content:center; padding:8px 0; min-height:65px; }
-/* ローディング中に閉じた時の復元バナー */
-#resume-loading-banner { background:#1a1000; border:1px solid #ff6b3555; border-radius:10px; padding:12px 14px; margin:0 18px 16px; font-size:12.5px; color:#ccc; line-height:1.7; display:none; animation:fadeUp 0.3s ease; }
-#resume-loading-banner strong { color:#ff6b35; }
+.err-screen { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
+.err-card   { text-align:center; max-width:320px; animation:fadeUp 0.4s ease; }
+.err-emoji  { font-size:52px; margin-bottom:14px; }
+.err-title  { font-size:17px; font-weight:800; margin-bottom:10px; }
+.err-desc   { font-size:13px; color:#777; line-height:1.75; margin-bottom:24px; }
+.hold-box   { background:#1a0f00; border:1px solid #ff6b3544; border-radius:12px; padding:16px; margin-bottom:20px; font-size:13px; color:#ddd; line-height:1.8; text-align:left; }
 </style>
+
 </head>
 <body>
 <div id="app">
-  <div id="header">
-    <div id="header-left">🥋 <span id="app-name-header">AIアプリ道場</span></div>
-    <div id="header-right">
-      <button id="back-btn" style="display:none" onclick="showArticle()"></button>
+  <div id="hdr">
+    <div id="hdr-left">🥋 <span id="hdr-name">AIアプリ道場</span></div>
+    <div id="hdr-right">
+      <button id="back-btn" onclick="showArticle()"></button>
       <button id="lang-btn" onclick="toggleLang()">EN</button>
       <span class="badge">BETA</span>
     </div>
   </div>
-
   <div id="pwa-banner">
-    <span>📱 </span><span id="pwa-banner-text">ホーム画面に追加してアプリとして使えます！</span>
-    <button id="pwa-install-btn" onclick="handleInstall()">追加する</button>
-    <button id="pwa-dismiss-btn" onclick="dismissPWA()">あとで</button>
+    <span>📱</span>
+    <span id="pwa-banner-text">ホーム画面に追加してアプリとして使えます！</span>
+    <button id="pwa-add-btn" onclick="handleInstall()">追加する</button>
+    <button id="pwa-dismiss" onclick="dismissPWA()">あとで</button>
   </div>
-
   <div id="content"></div>
 </div>
 
-<!-- ホーム画面追加モーダル -->
-<div id="home-modal" onclick="if(event.target===this)closeHomeModal()">
-  <div id="home-modal-inner">
-    <div class="home-modal-title">📱 ホーム画面に追加する</div>
-    <div class="home-modal-desc" id="home-modal-desc">毎日すぐ開けるように、ホーム画面にアイコンを置きましょう。</div>
-    <div class="os-tabs">
-      <button class="os-tab active" id="tab-ios" onclick="switchOS('ios')">iPhone / iPad</button>
-      <button class="os-tab" id="tab-android" onclick="switchOS('android')">Android</button>
-    </div>
-    <div class="home-steps" id="home-steps"></div>
-    <button class="btn-ghost" style="color:#555" onclick="closeHomeModal()">閉じる</button>
-  </div>
-</div>
-
 <script>
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // 設定
-// ═══════════════════════════════════════════
-// ⚠️ バックエンドURLをここに設定（Cloudflare WorkersのURL）
-// デプロイ後: const BACKEND_URL = "https://your-worker.your-name.workers.dev/generate";
-const BACKEND_URL = null; // nullの間はモック動作
+// -----------------------------------------------
+var BACKEND_URL = null; // デプロイ後にWorkerのURLを入れる
+var SAVE_KEY    = 'dojo_v1';
+var RATE_KEY    = 'dojo_rate';
+var TOKEN_KEY   = 'dojo_token';
 
-// Turnstileサイトキー（Cloudflareで発行後にここに入れる）
-// const TURNSTILE_SITE_KEY = "0x4AAAAAAA..."; // 設定するまでnullのまま
-const TURNSTILE_SITE_KEY = null;
-
-const SAVE_KEY = "dojo_progress_v1";
-const USER_TOKEN_KEY = "dojo_user_token";
-const RATE_KEY = "dojo_rate";
-
-// ユーザートークン：デバイス識別子（削除されない限り永続）
-function getUserToken() {
-  let token = localStorage.getItem(USER_TOKEN_KEY);
-  if (!token) {
-    token = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
-    localStorage.setItem(USER_TOKEN_KEY, token);
-  }
-  return token;
-}
-
-// フロント側レート制限チェック（1日1回）
-function checkFrontendRate() {
-  const today = new Date().toISOString().slice(0, 10);
-  try {
-    const data = JSON.parse(localStorage.getItem(RATE_KEY) || '{}');
-    return (data.date === today && data.count >= 1);
-  } catch(e) { return false; }
-}
-
-function incrementFrontendRate() {
-  const today = new Date().toISOString().slice(0, 10);
-  try {
-    const data = JSON.parse(localStorage.getItem(RATE_KEY) || '{}');
-    const count = (data.date === today ? data.count : 0) + 1;
-    localStorage.setItem(RATE_KEY, JSON.stringify({ date: today, count }));
-  } catch(e) {}
-}
-
-// ═══════════════════════════════════════════
-// 多言語テキスト
-// ═══════════════════════════════════════════
-const T = {
+// -----------------------------------------------
+// 言語テキスト
+// -----------------------------------------------
+var T = {
   ja: {
-    appName:"AIアプリ道場",
-    backToArticle:"← 記事",
-    enterDojo:"道場に入門する 押忍！",
-    roundsLeft: n => `あと${n}ラウンド残ってます`,
-    tryYourself:"自分のアプリ、作ってみますか？",
-    tryDesc:"記事で見た「あの流れ」を、今度はあなた自身のアイデアで体験できます。",
-    allRoundsHint:"💡 全ラウンドを見るとボタンが光ります",
-    zeroProg:"プログラミング知識ゼロでOK",
-    stepSubtitle:"STEP 2 / 2 — いよいよ本番",
-    dojoTitle:"あなたのアイデアを\n形にしましょう",
-    dojoDesc:"記事で見たあの手順を、今度はあなたのアイデアで。AIが5つの質問で、頭の中のモヤモヤを仕様書に変えます。",
-    startBtn:"入門する 押忍！",
-    send:"送信 →",
-    loadingSub:"AIが本気で戦っています。少々お待ちを…",
-    resultNote:"📱 このプレビューはデモです。バックエンド接続後にあなたの言葉で項目が生成されます",
-    retryBtn:"🔄 別のアプリを作る",
-    bugIdle:"🐛 動かない！直して",
-    bugFixing:"🔧 AIが修正中...",
-    bugFixed:"✅ 修正完了！もう一度試してみて",
-    downloadTitle:"📥 HTMLをダウンロード（お持ち帰り）",
-    downloadDesc:"完成したアプリをHTMLファイルとして保存。サーバー不要でスマホ内で動きます。",
-    downloadBtn:"📥 HTMLをダウンロード",
-    downloaded:"✅ ダウンロード完了！",
-    holdTitle:"ちょっと待った！",
-    holdSenseiStop:"師範のストップ",
-    holdDefault:"このアイデアは素晴らしいですが、まずは一人用のシンプル版から始めませんか？",
-    holdRetry:"わかった！やり直す 押忍！",
-    holdReset:"最初からやり直す",
-    holdHint:"localStorageだけで動く機能が最強です",
-    holdRedoMsg:"改めて「必殺技」を教えてください👇\n一人のスマホの中だけで完結する機能で考えてみましょう🥋",
-    rateLimitTitle:"今日の道場は閉まりました",
-    rateLimitDesc:"1日3回まで無料で使えますが、本日の上限に達しました。",
-    rateLimitSub:"明日また来てください。押忍！🥋",
-    errorTitle:"電波が悪いようです…",
-    errorDesc:"AIとの通信に失敗しました。\nもう一度試してみましょう💪",
-    retryFight:"再挑戦する 押忍！",
-    pwaInstall:"ホーム画面に追加してアプリとして使えます！",
-    pwaAdd:"追加する",
-    pwaLater:"あとで",
-    resumeMsg:"おかえり！途中まで答えてくれてましたね。続きから行きましょう💪",
-    doneMsg:"完璧です！✊ 仕様書が完成しました。\nクロード大明神に渡して、今すぐコード生成を始めます！",
-    redirectMsg:"面白いアイデアですね！✨\nただ複数人が絡む機能は、まず一人用で土台を作ってからが道場の鉄則です🥋\nまずはあなた自身が使うシンプル版から始めませんか？",
-    redirectHint:"一人用でも十分すごいものが作れます！",
-    redirectBtn:"わかった！一人用で進める →",
-    articleTitle:"AI3体を戦わせてスマホアプリを\n作れた話（秘伝のレシピ公開）",
-    articleLead:"プログラミング知識ゼロの私が、AI同士を格闘技のリングで戦わせてアプリを作った話。各ラウンドをタップして、実際の「泥臭い戦い」を体験してください。",
-    articleHint:"各ラウンドをタップするとAI達の実際のやり取りが再生されます",
-    authorDate:"2026年4月14日",
-    authorDesc:"難しい税金やAIの「構造」を噛み砕いて発信中",
-    authorCTA:"「こんなの作りたい！」はコメント欄へ。プログラミング知識ゼロでよければ全力で相談に乗ります。押忍！",
-    questions:[
-      {id:"problem",text:"押忍！今日作るのは、誰のどんなモヤモヤを解決するツールですか？",ph:"例：営業前の準備を毎回ど忘れしてしまう自分のため",hint:"思いつきでOK。完璧じゃなくて大丈夫です💪"},
-      {id:"user",   text:"それを一番使うのは誰ですか？あなた自身？それとも誰か大切な人？",ph:"例：外回りが多い営業職の自分",hint:"具体的な人を思い浮かべると、アプリがグッと良くなります"},
-      {id:"killer", text:"そのアプリの「必殺技」は何ですか？これ一個だけは絶対に外せない！",ph:"例：訪問前にワンタップで準備リストをチェックできる",hint:"多機能より「これだけ」の方が最強です"},
-      {id:"cut",    text:"逆に、あえて削る機能は何ですか？「あれば便利だけど、今はいらない」もの。",ph:"例：データの統計グラフ、チームへの共有機能",hint:"削る勇気が、神アプリを生む"},
-      {id:"feel",   text:"アプリを使い終わった後、どんな気持ちになってほしいですか？",ph:"例：「よし、完璧な準備ができた！」という達成感",hint:"感情を言葉にすると、デザインが決まります"},
+    appName:       'AIアプリ道場',
+    backToArticle: '← 記事',
+    enterDojo:     '道場に入門する 押忍！',
+    roundsLeft:    function(n){ return 'あと'+n+'ラウンド残ってます'; },
+    tryYourself:   '自分のアプリ、作ってみますか？',
+    tryDesc:       '記事で見た「あの流れ」を、今度はあなた自身のアイデアで。',
+    allRoundsHint: '💡 全ラウンドを見るとボタンが光ります',
+    zeroProg:      'プログラミング知識ゼロでOK',
+    stepSubtitle:  'STEP 2 / 2 — いよいよ本番',
+    dojoTitle:     'あなたのアイデアを\n形にしましょう',
+    dojoDesc:      'AIが5つの質問で、頭の中のモヤモヤを仕様書に変えます。',
+    startBtn:      '入門する 押忍！',
+    send:          '送信 →',
+    loadingSub:    'AIが本気で戦っています。少々お待ちを…',
+    resultNote:    '📱 バックエンド接続後にあなたの言葉で項目が生成されます',
+    retryBtn:      '🔄 別のアプリを作る',
+    bugIdle:       '🐛 動かない！直して',
+    bugFixing:     '🔧 AIが修正中...',
+    bugFixed:      '✅ 修正完了！もう一度試してみて',
+    downloadBtn:   '📥 HTMLをダウンロード（無料版）',
+    downloaded:    '✅ ダウンロード完了！',
+    proDownload:   '🚀 プロ版をダウンロード（無料）',
+    holdTitle:     'ちょっと待った！',
+    holdSenseiStop:'師範のストップ',
+    holdDefault:   'このアイデアは素晴らしいですが、まずは一人用のシンプル版から始めませんか？',
+    holdRetry:     'わかった！やり直す 押忍！',
+    holdReset:     '最初からやり直す',
+    holdRedoMsg:   '改めて「必殺技」を教えてください👇\n一人のスマホだけで完結する機能で考えてみましょう🥋',
+    holdHint:      'localStorageだけで動く機能が最強です',
+    rateLimitTitle:'今日の道場は閉まりました',
+    rateLimitDesc: '本日のアプリ生成回数に達しました。',
+    rateLimitSub:  '明日また来てください。押忍！🥋',
+    errorTitle:    '電波が悪いようです…',
+    errorDesc:     'AIとの通信に失敗しました。\nもう一度試してみましょう💪',
+    retryFight:    '再挑戦する 押忍！',
+    blockedTitle:  'このアプリは作成できません',
+    blockedReset:  '別のアイデアで試す',
+    pwaInstall:    'ホーム画面に追加してアプリとして使えます！',
+    pwaAdd:        '追加する',
+    pwaLater:      'あとで',
+    resumeMsg:     'おかえり！途中まで答えてくれてましたね。続きから行きましょう💪',
+    doneMsg:       '完璧です！✊ 仕様書が完成しました。\nクロード大明神に渡して、今すぐコード生成を始めます！',
+    redirectMsg:   '面白いアイデアですね！✨\nただ複数人が絡む機能は、まず一人用で土台を作ってからが道場の鉄則です🥋',
+    redirectHint:  '一人用でも十分すごいものが作れます！',
+    redirectBtn:   'わかった！一人用で進める →',
+    articleTitle:  'AI3体を戦わせてスマホアプリを\n作れた話（秘伝のレシピ公開）',
+    articleLead:   'プログラミング知識ゼロの私が、AI同士を格闘技のリングで戦わせてアプリを作った話。各ラウンドをタップして実際の泥臭い戦いを体験してください。',
+    articleHint:   '各ラウンドをタップするとAI達の実際のやり取りが再生されます',
+    authorDate:    '2026年4月14日',
+    authorDesc:    '難しい税金やAIの「構造」を噛み砕いて発信中',
+    authorCTA:     '「こんなの作りたい！」はコメント欄へ。プログラミング知識ゼロでよければ全力で相談に乗ります。押忍！',
+    supportTitle:  '💬 困ったことがあればすぐ聞いてください',
+    supportDesc:   'コメント欄に書いてもらえれば、できる限り早く返します。',
+    skipLink:      '残りのラウンドをスキップする →',
+    questions: [
+      { id:'problem', text:'押忍！今日作るのは、誰のどんなモヤモヤを解決するツールですか？',         ph:'例：営業前の準備を毎回ど忘れしてしまう自分のため',  hint:'思いつきでOK。完璧じゃなくて大丈夫です💪' },
+      { id:'user',    text:'それを一番使うのは誰ですか？あなた自身？それとも誰か大切な人？',           ph:'例：外回りが多い営業職の自分',                       hint:'具体的な人を思い浮かべると、アプリがグッと良くなります' },
+      { id:'killer',  text:'そのアプリの「必殺技」は何ですか？これ一個だけは絶対に外せない！',         ph:'例：訪問前にワンタップで準備リストをチェックできる', hint:'多機能より「これだけ」の方が最強です' },
+      { id:'cut',     text:'逆に、あえて削る機能は何ですか？「あれば便利だけど、今はいらない」もの。', ph:'例：データの統計グラフ、チームへの共有機能',          hint:'削る勇気が、神アプリを生む' },
+      { id:'feel',    text:'アプリを使い終わった後、どんな気持ちになってほしいですか？',               ph:'例：「よし、完璧な準備ができた！」という達成感',    hint:'感情を言葉にすると、デザインが決まります' }
     ],
-    loadingMsgs:[
-      {icon:"⚔️",text:"AI同士が仕様を巡って白熱の議論中..."},
-      {icon:"🔍",text:"要件の穴を洗い出しています..."},
-      {icon:"✍️",text:"クロード大明神がコードを爆速執筆中..."},
-      {icon:"🏗️",text:"画面レイアウトを組み立てています..."},
-      {icon:"🎨",text:"UIに魂を吹き込んでいます..."},
-      {icon:"🛡️",text:"セキュリティの最終チェック中..."},
-      {icon:"💥",text:"あと少し！クオリティチェック中..."},
-      {icon:"✨",text:"完成しました！！"},
-    ],
+    loadingMsgs: [
+      { icon:'⚔️', text:'AI同士が仕様を巡って白熱の議論中...' },
+      { icon:'🔍', text:'要件の穴を洗い出しています...' },
+      { icon:'✍️', text:'クロード大明神がコードを爆速執筆中...' },
+      { icon:'🏗️', text:'画面レイアウトを組み立てています...' },
+      { icon:'🎨', text:'UIに魂を吹き込んでいます...' },
+      { icon:'🛡️', text:'セキュリティの最終チェック中...' },
+      { icon:'💥', text:'あと少し！クオリティチェック中...' },
+      { icon:'✨', text:'完成しました！！' }
+    ]
   },
   en: {
-    appName:"AI App Dojo",
-    backToArticle:"← Article",
-    enterDojo:"Enter the Dojo! Osu!",
-    roundsLeft: n => `${n} rounds left`,
-    tryYourself:"Ready to build your own app?",
-    tryDesc:"Experience the process from the article — but with YOUR own idea this time.",
-    allRoundsHint:"💡 Read all rounds to unlock the button",
-    zeroProg:"Zero coding knowledge needed",
-    stepSubtitle:"STEP 2 / 2 — Let's do this",
-    dojoTitle:"Let's turn your idea\ninto an app",
-    dojoDesc:"Just answer 5 questions. The AI will turn the vague idea in your head into a real app spec.",
-    startBtn:"Enter the Dojo! Osu!",
-    send:"Send →",
-    loadingSub:"The AI is fighting hard. Please wait…",
-    resultNote:"📱 Demo preview. After backend connection, items will be generated from your words.",
-    retryBtn:"🔄 Build another app",
-    bugIdle:"🐛 It's broken! Fix it",
-    bugFixing:"🔧 AI is fixing...",
-    bugFixed:"✅ Fixed! Try again",
-    downloadTitle:"📥 Download as HTML (Take it home)",
-    downloadDesc:"Save your app as an HTML file. Works on your phone without any server.",
-    downloadBtn:"📥 Download HTML",
-    downloaded:"✅ Downloaded!",
-    holdTitle:"Hold on!",
-    holdSenseiStop:"Sensei says stop",
-    holdDefault:"Great idea! But let's start with a simple solo version first.",
-    holdRetry:"Got it! Let's redo it. Osu!",
-    holdReset:"Start over",
-    holdHint:"localStorage-only features are the strongest",
-    holdRedoMsg:"Let's rethink the killer feature 👇\nFocus on something that works only on your own phone 🥋",
-    rateLimitTitle:"The dojo is closed for today",
-    rateLimitDesc:"You've used today's free limit (3 times).",
-    rateLimitSub:"Come back tomorrow. Osu! 🥋",
-    errorTitle:"Connection issue…",
-    errorDesc:"Failed to reach the AI.\nLet's try again 💪",
-    retryFight:"Try again! Osu!",
-    pwaInstall:"Add to your home screen to use as an app!",
-    pwaAdd:"Add",
-    pwaLater:"Later",
-    resumeMsg:"Welcome back! Let's pick up where you left off 💪",
-    doneMsg:"Perfect! ✊ The spec is complete.\nHanding it to Claude the Almighty to start generating code!",
-    redirectMsg:"That's a brilliant idea! ✨\nHowever, multi-user features need a solid solo foundation first 🥋\nShall we start with a simple solo version?",
-    redirectHint:"A solo app can still be incredibly powerful!",
-    redirectBtn:"Got it! Go solo →",
-    articleTitle:"How I Made a Smartphone App\nby Making 3 AIs Fight Each Other",
-    articleLead:"Zero programming knowledge. One phone. I made a real app by making AIs battle each other. Tap each round to experience the messy, glorious process.",
-    articleHint:"Tap each round to replay the actual AI conversation",
-    authorDate:"April 14, 2026",
-    authorDesc:"Breaking down complex topics into plain language",
-    authorCTA:"Drop a comment with 'I want to make X!' — I'll help you figure out if and how it can be built. Osu!",
-    questions:[
-      {id:"problem",text:"Osu! What problem are you trying to solve, and for whom?",ph:"e.g. I keep forgetting my pre-sales checklist",hint:"Any rough idea is fine. It doesn't have to be perfect 💪"},
-      {id:"user",   text:"Who will use this app most? You? Or someone important to you?",ph:"e.g. Me — a sales rep who's always on the go",hint:"Picturing a specific person makes the app much better"},
-      {id:"killer", text:"What's the ONE killer feature? The single thing you can't remove.",ph:"e.g. One-tap checklist before each client visit",hint:"One great thing beats ten mediocre features"},
-      {id:"cut",    text:"What would you deliberately cut? 'Nice to have but not needed now'",ph:"e.g. Stats charts, team sharing, cloud sync",hint:"The courage to cut is what makes a great app"},
-      {id:"feel",   text:"How should users feel after using the app?",ph:"e.g. 'Yes! I'm fully prepared!' — a sense of achievement",hint:"Naming the feeling shapes the design"},
+    appName:       'AI App Dojo',
+    backToArticle: '← Article',
+    enterDojo:     'Enter the Dojo! Osu!',
+    roundsLeft:    function(n){ return n+' rounds left'; },
+    tryYourself:   'Ready to build your own app?',
+    tryDesc:       'Experience the process from the article — with YOUR idea.',
+    allRoundsHint: '💡 Read all rounds to unlock the button',
+    zeroProg:      'Zero coding knowledge needed',
+    stepSubtitle:  'STEP 2 / 2 — Let\'s do this',
+    dojoTitle:     'Let\'s turn your idea\ninto an app',
+    dojoDesc:      'Just answer 5 questions. The AI handles the rest.',
+    startBtn:      'Enter the Dojo! Osu!',
+    send:          'Send →',
+    loadingSub:    'The AI is fighting hard. Please wait…',
+    resultNote:    '📱 After backend connection, items will match your words.',
+    retryBtn:      '🔄 Build another app',
+    bugIdle:       '🐛 Broken! Fix it',
+    bugFixing:     '🔧 AI is fixing...',
+    bugFixed:      '✅ Fixed! Try again',
+    downloadBtn:   '📥 Download HTML (Free)',
+    downloaded:    '✅ Downloaded!',
+    proDownload:   '🚀 Download Pro Version (Free)',
+    holdTitle:     'Hold on!',
+    holdSenseiStop:'Sensei says stop',
+    holdDefault:   'Great idea! But let\'s start with a solo version first.',
+    holdRetry:     'Got it! Redo it. Osu!',
+    holdReset:     'Start over',
+    holdRedoMsg:   'Let\'s rethink the killer feature 👇\nFocus on something that works solo on your phone 🥋',
+    holdHint:      'localStorage-only features are the strongest',
+    rateLimitTitle:'The dojo is closed for today',
+    rateLimitDesc: 'You\'ve used today\'s generation limit.',
+    rateLimitSub:  'Come back tomorrow. Osu! 🥋',
+    errorTitle:    'Connection issue…',
+    errorDesc:     'Failed to reach the AI.\nLet\'s try again 💪',
+    retryFight:    'Try again! Osu!',
+    blockedTitle:  'Cannot create this app',
+    blockedReset:  'Try a different idea',
+    pwaInstall:    'Add to your home screen to use as an app!',
+    pwaAdd:        'Add',
+    pwaLater:      'Later',
+    resumeMsg:     'Welcome back! Let\'s pick up where you left off 💪',
+    doneMsg:       'Perfect! ✊ The spec is complete.\nHanding it to Claude the Almighty now!',
+    redirectMsg:   'Brilliant idea! ✨\nHowever, multi-user features need a solo foundation first 🥋',
+    redirectHint:  'A solo app can still be incredibly powerful!',
+    redirectBtn:   'Got it! Go solo →',
+    articleTitle:  'How I Made a Smartphone App\nby Making 3 AIs Fight Each Other',
+    articleLead:   'Zero programming knowledge. One phone. I made a real app by making AIs battle each other. Tap each round to experience the messy, glorious process.',
+    articleHint:   'Tap each round to replay the actual AI conversation',
+    authorDate:    'April 14, 2026',
+    authorDesc:    'Breaking down complex topics into plain language',
+    authorCTA:     'Drop a comment with \'I want to make X!\' — I\'ll help you figure out how. Osu!',
+    supportTitle:  '💬 Got a question? Ask anytime',
+    supportDesc:   'Drop a comment and I\'ll reply as fast as I can.',
+    skipLink:      'Skip remaining rounds →',
+    questions: [
+      { id:'problem', text:'Osu! What problem are you solving, and for whom?',          ph:'e.g. I keep forgetting my pre-sales checklist',        hint:'Any rough idea is fine 💪' },
+      { id:'user',    text:'Who will use this most? You? Someone important to you?',    ph:'e.g. Me — a sales rep always on the go',               hint:'Picturing a specific person makes the app better' },
+      { id:'killer',  text:'What\'s the ONE killer feature? The thing you can\'t cut.', ph:'e.g. One-tap checklist before each client visit',      hint:'One great thing beats ten mediocre features' },
+      { id:'cut',     text:'What would you deliberately cut? \'Nice to have but not now\'', ph:'e.g. Stats charts, team sharing, cloud sync',      hint:'The courage to cut makes a great app' },
+      { id:'feel',    text:'How should users feel after using the app?',                 ph:'e.g. \'Yes! I\'m fully prepared!\' — achievement',     hint:'Naming the feeling shapes the design' }
     ],
-    loadingMsgs:[
-      {icon:"⚔️",text:"AIs are debating the spec…"},
-      {icon:"🔍",text:"Hunting for requirement gaps…"},
-      {icon:"✍️",text:"Claude the Almighty is coding at full speed…"},
-      {icon:"🏗️",text:"Building the screen layout…"},
-      {icon:"🎨",text:"Breathing soul into the UI…"},
-      {icon:"🛡️",text:"Final security check…"},
-      {icon:"💥",text:"Almost there! Quality check…"},
-      {icon:"✨",text:"Complete!!"},
-    ],
-  },
+    loadingMsgs: [
+      { icon:'⚔️', text:'AIs debating the spec…' },
+      { icon:'🔍', text:'Hunting for requirement gaps…' },
+      { icon:'✍️', text:'Claude coding at full speed…' },
+      { icon:'🏗️', text:'Building the screen layout…' },
+      { icon:'🎨', text:'Breathing soul into the UI…' },
+      { icon:'🛡️', text:'Final security check…' },
+      { icon:'💥', text:'Almost there! Quality check…' },
+      { icon:'✨', text:'Complete!!' }
+    ]
+  }
 };
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // 記事デモデータ
-// ═══════════════════════════════════════════
-const ROUNDS = [
-  {id:"r1",badge:"第1ラウンド",badgeEn:"Round 1",title:"AI同士を戦わせる",titleEn:"Making AIs Battle",icon:"⚔️",
-   quote:"AI2人で「あーでもない、こーでもない」と戦わせます。",
-   quoteEn:"I made two AIs argue until they figured it out.",
-   exchanges:[
-    {speaker:"Gemini",avatar:"✨",color:"#4285f4",text:"インターバルタイマーですね！音声カウントダウン付きのリングUIにしましょう。",textEn:"An interval timer! Let's make a ring UI with voice countdown."},
-    {speaker:"ChatGPT",avatar:"🤖",color:"#10a37f",text:"ちょっと待って。スマホだけで作るなら音声APIは鬼門です。確実に沼る。まずシンプルなテキストカウントから。",textEn:"Hold on. Voice API is a trap for phone-only builds. Start with simple text countdown."},
-    {speaker:"Gemini",avatar:"✨",color:"#4285f4",text:"……確かに。では画面全体の色が変わる方式に変更します。",textEn:"...Fair point. Let's change the whole screen color instead."},
-    {speaker:"パパさん",avatar:"🥋",color:"#ff6b35",text:"お前ら！ユーザーが実際に使った時のモヤモヤを全部洗い出して、解決しろ！",textEn:"Hey! Find every frustration a real user would feel and fix it all!"},
-    {speaker:"ChatGPT",avatar:"🤖",color:"#10a37f",text:"了解。①セット数が分からなくなる→「3/8」大きく表示。②汗で操作しにくい→ボタン超巨大化。③ポケットで誤作動→ロック機能。",textEn:"Got it. ①Lost track of sets→show '3/8' big. ②Sweaty hands→giant buttons. ③Pocket misfire→lock mode."},
-    {speaker:"Gemini",avatar:"✨",color:"#4285f4",text:"（さっきまでの意見をあっさり撤回して）それで行きましょう！完璧な仕様ですね！",textEn:"(casually abandoning previous opinion) Let's go with that! Perfect spec!"},
-    {speaker:"パパさん",avatar:"🥋",color:"#ff6b35",text:"……許すまじ。でもまあ結果よければいいか。押忍！",textEn:"...Unforgivable. But results matter. Osu!"},
-   ]},
-  {id:"r2",badge:"第2ラウンド",badgeEn:"Round 2",title:"パパの爆弾投下",titleEn:"The Human Bomb Drop",icon:"💣",
-   quote:"「血の通ったツール」に進化させるのは、人間の泥臭い視点だけです。",
-   quoteEn:"Only the messy human perspective turns code into a real tool.",
-   specItems:[
-    {icon:"⚡",label:"必殺機能",labelEn:"Killer Feature",value:"ワンタップスタート、画面全体で状態表示",valueEn:"One-tap start, full-screen status display"},
-    {icon:"✂️",label:"あえて削った機能",labelEn:"Deliberately Cut",value:"ログイン、SNS共有、クラウド同期",valueEn:"Login, social sharing, cloud sync"},
-    {icon:"🛡️",label:"技術制約",labelEn:"Tech Constraint",value:"HTML1ファイル完結、localStorage保存のみ",valueEn:"Single HTML file, localStorage only"},
-    {icon:"🔥",label:"感情目標",labelEn:"Feeling Goal",value:"「達成感」「もう一回やりたい」",valueEn:"'Achievement' 'I want to do it again'"},
-   ]},
-  {id:"r3",badge:"第3ラウンド",badgeEn:"Round 3",title:"神の降臨とトリプルチェック",titleEn:"Claude Descends",icon:"⚡",
-   quote:"3分もかからず、完璧っぽいコードがドバッと出てきます。",
-   quoteEn:"In under 3 minutes, a flood of 'looks perfect' code appears.",
-   codeLines:["<!DOCTYPE html>","<html lang=\"ja\">","<head>","  <meta charset=\"UTF-8\">","  <title>タバタタイマー 💪</title>","  <style>","    body { background:#0a0a0a; color:#fff; }","    .work { background:#ff4444; }","    .timer { font-size:80px; font-weight:900; }","  </style>","</head>","<body>","  <button onclick=\"start()\">▶ スタート</button>","  <script>","    let sets=8, phase='work';","    function start() { /* タバタロジック */ }","    // セキュリティチェック済み ✅","  </script>","</body></html>"]},
-  {id:"r4",badge:"最終ラウンド",badgeEn:"Final Round",title:"スマホで実装（泥試合）",titleEn:"The Muddy Implementation",icon:"📱",
-   quote:"1回で完璧に動くなんて奇跡。何度も何度もコードを書き直す「デバッグの反復横跳び」です。",
-   quoteEn:"It never works first try. Endless rewrites — the 'debug shuffle'.",
-   exchanges:[
-    {from:"user",text:"URLを開いたら画面が真っ白！！",textEn:"The page is completely blank!!"},
-    {from:"ai",  text:"scriptタグの閉じ忘れです。23行目を修正します👇",textEn:"Missing closing script tag. Fixing line 23 👇"},
-    {from:"user",text:"スタートボタン押しても動かない！",textEn:"The start button does nothing!"},
-    {from:"ai",  text:"DOMContentLoadedの外に書いてましたね。修正版↓",textEn:"The code ran before the DOM loaded. Fixed version↓"},
-    {from:"user",text:"音が鳴らない！iPhoneだけ！",textEn:"No sound! Only on iPhone!"},
-    {from:"ai",  text:"iOSのAutoplay制限です。ユーザー操作後に音声コンテキストを初期化します。",textEn:"iOS Autoplay restriction. Initializing audio context after user gesture."},
-    {from:"user",text:"全部直った！！🎉🎉",textEn:"Everything works!! 🎉🎉"},
-    {from:"ai",  text:"お疲れ様でした！泥試合、見事でしたよ🥋 押忍！！",textEn:"Well done! You survived the mud fight 🥋 Osu!!"},
-   ]},
+// -----------------------------------------------
+var ROUNDS = [
+  { id:'r1', badgeJa:'第1ラウンド', badgeEn:'Round 1', titleJa:'AI同士を戦わせる', titleEn:'Making AIs Battle', icon:'⚔️',
+    quoteJa:'AI2人で「あーでもない、こーでもない」と戦わせます。',
+    quoteEn:'I made two AIs argue until they figured it out.',
+    type:'battle',
+    exchanges:[
+      { who:'Gemini', av:'✨', col:'#4285f4', ja:'インターバルタイマーですね！音声カウントダウン付きのリングUIにしましょう。', en:'Interval timer! Let\'s add a ring UI with voice countdown.' },
+      { who:'ChatGPT', av:'🤖', col:'#10a37f', ja:'ちょっと待って。スマホだけなら音声APIは鬼門です。確実に沼る。', en:'Hold on. Voice API is a trap for phone-only builds.' },
+      { who:'Gemini', av:'✨', col:'#4285f4', ja:'確かに。では画面全体の色が変わる方式に変更します。', en:'Fair point. Let\'s change the whole screen color instead.' },
+      { who:'パパさん', av:'🥋', col:'#ff6b35', ja:'お前ら！ユーザーのモヤモヤを全部洗い出して解決しろ！', en:'Hey! Find every user frustration and fix it all!' },
+      { who:'ChatGPT', av:'🤖', col:'#10a37f', ja:'了解。①セット数が分からない→「3/8」大きく表示。②汗で操作しにくい→ボタン超巨大化。③誤作動→ロック機能。', en:'Got it. ①Lost sets→show 3/8 big. ②Sweaty hands→giant buttons. ③Misfire→lock.' },
+      { who:'Gemini', av:'✨', col:'#4285f4', ja:'（さっきの意見をあっさり撤回）それで行きましょう！完璧ですね！', en:'(abandons previous opinion) Let\'s go! Perfect spec!' },
+      { who:'パパさん', av:'🥋', col:'#ff6b35', ja:'……許すまじ。まあ結果よければいいか。押忍！', en:'...Unforgivable. But results matter. Osu!' }
+    ]
+  },
+  { id:'r2', badgeJa:'第2ラウンド', badgeEn:'Round 2', titleJa:'パパの爆弾投下', titleEn:'The Human Bomb Drop', icon:'💣',
+    quoteJa:'「血の通ったツール」に進化させるのは、人間の泥臭い視点だけです。',
+    quoteEn:'Only the messy human perspective turns code into a real tool.',
+    type:'spec',
+    specItems:[
+      { icon:'⚡', labelJa:'必殺機能', labelEn:'Killer Feature', valJa:'ワンタップスタート、画面全体で状態表示', valEn:'One-tap start, full-screen status display' },
+      { icon:'✂️', labelJa:'削った機能', labelEn:'Cut Features', valJa:'ログイン、SNS共有、クラウド同期', valEn:'Login, social sharing, cloud sync' },
+      { icon:'🛡️', labelJa:'技術制約', labelEn:'Constraint', valJa:'HTML1ファイル完結', valEn:'Single HTML file only' },
+      { icon:'🔥', labelJa:'感情目標', labelEn:'Feeling Goal', valJa:'「達成感」「もう一回やりたい」', valEn:'Achievement & want to do it again' }
+    ]
+  },
+  { id:'r3', badgeJa:'第3ラウンド', badgeEn:'Round 3', titleJa:'神の降臨とトリプルチェック', titleEn:'Claude Descends', icon:'⚡',
+    quoteJa:'3分もかからず、完璧っぽいコードがドバッと出てきます。',
+    quoteEn:'In under 3 minutes, a flood of looks-perfect code appears.',
+    type:'code',
+    codeLines:['<!DOCTYPE html>','<html lang="ja">','<head>','  <meta charset="UTF-8">','  <title>タバタタイマー</title>','  <style>','    body { background:#0a0a0a; }','    .work { background:#ff4444; }','    .timer { font-size:80px; }','  </style>','</head>','<body>','  <button onclick="start()">▶ スタート</button>','  <script>','    let sets=8, phase="work";','    function start() { /* タバタロジック */ }','  </script>','</body></html>']
+  },
+  { id:'r4', badgeJa:'最終ラウンド', badgeEn:'Final Round', titleJa:'スマホで実装（泥試合）', titleEn:'The Muddy Implementation', icon:'📱',
+    quoteJa:'1回で完璧に動くなんて奇跡。何度も書き直す「デバッグの反復横跳び」です。',
+    quoteEn:'It never works first try. Endless rewrites — the debug shuffle.',
+    type:'debug',
+    exchanges:[
+      { who:'user', ja:'URLを開いたら画面が真っ白！！', en:'The page is completely blank!!' },
+      { who:'ai',   ja:'scriptタグの閉じ忘れです。修正します👇', en:'Missing closing script tag. Fixing now 👇' },
+      { who:'user', ja:'スタートボタン押しても動かない！', en:'The start button does nothing!' },
+      { who:'ai',   ja:'DOMContentLoadedの外に書いてました。修正版↓', en:'Code ran before DOM loaded. Fixed version↓' },
+      { who:'user', ja:'全部直った！！🎉🎉', en:'Everything works!! 🎉🎉' },
+      { who:'ai',   ja:'泥試合、見事でしたよ🥋 押忍！！', en:'You survived the mud fight 🥋 Osu!!' }
+    ]
+  }
 ];
 
-// ═══════════════════════════════════════════
-// 状態管理
-// ═══════════════════════════════════════════
-let lang = 'ja';
-let view = 'article'; // article | dojo
-let phase = 'welcome'; // welcome | interview | loading | result | hold | rateLimit | error
-let qIndex = 0;
-let answers = {};
-let messages = [];
-let loadStep = 0;
-let loadTimer = null;
-let generatedApp = null;
-let holdMsg = '';
-let readCount = 0;
-let openRound = null;
-let demoTimers = {};
-let demoShown = {};
-let bugPhase = 'idle';
-let bugTimer = null;
-let pwaPrompt = null;
-let isComposing = false;
+// -----------------------------------------------
+// 状態
+// -----------------------------------------------
+var lang      = 'ja';
+var view      = 'article'; // article | dojo
+var phase     = 'welcome'; // welcome | interview | loading | result | hold | blocked | rateLimit | error
+var qIndex    = 0;
+var answers   = {};
+var messages  = [];
+var loadStep  = 0;
+var loadTimer = null;
+var genApp    = null;
+var holdMsg   = '';
+var readCount = 0;
+var openRound = null;
+var demoShown = {};
+var demoTimers= {};
+var checkedItems = {};
+var bugPhase  = 'idle';
+var pwaPrompt = null;
+var isComposing = false;
 
-function t() { return T[lang]; }
+function t(){ return T[lang]; }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // localStorage
-// ═══════════════════════════════════════════
-function saveProgress(data) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e){} }
-function loadProgress()     { try { const r=localStorage.getItem(SAVE_KEY); return r?JSON.parse(r):null; } catch(e){return null;} }
-function clearProgress()    { try { localStorage.removeItem(SAVE_KEY); } catch(e){} }
+// -----------------------------------------------
+function saveProgress(data){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(data)); }catch(e){} }
+function loadProgress(){ try{ var r=localStorage.getItem(SAVE_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+function clearProgress(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+function getUserToken(){
+  var tok=localStorage.getItem(TOKEN_KEY);
+  if(!tok){ tok='u_'+Date.now()+'_'+Math.random().toString(36).slice(2,9); localStorage.setItem(TOKEN_KEY,tok); }
+  return tok;
+}
+function checkRate(){
+  var today=new Date().toISOString().slice(0,10);
+  try{ var d=JSON.parse(localStorage.getItem(RATE_KEY)||'{}'); return (d.date===today && d.count>=1); }catch(e){ return false; }
+}
+function incRate(){
+  var today=new Date().toISOString().slice(0,10);
+  try{ var d=JSON.parse(localStorage.getItem(RATE_KEY)||'{}'); var c=(d.date===today?d.count:0)+1; localStorage.setItem(RATE_KEY,JSON.stringify({date:today,count:c})); }catch(e){}
+}
 
-// ═══════════════════════════════════════════
-// アイコン自動生成（3案）
-// ═══════════════════════════════════════════
-// feelとkillerとapp_nameからアイコン候補3つを生成
-const ICON_POOLS = {
-  仕事:   ['💼','📋','✅','📌','🎯','📊','💡','🔑','📞','📝'],
-  健康:   ['💪','🏃','🥗','💧','😴','⚖️','🏋️','🧘','❤️','🌿'],
-  家族:   ['👨‍👩‍👧','🏠','❤️','👶','🎒','🍱','📚','🛁','🌙','💝'],
-  学習:   ['📖','🎓','✏️','💡','🧠','📐','🔬','🌟','📚','🏆'],
-  習慣:   ['☀️','🌅','⏰','🔄','✨','🎯','💫','🌱','🔥','⚡'],
-  default:['🚀','⭐','🎪','🎨','🛠️','🔮','🎭','🌈','💎','🎸'],
+// -----------------------------------------------
+// デザインテーマ
+// -----------------------------------------------
+var FEEL_MAP = {
+  '達成':{ accent:'#4caf50', bg:'#0a1a0a' }, '完了':{ accent:'#4caf50', bg:'#0a1a0a' }, 'スッキリ':{ accent:'#4caf50', bg:'#0a1a0a' },
+  '安心':{ accent:'#5c9eff', bg:'#0a0f1a' }, '落ち着':{ accent:'#5c9eff', bg:'#0a0f1a' },
+  'やる気':{ accent:'#ff6b35', bg:'#1a0a00' }, '燃える':{ accent:'#ff6b35', bg:'#1a0a00' },
+  '楽しい':{ accent:'#c084fc', bg:'#100a1a' }, 'ワクワク':{ accent:'#c084fc', bg:'#100a1a' },
+  '癒し':{ accent:'#d4a574', bg:'#120e0a' }
 };
-const BG_POOLS = {
-  達成:  ['#1a3a1a','#0d2a0d','#1e4a1e'],
-  安心:  ['#0a1a2a','#0d1e3a','#0a1530'],
-  やる気:['#2a1000','#3a1500','#2a0d00'],
-  楽しい:['#1a0a2a','#2a0d3a','#150a25'],
-  癒し:  ['#2a1a0a','#3a2000','#251500'],
-  default:['#1a1a1a','#0f1a0f','#1a0f1a'],
-};
-
-let selectedIconIndex = 0;
-let iconCandidates = [];
-
-function generateIconCandidates(app) {
-  const p=(app.problem||app.one_liner||'').toLowerCase();
-  const f=app.feel||'';
-  const design=app.design||getDesign(f);
-
-  // キーワードでアイコンプールを選択
-  let pool = ICON_POOLS.default;
-  if(/(仕事|業務|営業|タスク|仕様|プロジェクト)/.test(p)) pool=ICON_POOLS.仕事;
-  else if(/(健康|運動|体重|筋トレ|食事|睡眠)/.test(p)) pool=ICON_POOLS.健康;
-  else if(/(家族|子ども|育児|妻|夫|パートナー)/.test(p)) pool=ICON_POOLS.家族;
-  else if(/(学習|勉強|読書|スキル|資格)/.test(p)) pool=ICON_POOLS.学習;
-  else if(/(習慣|ルーティン|毎朝|毎日)/.test(p)) pool=ICON_POOLS.習慣;
-
-  // 背景色プールを感情から選択
-  let bgPool = BG_POOLS.default;
-  if(/(達成|スッキリ|完了)/.test(f)) bgPool=BG_POOLS.達成;
-  else if(/(安心|落ち着き|穏やか)/.test(f)) bgPool=BG_POOLS.安心;
-  else if(/(やる気|燃える|頑張る)/.test(f)) bgPool=BG_POOLS.やる気;
-  else if(/(楽しい|ワクワク|嬉しい)/.test(f)) bgPool=BG_POOLS.楽しい;
-  else if(/(癒し|リラックス)/.test(f)) bgPool=BG_POOLS.癒し;
-
-  // 3候補をシャッフルして生成
-  const shuffled=[...pool].sort(()=>Math.random()-0.5);
-  return [
-    {emoji:shuffled[0], bg:bgPool[0]||design.bg, label:lang==='ja'?'シンプル':'Simple'},
-    {emoji:shuffled[1], bg:bgPool[1]||design.bg, label:lang==='ja'?'活発':'Active'},
-    {emoji:shuffled[2]||shuffled[0], bg:bgPool[2]||bgPool[0], label:lang==='ja'?'個性的':'Unique'},
-  ];
+function getDesign(feel){
+  if(!feel) return { accent:'#ff6b35', bg:'#1a0a00' };
+  var keys=Object.keys(FEEL_MAP);
+  for(var i=0;i<keys.length;i++){ if(feel.indexOf(keys[i])>=0) return FEEL_MAP[keys[i]]; }
+  return { accent:'#ff6b35', bg:'#1a0a00' };
 }
 
-function renderIconSection(design) {
-  if(!generatedApp) return '';
-  iconCandidates=generateIconCandidates(generatedApp);
-  const isEn=lang==='en';
-  const candidates=iconCandidates.map((c,i)=>`
-    <div class="icon-candidate" onclick="selectIcon(${i})">
-      <div class="icon-frame${i===selectedIconIndex?' selected':''}" id="icon-frame-${i}"
-           style="background:${c.bg};border-color:${i===selectedIconIndex?design.accent:'transparent'}">
-        ${c.emoji}
-      </div>
-      <div class="icon-label">${c.label}</div>
-    </div>`).join('');
-
-  return `<div class="icon-section">
-    <div class="icon-section-title">${isEn?'🎨 Choose your app icon':'🎨 アイコンを選んでください'}</div>
-    <div class="icon-section-desc">${isEn?'3 icons generated from your app content. Tap to select.':'あなたのアプリ内容から3つのアイコン案を生成しました。タップして選択してください。'}</div>
-    <div class="icon-candidates">${candidates}</div>
-    <button class="btn-primary" style="background:${design.accent};padding:11px 0;font-size:13.5px" onclick="openHomeModal()">
-      ${isEn?'📱 Add to home screen':'📱 ホーム画面に追加する'}
-    </button>
-  </div>`;
-}
-
-function selectIcon(i) {
-  selectedIconIndex=i;
-  const design=generatedApp&&generatedApp.design||{accent:'#ff6b35'};
-  // フレームのselected状態を更新
-  iconCandidates.forEach((_,j)=>{
-    const f=document.getElementById('icon-frame-'+j);
-    if(f){
-      f.className='icon-frame'+(j===i?' selected':'');
-      f.style.borderColor=j===i?design.accent:'transparent';
-    }
-  });
-  // 選択を保存
-  if(generatedApp) {
-    generatedApp.selectedIcon=iconCandidates[i];
-    saveProgress({stage:'result',answers,generatedApp});
-  }
-}
-
-// ═══════════════════════════════════════════
-// ホーム画面追加モーダル
-// ═══════════════════════════════════════════
-let currentOS = 'ios';
-
-const HOME_STEPS = {
-  ios: {
-    ja: [
-      {num:1, text:'このページを<strong>Safariで開いて</strong>いることを確認してください（Chrome不可）'},
-      {num:2, text:'画面下の<strong>「共有」ボタン</strong>（四角から矢印が出るアイコン）をタップ'},
-      {num:3, text:'メニューを下にスクロールして<strong>「ホーム画面に追加」</strong>をタップ'},
-      {num:4, text:'アプリ名を確認して<strong>「追加」</strong>をタップ'},
-      {num:5, text:'ホーム画面にアイコンが追加されます ✅'},
-    ],
-    en: [
-      {num:1, text:'Make sure you\'re using <strong>Safari</strong> (Chrome won\'t work)'},
-      {num:2, text:'Tap the <strong>Share button</strong> at the bottom (box with arrow)'},
-      {num:3, text:'Scroll down and tap <strong>"Add to Home Screen"</strong>'},
-      {num:4, text:'Confirm the name and tap <strong>"Add"</strong>'},
-      {num:5, text:'The icon will appear on your home screen ✅'},
-    ],
-  },
-  android: {
-    ja: [
-      {num:1, text:'このページを<strong>Chromeで開いて</strong>いることを確認してください'},
-      {num:2, text:'右上の<strong>「⋮」メニュー</strong>をタップ'},
-      {num:3, text:'<strong>「アプリをインストール」</strong>または<strong>「ホーム画面に追加」</strong>をタップ'},
-      {num:4, text:'確認ダイアログで<strong>「インストール」</strong>をタップ'},
-      {num:5, text:'ホーム画面にアイコンが追加されます ✅'},
-    ],
-    en: [
-      {num:1, text:'Make sure you\'re using <strong>Chrome</strong>'},
-      {num:2, text:'Tap the <strong>⋮ menu</strong> in the top right'},
-      {num:3, text:'Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>'},
-      {num:4, text:'Tap <strong>"Install"</strong> to confirm'},
-      {num:5, text:'The icon will appear on your home screen ✅'},
-    ],
-  },
-};
-
-function openHomeModal() {
-  currentOS='ios';
-  updateHomeModalSteps();
-  document.getElementById('home-modal').classList.add('show');
-  document.body.style.overflow='hidden';
-}
-function closeHomeModal() {
-  document.getElementById('home-modal').classList.remove('show');
-  document.body.style.overflow='';
-}
-function switchOS(os) {
-  currentOS=os;
-  document.getElementById('tab-ios').className='os-tab'+(os==='ios'?' active':'');
-  document.getElementById('tab-android').className='os-tab'+(os==='android'?' active':'');
-  updateHomeModalSteps();
-}
-function updateHomeModalSteps() {
-  const isEn=lang==='en';
-  const steps=HOME_STEPS[currentOS][isEn?'en':'ja'];
-  const icon=iconCandidates[selectedIconIndex];
-  const appName=generatedApp&&generatedApp.app_name||'マイアプリ';
-
-  // モーダルタイトルにアイコンを反映
-  const titleEl=document.getElementById('home-modal-inner')&&document.querySelector('.home-modal-title');
-  if(titleEl&&icon) titleEl.textContent=`${icon.emoji} ホーム画面に追加する`;
-
-  const descEl=document.getElementById('home-modal-desc');
-  if(descEl) descEl.textContent=isEn
-    ?`Add "${appName}" to your home screen for instant access every day.`
-    :`「${appName}」をホーム画面に追加して、毎日すぐ開けるようにしましょう。`;
-
-  const stepsEl=document.getElementById('home-steps');
-  if(stepsEl) stepsEl.innerHTML=steps.map(s=>`
-    <div class="home-step">
-      <div class="home-step-num">${s.num}</div>
-      <div class="home-step-text">${s.text}</div>
-    </div>`).join('');
-}
-const FEEL_MAP = {
-  達成:{accent:"#4caf50",bg:"#0a1a0a"}, 完了:{accent:"#4caf50",bg:"#0a1a0a"}, スッキリ:{accent:"#4caf50",bg:"#0a1a0a"},
-  安心:{accent:"#5c9eff",bg:"#0a0f1a"}, 落ち着き:{accent:"#5c9eff",bg:"#0a0f1a"}, 穏やか:{accent:"#5c9eff",bg:"#0a0f1a"},
-  やる気:{accent:"#ff6b35",bg:"#1a0a00"}, 燃える:{accent:"#ff6b35",bg:"#1a0a00"}, 頑張る:{accent:"#ff6b35",bg:"#1a0a00"},
-  楽しい:{accent:"#c084fc",bg:"#100a1a"}, ワクワク:{accent:"#c084fc",bg:"#100a1a"}, 嬉しい:{accent:"#c084fc",bg:"#100a1a"},
-  癒し:{accent:"#d4a574",bg:"#120e0a"}, リラックス:{accent:"#d4a574",bg:"#120e0a"},
-};
-function getDesign(feel) {
-  if (!feel) return {accent:"#ff6b35",bg:"#1a0a00"};
-  for (const [k,v] of Object.entries(FEEL_MAP)) { if (feel.includes(k)) return v; }
-  return {accent:"#ff6b35",bg:"#1a0a00"};
-}
-
-// ═══════════════════════════════════════════
-// モック生成（バックエンド未接続時）
-// ═══════════════════════════════════════════
-function mockGenerate(ans) {
-  const p=ans.problem||'', f=ans.feel||'', k=ans.killer||'', u=ans.user||'あなた';
-  const design = getDesign(f);
-  const items = k
-    ? [`✅ ${k.slice(0,12)}の確認①`,`📋 ${k.slice(0,12)}の確認②`,`🔍 ${k.slice(0,12)}の確認③`,`💡 ${k.slice(0,12)}の確認④`,`🎯 ${k.slice(0,12)}の完了確認`]
+// -----------------------------------------------
+// モック生成
+// -----------------------------------------------
+function mockGen(ans){
+  var p=ans.problem||'', f=ans.feel||'', k=ans.killer||'', u=ans.user||'あなた';
+  var d=getDesign(f);
+  var items=k
+    ? ['✅ '+k.slice(0,12)+'の確認①','📋 '+k.slice(0,12)+'の確認②','🔍 '+k.slice(0,12)+'の確認③','💡 '+k.slice(0,12)+'の確認④','🎯 '+k.slice(0,12)+'の完了確認']
     : ['🎯 今日の目標①','📌 確認事項②','✅ タスク③','💡 メモ④','🔄 振り返り⑤'];
   return {
     app_name: p.slice(0,15)||'マイチェックリスト',
-    one_liner: `${u}のためのアプリ`,
-    items,
-    done_message: f ? `🔥「${f}」達成！押忍！` : '🎊 全部クリア！最高です！',
-    feel:f, design,
-    storage_key:'app_'+Date.now(),
-    warnings:[],
+    one_liner: u+'のためのアプリ',
+    items: items,
+    done_message: f ? '🔥「'+f+'」達成！押忍！' : '🎊 全部クリア！最高です！',
+    feel: f, design: d,
+    storage_key: 'app_'+Date.now(),
+    warnings: []
   };
 }
 
-// ═══════════════════════════════════════════
-// バックエンドAPI呼び出し（安全な構造）
-// ═══════════════════════════════════════════
-async function callBackend(ans) {
-  if (!BACKEND_URL) return mockGenerate(ans);
-
-  let turnstileToken = null;
-  if (TURNSTILE_SITE_KEY && window.turnstile) {
-    try {
-      turnstileToken = await new Promise((resolve, reject) => {
-        window.turnstile.render('#turnstile-container', {
-          sitekey: TURNSTILE_SITE_KEY,
-          callback: resolve,
-          'error-callback': reject,
-        });
-      });
-    } catch(e) { console.warn('Turnstile error:', e); }
-  }
-
-  const res = await fetch(BACKEND_URL, {
+// -----------------------------------------------
+// バックエンド呼び出し
+// -----------------------------------------------
+async function callBackend(ans){
+  if(!BACKEND_URL) return mockGen(ans);
+  var res=await fetch(BACKEND_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      answers: ans,
-      turnstileToken,
-      userToken: getUserToken(),  // ユーザー識別子をバックエンドに渡す
-    }),
+    body:JSON.stringify({ answers:ans, userToken:getUserToken() })
   });
-  if (res.status===429) {
-    const data = await res.json().catch(()=>({}));
-    throw new Error(data.error==='RATE_LIMIT_USER' ? 'RATE_LIMIT_USER' : 'RATE_LIMIT');
-  }
-  if (res.status===403) throw new Error('CAPTCHA_FAILED');
-  if (!res.ok) throw new Error('BACKEND_ERROR');
-  const spec = await res.json();
-  // 成功したらフロント側カウントも更新（blocked・holdは除く）
-  if (spec.status === 'ok') incrementFrontendRate();
+  if(res.status===429){ var d=await res.json().catch(function(){ return {}; }); throw new Error(d.error==='RATE_LIMIT_USER'?'RATE_LIMIT_USER':'RATE_LIMIT'); }
+  if(res.status===403) throw new Error('CAPTCHA_FAILED');
+  if(!res.ok) throw new Error('BACKEND_ERROR');
+  var spec=await res.json();
+  if(spec.status==='ok') incRate();
   return spec;
 }
 
-// ═══════════════════════════════════════════
-// プロ版アプリHTML生成（全7機能）
-// A: 項目編集・追加・並び替え
-// B: 日付で自動リセット
-// C: 複数リスト・場面切り替え
-// D: 達成履歴・完了率
-// E: カスタムデザイン・アイコン変更
-// F: AI再生成（無制限）→ 道場へのリンク
-// G: QRコードで共有
-// ═══════════════════════════════════════════
-function downloadHTML(isPro) {
-  if (!generatedApp) return;
-  const a    = generatedApp;
-  const design = a.design || {accent:'#ff6b35', bg:'#0a0a0a'};
-  const items  = a.items || [];
-  const skey   = a.storage_key || ('app_'+Date.now());
-  const isJa   = lang === 'ja';
-
-  // アイコン候補（選択済みアイコンがあれば使う）
-  const icon = (iconCandidates[selectedIconIndex] && iconCandidates[selectedIconIndex].emoji) || '🥋';
-
-  // 無料版 vs プロ版で出し分け
-  if (!isPro) {
-    // ── 無料版（シンプルチェックリスト） ──────────────────
-    const freeHtml = `<!DOCTYPE html>
-<html lang="${lang}">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="${design.accent}">
-<title>${icon} ${a.app_name}</title>
-<style>
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:${design.bg};color:#f0f0f0;font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;min-height:100vh}
-.hdr{background:#111;padding:16px;text-align:center;border-bottom:1px solid #222}
-.hdr h1{font-size:18px;font-weight:900;color:${design.accent}}
-.hdr p{font-size:12px;color:#666;margin-top:4px}
-.progress-wrap{padding:8px 16px 4px}
-.prog-bar{height:4px;background:#1e1e1e;border-radius:2px}
-.prog-fill{height:100%;background:${design.accent};border-radius:2px;transition:width .4s ease;width:0%}
-.prog-text{font-size:10px;color:#555;margin-top:3px;text-align:right}
-.item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #131313;cursor:pointer;transition:background .2s;animation:fadeIn .3s ease}
-.item.done{background:${design.accent}12}
-.item.done .lbl{text-decoration:line-through;opacity:.4}
-.chk{font-size:20px;flex-shrink:0}
-.lbl{font-size:14.5px}
-.complete{text-align:center;padding:20px;color:${design.accent};font-weight:700;display:none}
-.complete.show{display:block}
-.upgrade{background:#1a0f00;border:1px solid #ff6b3544;border-radius:12px;margin:16px;padding:14px;text-align:center}
-.upgrade-title{font-size:13px;font-weight:700;color:#ff6b35;margin-bottom:6px}
-.upgrade-desc{font-size:11.5px;color:#888;line-height:1.7;margin-bottom:10px}
-.upgrade-link{display:inline-block;background:#ff6b35;color:#fff;border-radius:8px;padding:8px 20px;font-size:12px;font-weight:700;text-decoration:none}
-.ftr{text-align:center;padding:16px;font-size:11px;color:#2a2a2a}
-</style>
-</head>
-<body>
-<div class="hdr"><h1>${icon} ${a.app_name}</h1><p>${a.one_liner||''}</p></div>
-<div class="progress-wrap">
-  <div class="prog-bar"><div class="prog-fill" id="pf"></div></div>
-  <div class="prog-text" id="pt"></div>
-</div>
-<div id="list">${items.map((item,i)=>`<div class="item" id="i${i}" onclick="tog(${i})"><span class="chk" id="c${i}">⬜</span><span class="lbl">${item}</span></div>`).join('')}</div>
-<div class="complete" id="done">${a.done_message||'🎊 Complete!'}</div>
-<div class="upgrade">
-  <div class="upgrade-title">✨ ${isJa?'プロ版でもっと便利に':'Upgrade to Pro for more features'}</div>
-  <div class="upgrade-desc">${isJa?'項目編集・自動リセット・複数リスト・達成履歴など全7機能':'Edit items, auto-reset, multiple lists, history & more'}</div>
-  <a class="upgrade-link" href="https://note.com/karate_papa" target="_blank">
-    ${isJa?'道場でプロ版を作る 🥋':'Get Pro Version 🥋'}
-  </a>
-</div>
-<div class="ftr">Made with AI App Dojo 🥋<br>
-<a href="https://note.com/karate_papa" target="_blank" style="color:#ff6b35;text-decoration:none;font-size:10px">
-${isJa?'💬 困ったことはコメント欄へ':'💬 Questions? Drop a comment'}
-</a></div>
-<script>
-var chk={},tot=${items.length};
-function tog(i){
-  chk[i]=!chk[i];
-  var el=document.getElementById('i'+i);
-  el.className='item'+(chk[i]?' done':'');
-  document.getElementById('c'+i).textContent=chk[i]?'✅':'⬜';
-  var n=Object.values(chk).filter(Boolean).length;
-  document.getElementById('done').className='complete'+(n===tot?' show':'');
-  document.getElementById('pf').style.width=Math.round(n/tot*100)+'%';
-  document.getElementById('pt').textContent=n+' / '+tot;
-  try{localStorage.setItem('${skey}',JSON.stringify(chk));}catch(e){}
-}
-try{
-  var s=JSON.parse(localStorage.getItem('${skey}')||'{}');
-  Object.keys(s).forEach(function(i){if(s[i])tog(parseInt(i));});
-}catch(e){}
-<\/script>
-</body></html>`;
-
-    const blob = new Blob([freeHtml], {type:'text/html;charset=utf-8'});
-    const url  = URL.createObjectURL(blob);
-    const el   = document.createElement('a');
-    el.href    = url;
-    el.download = (a.app_name||'myapp').replace(/\s/g,'_')+'.html';
-    document.body.appendChild(el); el.click();
-    document.body.removeChild(el); URL.revokeObjectURL(url);
-    const btn = document.getElementById('download-btn');
-    if(btn){ btn.textContent=t().downloaded; setTimeout(()=>{ btn.textContent=t().downloadBtn; },3000); }
-    return;
-  }
-
-  // ── プロ版HTML（以下既存コード） ──────────────────────
-  const html = `<!DOCTYPE html>
-<html lang="${lang}">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="${design.accent}">
-<title>${icon} ${a.app_name}</title>
-<style>
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:${design.bg};color:#f0f0f0;
-  font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif}
-::-webkit-scrollbar{width:3px}
-::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px}
-
-/* ── ヘッダー ── */
-.hdr{background:#111;padding:0;border-bottom:1px solid #1e1e1e;position:sticky;top:0;z-index:50}
-.hdr-top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
-.hdr-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;
-  justify-content:center;font-size:20px;background:${design.accent}22;flex-shrink:0}
-.hdr-title{font-size:16px;font-weight:900;color:${design.accent};flex:1;margin:0 10px}
-.hdr-btns{display:flex;gap:8px}
-.hdr-btn{background:transparent;border:1px solid #2a2a2a;border-radius:8px;
-  padding:5px 10px;font-size:11px;color:#888;cursor:pointer;font-family:inherit}
-
-/* ── タブ（複数リスト） ── */
-.tabs{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid #1e1e1e;background:#0d0d0d}
-.tabs::-webkit-scrollbar{height:0}
-.tab{padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
-  border-bottom:2px solid transparent;color:#555;background:transparent;
-  border-top:none;border-left:none;border-right:none;font-family:inherit;transition:all .2s}
-.tab.active{color:${design.accent};border-bottom-color:${design.accent}}
-.tab-add{padding:10px 14px;font-size:16px;cursor:pointer;color:#444;background:transparent;
-  border:none;font-family:inherit}
-
-/* ── リストエリア ── */
-#main{flex:1;overflow-y:auto;padding-bottom:80px}
-.section-title{font-size:10px;color:#444;letter-spacing:1px;padding:12px 16px 6px;font-weight:700}
-.item{display:flex;align-items:center;gap:12px;padding:13px 16px;
-  border-bottom:1px solid #131313;cursor:pointer;transition:background .2s;
-  animation:fadeIn .3s ease}
-.item:active{opacity:.7}
-.item.done{background:${design.accent}12}
-.item.done .lbl{text-decoration:line-through;opacity:.4}
-.chk{font-size:18px;flex-shrink:0;color:#555;transition:color .2s}
-.item.done .chk{color:${design.accent}}
-.lbl{font-size:14.5px;flex:1;line-height:1.5}
-.drag-handle{font-size:16px;color:#2a2a2a;cursor:grab;padding:0 4px;user-select:none}
-.item-edit-btn{background:transparent;border:none;font-size:14px;color:#333;
-  cursor:pointer;padding:4px;opacity:0;transition:opacity .2s}
-.item:hover .item-edit-btn{opacity:1}
-
-/* ── 完了メッセージ ── */
-.complete{text-align:center;padding:20px 16px;color:${design.accent};
-  font-weight:700;font-size:14px;display:none;animation:pulse 1s ease}
-.complete.show{display:block}
-
-/* ── 進捗バー ── */
-.progress-wrap{padding:8px 16px 4px}
-.progress-bar{height:4px;background:#1e1e1e;border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;background:${design.accent};border-radius:2px;transition:width .4s ease}
-.progress-text{font-size:10px;color:#555;margin-top:4px;text-align:right}
-
-/* ── FAB（追加ボタン） ── */
-.fab{position:fixed;bottom:24px;right:20px;width:52px;height:52px;border-radius:50%;
-  background:${design.accent};color:#fff;border:none;font-size:24px;cursor:pointer;
-  box-shadow:0 4px 20px ${design.accent}66;display:flex;align-items:center;justify-content:center;
-  font-family:inherit;transition:transform .2s}
-.fab:active{transform:scale(.92)}
-
-/* ── モーダル共通 ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;
-  display:none;align-items:flex-end;justify-content:center}
-.modal-overlay.show{display:flex}
-.modal{background:#111;border-radius:20px 20px 0 0;padding:24px 20px 40px;
-  width:100%;max-width:480px;animation:slideUp .3s ease;max-height:85vh;overflow-y:auto}
-.modal-title{font-size:17px;font-weight:900;margin-bottom:16px}
-.modal-input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;
-  color:#f0f0f0;padding:12px 14px;font-size:14px;outline:none;font-family:inherit;margin-bottom:12px}
-.modal-input:focus{border-color:${design.accent}}
-.btn-primary{background:${design.accent};color:#fff;border:none;border-radius:12px;
-  padding:13px 0;font-size:15px;font-weight:700;cursor:pointer;width:100%;font-family:inherit}
-.btn-ghost{background:transparent;border:1px solid #2a2a2a;border-radius:12px;
-  padding:11px 0;font-size:13px;cursor:pointer;width:100%;color:#666;
-  font-family:inherit;margin-top:8px}
-.color-swatches{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-.swatch{width:40px;height:40px;border-radius:10px;cursor:pointer;
-  border:2px solid transparent;transition:all .2s}
-.swatch.selected{border-color:#fff;transform:scale(1.1)}
-.emoji-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-.emoji-opt{width:44px;height:44px;border-radius:10px;background:#1a1a1a;
-  border:2px solid transparent;font-size:22px;cursor:pointer;display:flex;
-  align-items:center;justify-content:center;transition:all .2s}
-.emoji-opt.selected{border-color:${design.accent};background:${design.accent}22}
-
-/* ── 履歴画面 ── */
-.history-wrap{padding:16px}
-.history-day{background:#111;border-radius:12px;padding:14px;margin-bottom:10px}
-.history-date{font-size:11px;color:#555;margin-bottom:8px}
-.history-bar-wrap{display:flex;align-items:center;gap:10px}
-.history-bar{flex:1;height:8px;background:#1a1a1a;border-radius:4px;overflow:hidden}
-.history-bar-fill{height:100%;border-radius:4px;background:${design.accent};transition:width .6s ease}
-.history-pct{font-size:12px;color:${design.accent};font-weight:700;width:36px;text-align:right}
-.stat-row{display:flex;gap:10px;margin-bottom:16px}
-.stat-card{flex:1;background:#111;border-radius:12px;padding:14px;text-align:center}
-.stat-num{font-size:28px;font-weight:900;color:${design.accent}}
-.stat-label{font-size:10px;color:#555;margin-top:4px}
-
-/* ── QRモーダル ── */
-#qr-canvas{display:block;margin:0 auto 16px;border-radius:12px}
-.qr-url{font-size:10px;color:#444;text-align:center;word-break:break-all;margin-bottom:12px}
-
-/* ── ナビゲーション ── */
-.nav{position:fixed;bottom:0;left:0;right:0;background:#0d0d0d;
-  border-top:1px solid #1e1e1e;display:flex;max-width:480px;margin:0 auto}
-.nav-btn{flex:1;padding:10px 0;background:transparent;border:none;
-  font-size:10px;color:#555;cursor:pointer;font-family:inherit;
-  display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .2s}
-.nav-btn.active{color:${design.accent}}
-.nav-btn span:first-child{font-size:20px}
-
-/* ── フッター ── */
-.ftr{text-align:center;padding:16px;font-size:11px;color:#2a2a2a}
-
-/* ── ドラッグ中 ── */
-.dragging{opacity:.5;background:${design.accent}18!important}
-</style>
-</head>
-<body>
-
-<!-- ヘッダー -->
-<div class="hdr">
-  <div class="hdr-top">
-    <div class="hdr-icon" id="app-icon">${icon}</div>
-    <div class="hdr-title" id="app-title">${a.app_name}</div>
-    <div class="hdr-btns">
-      <button class="hdr-btn" onclick="openHistory()">${isJa?'📊 履歴':'📊 History'}</button>
-      <button class="hdr-btn" onclick="openSettings()">${isJa?'⚙️':'⚙️'}</button>
-    </div>
-  </div>
-  <!-- タブ（複数リスト） -->
-  <div class="tabs" id="tabs"></div>
-</div>
-
-<!-- 進捗バー -->
-<div class="progress-wrap">
-  <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
-  <div class="progress-text" id="prog-text">0 / 0</div>
-</div>
-
-<!-- メイン -->
-<div id="main"></div>
-
-<!-- FAB -->
-<button class="fab" onclick="openAddItem()" title="${isJa?'項目を追加':'Add item'}">＋</button>
-
-<!-- ナビゲーション -->
-<nav class="nav">
-  <button class="nav-btn active" id="nav-list" onclick="showView('list')">
-    <span>☑️</span><span>${isJa?'リスト':'List'}</span>
-  </button>
-  <button class="nav-btn" id="nav-history" onclick="showView('history')">
-    <span>📊</span><span>${isJa?'履歴':'History'}</span>
-  </button>
-  <button class="nav-btn" id="nav-share" onclick="openQR()">
-    <span>📲</span><span>${isJa?'共有':'Share'}</span>
-  </button>
-</nav>
-
-<!-- ── モーダル群 ── -->
-
-<!-- 項目追加・編集 -->
-<div class="modal-overlay" id="modal-item">
-  <div class="modal">
-    <div class="modal-title" id="modal-item-title">${isJa?'項目を追加':'Add Item'}</div>
-    <input class="modal-input" id="item-input" placeholder="${isJa?'例：資料の最終確認':'e.g. Final check of documents'}">
-    <input class="modal-input" id="item-emoji-input" placeholder="${isJa?'絵文字（例：📋）':'Emoji (e.g. 📋)'}" maxlength="4" style="width:80px;display:inline-block">
-    <button class="btn-primary" onclick="saveItem()">${isJa?'保存':'Save'}</button>
-    <button class="btn-ghost" onclick="closeModal('modal-item')">${isJa?'キャンセル':'Cancel'}</button>
-  </div>
-</div>
-
-<!-- リスト追加 -->
-<div class="modal-overlay" id="modal-list">
-  <div class="modal">
-    <div class="modal-title">${isJa?'新しいリストを作成':'Create New List'}</div>
-    <input class="modal-input" id="list-name-input" placeholder="${isJa?'リスト名（例：週次レビュー）':'List name (e.g. Weekly Review)'}">
-    <button class="btn-primary" onclick="saveNewList()">${isJa?'作成':'Create'}</button>
-    <button class="btn-ghost" onclick="closeModal('modal-list')">${isJa?'キャンセル':'Cancel'}</button>
-  </div>
-</div>
-
-<!-- 設定（デザイン変更） -->
-<div class="modal-overlay" id="modal-settings">
-  <div class="modal">
-    <div class="modal-title">⚙️ ${isJa?'設定':'Settings'}</div>
-    <div style="font-size:12px;color:#666;margin-bottom:8px">${isJa?'アイコン':'Icon'}</div>
-    <div class="emoji-grid" id="emoji-grid"></div>
-    <div style="font-size:12px;color:#666;margin-bottom:8px">${isJa?'カラーテーマ':'Color Theme'}</div>
-    <div class="color-swatches" id="color-swatches"></div>
-    <div style="font-size:12px;color:#666;margin-bottom:8px">${isJa?'自動リセット':'Auto Reset'}</div>
-    <select id="reset-setting" class="modal-input" style="width:auto">
-      <option value="none">${isJa?'リセットしない':'No reset'}</option>
-      <option value="daily" selected>${isJa?'毎日深夜0時':'Reset daily at midnight'}</option>
-      <option value="weekly">${isJa?'毎週月曜':'Reset every Monday'}</option>
-    </select>
-    <div style="font-size:12px;color:#666;margin-bottom:8px;margin-top:12px">${isJa?'アプリ名':'App Name'}</div>
-    <input class="modal-input" id="app-name-input" value="${a.app_name}">
-    <button class="btn-primary" onclick="saveSettings()">${isJa?'保存':'Save'}</button>
-    <button class="btn-ghost" onclick="closeModal('modal-settings')">${isJa?'閉じる':'Close'}</button>
-  </div>
-</div>
-
-<!-- QR共有 -->
-<div class="modal-overlay" id="modal-qr">
-  <div class="modal" style="text-align:center">
-    <div class="modal-title">📲 ${isJa?'アプリを共有':'Share App'}</div>
-    <p style="font-size:12.5px;color:#888;margin-bottom:16px;line-height:1.7">
-      ${isJa?'QRコードを読み取ると、このアプリをそのまま使えます。':'Scan to use this app instantly.'}
-    </p>
-    <canvas id="qr-canvas" width="200" height="200"></canvas>
-    <div class="qr-url" id="qr-url-text"></div>
-    <button class="btn-primary" onclick="copyLink()">${isJa?'リンクをコピー':'Copy Link'}</button>
-    <button class="btn-ghost" onclick="closeModal('modal-qr')">${isJa?'閉じる':'Close'}</button>
-  </div>
-</div>
-
-<!-- 履歴 -->
-<div class="modal-overlay" id="modal-history">
-  <div class="modal">
-    <div class="modal-title">📊 ${isJa?'達成履歴':'Achievement History'}</div>
-    <div class="stat-row" id="stat-row"></div>
-    <div style="font-size:12px;color:#666;margin-bottom:10px">${isJa?'直近7日間':'Last 7 days'}</div>
-    <div id="history-list"></div>
-    <button class="btn-ghost" onclick="closeModal('modal-history')">${isJa?'閉じる':'Close'}</button>
-  </div>
-</div>
-
-<script>
-// ═══ データ構造 ═══════════════════════════
-var SKEY = '${skey}';
-var ACCENT = '${design.accent}';
-var IS_JA = ${isJa};
-
-var DEFAULT_ITEMS = ${JSON.stringify(items.map((item,i)=>({id:i+1,text:item,emoji:item.match(/^(\\S+\\s)/)?item.match(/^(\\S+\\s)/)[1].trim():'✅',label:item.replace(/^\\S+\\s/,''),order:i})))};
-
-var state = {
-  lists: [],
-  currentList: 0,
-  settings: { icon:'${icon}', accent:'${design.accent}', bg:'${design.bg}', reset:'daily', appName:'${a.app_name}' },
-  history: {}
-};
-
-// ═══ 初期化 ═══════════════════════════════
-function init() {
-  loadState();
-  if (state.lists.length === 0) {
-    state.lists = [{
-      id: 1, name: IS_JA ? 'メイン' : 'Main',
-      items: DEFAULT_ITEMS.map(function(it){ return Object.assign({},it,{done:false}); })
-    }];
-  }
-  checkAutoReset();
-  renderAll();
-}
-
-// ═══ localStorage ══════════════════════════
-function loadState() {
-  try {
-    var s = JSON.parse(localStorage.getItem(SKEY) || 'null');
-    if (s) state = s;
-  } catch(e) {}
-}
-function saveState() {
-  try { localStorage.setItem(SKEY, JSON.stringify(state)); } catch(e) {}
-}
-
-// ═══ 自動リセット（B機能） ════════════════
-function checkAutoReset() {
-  var today = new Date().toISOString().slice(0,10);
-  var lastReset = state.lastReset || '';
-  var setting = state.settings.reset || 'daily';
-  if (setting === 'none') return;
-  var shouldReset = false;
-  if (setting === 'daily' && lastReset !== today) shouldReset = true;
-  if (setting === 'weekly') {
-    var day = new Date().getDay();
-    var weekKey = getWeekKey();
-    if (day === 1 && state.lastWeekReset !== weekKey) {
-      shouldReset = true; state.lastWeekReset = weekKey;
-    }
-  }
-  if (shouldReset) {
-    // リセット前に履歴を記録（D機能）
-    recordHistory(lastReset);
-    state.lists.forEach(function(list) {
-      list.items.forEach(function(item) { item.done = false; });
-    });
-    state.lastReset = today;
-    saveState();
-  }
-}
-function getWeekKey() {
-  var d = new Date(); d.setHours(0,0,0,0);
-  d.setDate(d.getDate() - d.getDay() + 1);
-  return d.toISOString().slice(0,10);
-}
-
-// ═══ 履歴記録（D機能） ════════════════════
-function recordHistory(date) {
-  if (!date) return;
-  var list = getCurrentList();
-  if (!list || !list.items.length) return;
-  var done = list.items.filter(function(it){ return it.done; }).length;
-  var pct = Math.round(done / list.items.length * 100);
-  if (!state.history) state.history = {};
-  state.history[date] = { done: done, total: list.items.length, pct: pct };
-  // 履歴は30日分だけ保持
-  var keys = Object.keys(state.history).sort();
-  if (keys.length > 30) { delete state.history[keys[0]]; }
-}
-
-// ═══ レンダリング ══════════════════════════
-function renderAll() {
-  renderTabs();
-  renderList();
-  renderProgress();
-  applyDesign();
-}
-
-function applyDesign() {
-  var s = state.settings;
-  document.getElementById('app-icon').textContent = s.icon || '${icon}';
-  document.getElementById('app-title').textContent = s.appName || '${a.app_name}';
-  document.title = (s.icon||'') + ' ' + (s.appName||'${a.app_name}');
-}
-
-function getCurrentList() {
-  return state.lists[state.currentList] || state.lists[0];
-}
-
-// タブ（C機能）
-function renderTabs() {
-  var tabs = document.getElementById('tabs');
-  tabs.innerHTML = state.lists.map(function(list, i) {
-    return '<button class="tab' + (i===state.currentList?' active':'') + '" onclick="switchList('+i+')">' + list.name + '</button>';
-  }).join('') + '<button class="tab-add" onclick="openAddList()" title="' + (IS_JA?'リストを追加':'Add list') + '">＋</button>';
-}
-
-// リスト
-function renderList() {
-  var list = getCurrentList();
-  if (!list) return;
-  var main = document.getElementById('main');
-  var doneCount = list.items.filter(function(it){ return it.done; }).length;
-  var html = list.items.map(function(item, i) {
-    return '<div class="item' + (item.done?' done':'') + '" id="it'+item.id+'" draggable="true" '
-      + 'ondragstart="dragStart(event,'+i+')" ondragover="dragOver(event,'+i+')" ondrop="drop(event,'+i+')" ondragend="dragEnd()">'
-      + '<span class="drag-handle" title="drag">⠿</span>'
-      + '<span class="chk" onclick="toggle('+i+')">' + (item.done?'✅':'⬜') + '</span>'
-      + '<span class="lbl" onclick="toggle('+i+')">' + (item.emoji?item.emoji+' ':'') + item.label + '</span>'
-      + '<button class="item-edit-btn" onclick="editItem('+i+')">✏️</button>'
-      + '</div>';
-  }).join('');
-  html += '<div class="complete' + (doneCount===list.items.length&&list.items.length>0?' show':'') + '">'
-    + '${a.done_message||"🎊 Complete!"}' + '</div>';
-  html += '<div class="ftr">Made with AI App Dojo 🥋 Pro<br>'
-    + '<a href="https://note.com/karate_papa" target="_blank" '
-    + 'style="color:#ff6b35;text-decoration:none;font-size:10px">'
-    + (isJa ? '💬 困ったことはコメント欄へ。すぐ返します！' : '💬 Questions? Drop a comment — I reply fast!')
-    + '</a></div>';
-  main.innerHTML = html;
-}
-
-// 進捗バー
-function renderProgress() {
-  var list = getCurrentList();
-  if (!list || !list.items.length) return;
-  var done = list.items.filter(function(it){ return it.done; }).length;
-  var pct = Math.round(done / list.items.length * 100);
-  document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-text').textContent = done + ' / ' + list.items.length + ' (' + pct + '%)';
-}
-
-// ═══ チェック操作 ═════════════════════════
-function toggle(i) {
-  var list = getCurrentList();
-  list.items[i].done = !list.items[i].done;
-  saveState();
-  renderList();
-  renderProgress();
-}
-
-// ═══ 複数リスト（C機能） ═════════════════
-function switchList(i) {
-  state.currentList = i;
-  saveState();
-  renderAll();
-}
-function openAddList() {
-  document.getElementById('list-name-input').value = '';
-  document.getElementById('modal-list').classList.add('show');
-  setTimeout(function(){ document.getElementById('list-name-input').focus(); }, 100);
-}
-function saveNewList() {
-  var name = document.getElementById('list-name-input').value.trim();
-  if (!name) return;
-  state.lists.push({
-    id: Date.now(), name: name,
-    items: DEFAULT_ITEMS.map(function(it){ return Object.assign({},it,{done:false}); })
+// -----------------------------------------------
+// HTMLダウンロード
+// -----------------------------------------------
+function downloadHTML(){
+  if(!genApp) return;
+  var a=genApp, d=a.design||{accent:'#ff6b35',bg:'#0a0a0a'};
+  var items=a.items||[], skey=a.storage_key||'app';
+  var isJa=(lang==='ja');
+  var html='<!DOCTYPE html>\n<html lang="'+lang+'">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>'+a.app_name+'</title>\n<style>\n*{box-sizing:border-box;margin:0;padding:0}\nbody{background:'+d.bg+';color:#f0f0f0;font-family:\'Hiragino Kaku Gothic ProN\',\'Noto Sans JP\',sans-serif;min-height:100vh}\n.hdr{background:#111;padding:16px;text-align:center;border-bottom:1px solid #222}\n.hdr h1{font-size:18px;font-weight:900;color:'+d.accent+'}\n.hdr p{font-size:12px;color:#666;margin-top:4px}\n.prog{padding:8px 16px 4px}\n.prog-bar{height:4px;background:#1e1e1e;border-radius:2px}\n.prog-fill{height:100%;background:'+d.accent+';border-radius:2px;transition:width .4s;width:0%}\n.prog-text{font-size:10px;color:#555;margin-top:3px;text-align:right}\n.item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #131313;cursor:pointer;transition:background .2s}\n.item.done{background:'+d.accent+'12}\n.item.done .lbl{text-decoration:line-through;opacity:.4}\n.chk{font-size:18px;flex-shrink:0}\n.lbl{font-size:14.5px}\n.complete{text-align:center;padding:20px;color:'+d.accent+';font-weight:700;display:none}\n.complete.show{display:block}\n.upgrade{background:#1a0f00;border:1px solid #ff6b3544;border-radius:12px;margin:16px;padding:14px;text-align:center}\n.upgrade-title{font-size:13px;font-weight:700;color:#ff6b35;margin-bottom:6px}\n.upgrade-desc{font-size:11.5px;color:#888;line-height:1.7;margin-bottom:10px}\n.upgrade a{display:inline-block;background:#ff6b35;color:#fff;border-radius:8px;padding:8px 20px;font-size:12px;font-weight:700;text-decoration:none}\n.ftr{text-align:center;padding:16px;font-size:11px;color:#2a2a2a}\n</style>\n</head>\n<body>\n<div class="hdr"><h1>'+a.app_name+'</h1><p>'+(a.one_liner||'')+'</p></div>\n<div class="prog"><div class="prog-bar"><div class="prog-fill" id="pf"></div></div><div class="prog-text" id="pt"></div></div>\n<div id="list">';
+  items.forEach(function(item,i){
+    html+='<div class="item" id="i'+i+'" onclick="tog('+i+')"><span class="chk" id="c'+i+'">⬜</span><span class="lbl">'+item+'</span></div>';
   });
-  state.currentList = state.lists.length - 1;
-  saveState(); closeModal('modal-list'); renderAll();
+  html+='</div>\n<div class="complete" id="done">'+(a.done_message||'🎊 Complete!')+'</div>\n<div class="upgrade"><div class="upgrade-title">✨ '+(isJa?'プロ版でもっと便利に':'Want more features?')+'</div><div class="upgrade-desc">'+(isJa?'項目編集・自動リセット・複数リスト・達成履歴など全7機能':'Edit items, auto-reset, multiple lists, history & more')+'</div><a href="https://mugikohaone-netizen.github.io/dojo/dojo.html" target="_blank">'+(isJa?'道場でプロ版を作る 🥋':'Get Pro Version 🥋')+'</a></div>\n<div class="ftr">Made with AI App Dojo 🥋<br><a href="https://mugikohaone-netizen.github.io/dojo/dojo.html" target="_blank" style="color:#ff6b35;text-decoration:none;font-size:10px">'+(isJa?'💬 困ったことはコメント欄へ':'💬 Questions? Drop a comment')+'</a></div>\n<script>\nvar chk={},tot='+items.length+';\nfunction tog(i){\n  chk[i]=!chk[i];\n  document.getElementById("i"+i).className="item"+(chk[i]?" done":"");\n  document.getElementById("c"+i).textContent=chk[i]?"✅":"⬜";\n  var n=Object.values(chk).filter(Boolean).length;\n  document.getElementById("done").className="complete"+(n===tot?" show":"");\n  document.getElementById("pf").style.width=Math.round(n/tot*100)+"%";\n  document.getElementById("pt").textContent=n+" / "+tot;\n  try{localStorage.setItem("'+skey+'",JSON.stringify(chk));}catch(e){}\n}\ntry{var s=JSON.parse(localStorage.getItem("'+skey+'")||"{}");Object.keys(s).forEach(function(i){if(s[i])tog(parseInt(i));});}catch(e){}\n<\/script>\n</body></html>';
+  var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var el=document.createElement('a');
+  el.href=url; el.download=(a.app_name||'myapp').replace(/\s/g,'_')+'.html';
+  document.body.appendChild(el); el.click(); document.body.removeChild(el); URL.revokeObjectURL(url);
+  var btn=document.getElementById('dl-btn');
+  if(btn){ btn.textContent=t().downloaded; setTimeout(function(){ btn.textContent=t().downloadBtn; },3000); }
 }
 
-// ═══ 項目追加・編集（A機能） ══════════════
-var editingIndex = -1;
-function openAddItem() {
-  editingIndex = -1;
-  document.getElementById('modal-item-title').textContent = IS_JA ? '項目を追加' : 'Add Item';
-  document.getElementById('item-input').value = '';
-  document.getElementById('item-emoji-input').value = '';
-  document.getElementById('modal-item').classList.add('show');
-  setTimeout(function(){ document.getElementById('item-input').focus(); }, 100);
-}
-function editItem(i) {
-  editingIndex = i;
-  var item = getCurrentList().items[i];
-  document.getElementById('modal-item-title').textContent = IS_JA ? '項目を編集' : 'Edit Item';
-  document.getElementById('item-input').value = item.label;
-  document.getElementById('item-emoji-input').value = item.emoji || '';
-  document.getElementById('modal-item').classList.add('show');
-  setTimeout(function(){ document.getElementById('item-input').focus(); }, 100);
-}
-function saveItem() {
-  var text  = document.getElementById('item-input').value.trim();
-  var emoji = document.getElementById('item-emoji-input').value.trim() || '✅';
-  if (!text) return;
-  var list = getCurrentList();
-  if (editingIndex >= 0) {
-    list.items[editingIndex].label = text;
-    list.items[editingIndex].emoji = emoji;
-  } else {
-    list.items.push({ id: Date.now(), label: text, emoji: emoji, done: false, order: list.items.length });
-  }
-  saveState(); closeModal('modal-item'); renderList(); renderProgress();
-}
-
-// ═══ ドラッグ並び替え（A機能） ═══════════
-var dragFrom = -1;
-function dragStart(e, i) { dragFrom = i; e.currentTarget.classList.add('dragging'); }
-function dragOver(e, i)  { e.preventDefault(); }
-function drop(e, i) {
-  if (dragFrom < 0 || dragFrom === i) return;
-  var list = getCurrentList();
-  var moved = list.items.splice(dragFrom, 1)[0];
-  list.items.splice(i, 0, moved);
-  saveState(); renderList(); renderProgress();
-}
-function dragEnd() {
-  dragFrom = -1;
-  document.querySelectorAll('.dragging').forEach(function(el){ el.classList.remove('dragging'); });
-}
-
-// ═══ 設定（E機能） ════════════════════════
-var EMOJIS = ['🥋','⚡','🎯','📋','✅','💪','🌅','🔥','💡','🏆','🚀','🌸','📝','⭐','🎪'];
-var COLORS = ['#ff6b35','#4caf50','#5c9eff','#c084fc','#d4a574','#ff6b9d','#00bcd4','#ffd700'];
-function openSettings() {
-  var s = state.settings;
-  // 絵文字グリッド
-  document.getElementById('emoji-grid').innerHTML = EMOJIS.map(function(em) {
-    return '<button class="emoji-opt'+(s.icon===em?' selected':'')+'" onclick="selectEmoji(\''+em+'\')">' + em + '</button>';
-  }).join('');
-  // カラースウォッチ
-  document.getElementById('color-swatches').innerHTML = COLORS.map(function(c) {
-    return '<div class="swatch'+(s.accent===c?' selected':'')+'" style="background:'+c+'" onclick="selectColor(\''+c+'\')"></div>';
-  }).join('');
-  document.getElementById('reset-setting').value = s.reset || 'daily';
-  document.getElementById('app-name-input').value  = s.appName || '${a.app_name}';
-  document.getElementById('modal-settings').classList.add('show');
-}
-function selectEmoji(em) {
-  state.settings.icon = em;
-  document.querySelectorAll('.emoji-opt').forEach(function(el){
-    el.classList.toggle('selected', el.textContent === em);
-  });
-}
-function selectColor(c) {
-  state.settings.accent = c;
-  document.querySelectorAll('.swatch').forEach(function(el){
-    el.classList.toggle('selected', el.style.background === c);
-  });
-}
-function saveSettings() {
-  state.settings.reset   = document.getElementById('reset-setting').value;
-  state.settings.appName = document.getElementById('app-name-input').value.trim() || '${a.app_name}';
-  saveState(); closeModal('modal-settings'); applyDesign();
-  // アクセントカラーを動的に更新
-  var acc = state.settings.accent;
-  document.querySelectorAll('.btn-primary,.fab,.tab.active').forEach(function(el){ el.style.background=acc; });
-}
-
-// ═══ 達成履歴（D機能） ════════════════════
-function openHistory() { showView('history'); }
-function renderHistory() {
-  var list   = getCurrentList();
-  var done   = list ? list.items.filter(function(it){ return it.done; }).length : 0;
-  var total  = list ? list.items.length : 0;
-  var hist   = state.history || {};
-  var keys   = Object.keys(hist).sort().reverse().slice(0, 7);
-  var allPct = keys.length ? Math.round(keys.reduce(function(s,k){ return s+hist[k].pct; },0)/keys.length) : 0;
-  var streak = calcStreak(hist);
-
-  document.getElementById('stat-row').innerHTML =
-    '<div class="stat-card"><div class="stat-num">'+allPct+'%</div><div class="stat-label">'+(IS_JA?'平均達成率':'Avg Rate')+'</div></div>' +
-    '<div class="stat-card"><div class="stat-num">'+streak+'</div><div class="stat-label">'+(IS_JA?'連続日数':'Streak')+'</div></div>' +
-    '<div class="stat-card"><div class="stat-num">'+done+'/'+total+'</div><div class="stat-label">'+(IS_JA?'今日':'Today')+'</div></div>';
-
-  document.getElementById('history-list').innerHTML = keys.length
-    ? keys.map(function(k) {
-        var h = hist[k];
-        return '<div class="history-day">'
-          + '<div class="history-date">'+k+'</div>'
-          + '<div class="history-bar-wrap">'
-          + '<div class="history-bar"><div class="history-bar-fill" style="width:'+h.pct+'%"></div></div>'
-          + '<div class="history-pct">'+h.pct+'%</div>'
-          + '</div></div>';
-      }).join('')
-    : '<p style="color:#444;font-size:13px;text-align:center;padding:20px">'+(IS_JA?'まだ記録がありません。毎日使うと履歴が溜まります！':'No history yet. Use it daily to build your streak!')+'</p>';
-}
-function calcStreak(hist) {
-  var streak = 0; var d = new Date();
-  for (var i=0; i<30; i++) {
-    var key = d.toISOString().slice(0,10);
-    if (hist[key] && hist[key].pct === 100) { streak++; d.setDate(d.getDate()-1); }
-    else break;
-  }
-  return streak;
-}
-
-// ═══ QRコード生成（G機能） ════════════════
-// シンプルなQRコード生成（外部ライブラリ不要）
-// ファイルのURLをQRにするのではなく「アプリのデータをURLパラメータで共有」
-function openQR() {
-  showView('share');
-}
-function renderQR() {
-  var list  = getCurrentList();
-  var data  = encodeURIComponent(JSON.stringify({ name: state.settings.appName, items: list.items.map(function(it){ return it.emoji+' '+it.label; }), accent: state.settings.accent }));
-  var baseUrl = window.location.href.split('?')[0];
-  var shareUrl = baseUrl + '?d=' + data.slice(0, 800); // URLの長さ制限対応
-
-  document.getElementById('qr-url-text').textContent = shareUrl.slice(0, 60) + '...';
-
-  // QR生成（Google Charts API使用）
-  var canvas = document.getElementById('qr-canvas');
-  var ctx = canvas.getContext('2d');
-  var img = new Image();
-  img.onload = function() { ctx.drawImage(img, 0, 0, 200, 200); };
-  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(shareUrl);
-
-  document.getElementById('modal-qr').classList.add('show');
-}
-function copyLink() {
-  var list  = getCurrentList();
-  var shareData = JSON.stringify({ name: state.settings.appName, items: list.items.map(function(it){ return it.emoji+' '+it.label; }) });
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(shareData).then(function(){
-      alert(IS_JA ? 'コピーしました！' : 'Copied!');
-    });
-  }
-}
-
-// ═══ ビュー切り替え ════════════════════════
-var currentView = 'list';
-function showView(v) {
-  currentView = v;
-  var fab = document.querySelector('.fab');
-  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
-
-  if (v === 'list') {
-    document.getElementById('main').style.display = '';
-    document.querySelector('.progress-wrap').style.display = '';
-    if(fab) fab.style.display = '';
-    renderList(); renderProgress();
-    document.getElementById('nav-list').classList.add('active');
-  } else if (v === 'history') {
-    document.getElementById('main').innerHTML = '<div class="history-wrap" id="hist-inner"></div>';
-    document.querySelector('.progress-wrap').style.display = 'none';
-    if(fab) fab.style.display = 'none';
-    renderHistory();
-    // historyのHTML挿入
-    var histInner = document.getElementById('hist-inner');
-    if(histInner) {
-      histInner.innerHTML =
-        '<div class="stat-row" id="stat-row"></div>'
-        + '<div style="font-size:12px;color:#666;margin-bottom:10px">'+(IS_JA?'直近7日間':'Last 7 days')+'</div>'
-        + '<div id="history-list"></div>';
-      renderHistory();
-    }
-    document.getElementById('nav-history').classList.add('active');
-  } else if (v === 'share') {
-    renderQR();
-    document.getElementById('nav-share').classList.add('active');
-  }
-}
-
-// ═══ URLパラメータからインポート ═══════════
-function importFromURL() {
-  var params = new URLSearchParams(window.location.search);
-  var d = params.get('d');
-  if (!d) return;
-  try {
-    var data = JSON.parse(decodeURIComponent(d));
-    if (data.name && data.items) {
-      state.lists.push({
-        id: Date.now(), name: data.name,
-        items: data.items.map(function(text, i) {
-          var em = text.match(/^(\\S+)\\s(.+)/);
-          return { id: Date.now()+i, emoji: em?em[1]:'✅', label: em?em[2]:text, done: false, order: i };
-        })
-      });
-      state.currentList = state.lists.length - 1;
-      if (data.accent) state.settings.accent = data.accent;
-      saveState();
-    }
-  } catch(e) {}
-}
-
-// ═══ モーダル共通 ═════════════════════════
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
-}
-
-// ═══ 起動 ═════════════════════════════════
-importFromURL();
-init();
-</script>
-</body>
-</html>`;
-
-  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  const url  = URL.createObjectURL(blob);
-  const el   = document.createElement('a');
-  el.href    = url;
-  el.download = (a.app_name||'myapp').replace(/\s/g,'_')+'_pro.html';
-  document.body.appendChild(el); el.click();
-  document.body.removeChild(el); URL.revokeObjectURL(url);
-  const btn = document.getElementById('download-btn');
-  if(btn){ btn.textContent=t().downloaded; setTimeout(()=>{ btn.textContent=t().downloadBtn; },3000); }
-}
-
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // PWA
-// ═══════════════════════════════════════════
-window.addEventListener('beforeinstallprompt', e => {
+// -----------------------------------------------
+window.addEventListener('beforeinstallprompt',function(e){
   e.preventDefault(); pwaPrompt=e;
-  const banner=document.getElementById('pwa-banner');
   document.getElementById('pwa-banner-text').textContent=t().pwaInstall;
-  document.getElementById('pwa-install-btn').textContent=t().pwaAdd;
-  document.getElementById('pwa-dismiss-btn').textContent=t().pwaLater;
-  banner.classList.add('show');
+  document.getElementById('pwa-add-btn').textContent=t().pwaAdd;
+  document.getElementById('pwa-dismiss').textContent=t().pwaLater;
+  document.getElementById('pwa-banner').classList.add('show');
 });
-function handleInstall() {
+function handleInstall(){
   if(!pwaPrompt) return;
   pwaPrompt.prompt();
-  pwaPrompt.userChoice.then(r=>{ if(r.outcome==='accepted'){dismissPWA();pwaPrompt=null;} });
+  pwaPrompt.userChoice.then(function(r){ if(r.outcome==='accepted'){ dismissPWA(); pwaPrompt=null; } });
 }
-function dismissPWA() { document.getElementById('pwa-banner').classList.remove('show'); }
+function dismissPWA(){ document.getElementById('pwa-banner').classList.remove('show'); }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // 言語切り替え
-// ═══════════════════════════════════════════
-function toggleLang() {
-  lang = lang==='ja'?'en':'ja';
-  document.getElementById('lang-btn').textContent = lang==='ja'?'EN':'日本語';
-  document.getElementById('app-name-header').textContent = t().appName;
+// -----------------------------------------------
+function toggleLang(){
+  lang=(lang==='ja'?'en':'ja');
+  document.getElementById('lang-btn').textContent=(lang==='ja'?'EN':'日本語');
+  document.getElementById('hdr-name').textContent=t().appName;
   render();
 }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // ルーティング
-// ═══════════════════════════════════════════
-function showArticle() {
+// -----------------------------------------------
+function showArticle(){
   view='article'; phase='welcome';
   document.getElementById('back-btn').style.display='none';
   render();
 }
-function showDojo() {
+function showDojo(){
   view='dojo';
   document.getElementById('back-btn').style.display='';
   document.getElementById('back-btn').textContent=t().backToArticle;
-  // 保存データ復元
-  const saved=loadProgress();
-  if(saved && saved.stage==='result' && saved.generatedApp) {
-    generatedApp=saved.generatedApp; answers=saved.answers||{}; phase='result';
-  } else if(saved && saved.stage==='loading' && saved.answers) {
-    // ローディング中に閉じた場合：インタビュー完了済みなのでそのまま再生成
-    answers=saved.answers; qIndex=saved.qIndex||0;
-    messages=[
-      {from:'ai', text: lang==='ja'
-        ? 'おかえり！前回のアプリ生成が途中でした。続きから再開します💪'
-        : 'Welcome back! Your last generation was interrupted. Resuming now 💪',
-        hint:null},
-    ];
-    phase='interview';
-    // 自動でローディング再開（少し待ってから）
-    setTimeout(()=>{
-      // 再度doneメッセージを追加してローディングへ
-      addMsg('ai', lang==='ja'
-        ? '仕様書を再送信します。クロード大明神、もう一度頼む！'
-        : 'Re-sending the spec. Claude, one more time!',
-        null, false, true
-      );
-      phase='interview'; render();
-      setTimeout(()=>{ phase='loading'; loadStep=0; saveProgress({stage:'loading',answers,qIndex}); render(); startLoading(); },1200);
-    }, 800);
-  } else if(saved && saved.stage==='interview' && saved.answers) {
+  var saved=loadProgress();
+  if(saved && saved.stage==='result' && saved.app){
+    genApp=saved.app; answers=saved.answers||{}; phase='result';
+  } else if(saved && (saved.stage==='interview'||saved.stage==='loading') && saved.answers){
     answers=saved.answers; qIndex=saved.qIndex||0;
     messages=[
       {from:'ai',text:t().resumeMsg,hint:null},
-      {from:'ai',text:t().questions[qIndex].text,hint:t().questions[qIndex].hint},
+      {from:'ai',text:t().questions[qIndex].text,hint:t().questions[qIndex].hint}
     ];
+    if(saved.stage==='loading'){
+      setTimeout(function(){
+        addMsg('ai',t().doneMsg,null,false,true);
+        phase='interview'; render();
+        setTimeout(function(){ phase='loading'; loadStep=0; saveProgress({stage:'loading',answers:answers,qIndex:qIndex}); render(); startLoading(); },1200);
+      },600);
+    }
     phase='interview';
-  } else {
-    phase='welcome';
-  }
+  } else { phase='welcome'; }
   render();
 }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // レンダリング
-// ═══════════════════════════════════════════
-function render() {
-  const c=document.getElementById('content');
-  if(view==='article') { c.innerHTML=renderArticle(); bindArticle(); return; }
-  if(phase==='welcome')   { c.innerHTML=renderDojoWelcome(); return; }
-  if(phase==='interview') { c.innerHTML=renderInterview(); bindInterview(); scrollBottom(); return; }
-  if(phase==='loading')   { c.innerHTML=renderLoading(); return; }
-  if(phase==='result')    { c.innerHTML=renderResult(); bindResult(); return; }
-  if(phase==='hold')      { c.innerHTML=renderHold(); return; }
-  if(phase==='blocked')   { c.innerHTML=renderBlocked(); return; }
-  if(phase==='captchaFail'){ c.innerHTML=renderCaptchaFail(); return; }
-  if(phase==='rateLimit') { c.innerHTML=renderRateLimit(); return; }
+// -----------------------------------------------
+function render(){
+  var c=document.getElementById('content');
+  if(view==='article'){ c.innerHTML=renderArticle(); bindArticle(); return; }
+  if(phase==='welcome')    { c.innerHTML=renderWelcome(); return; }
+  if(phase==='interview')  { c.innerHTML=renderInterview(); bindInterview(); scrollBottom(); return; }
+  if(phase==='loading')    { c.innerHTML=renderLoading(); return; }
+  if(phase==='result')     { c.innerHTML=renderResult(); return; }
+  if(phase==='hold')       { c.innerHTML=renderHold(); return; }
+  if(phase==='blocked')    { c.innerHTML=renderBlocked(); return; }
+  if(phase==='rateLimit')  { c.innerHTML=renderRateLimit(); return; }
   c.innerHTML=renderError();
 }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // 記事
-// ═══════════════════════════════════════════
-function renderArticle() {
-  const isEn=lang==='en';
-  const titleLines=t().articleTitle.split('\n');
-  const roundsHTML=ROUNDS.map(r=>`
-    <div class="round-card${openRound===r.id?' open':''}" id="rc-${r.id}">
-      <div class="round-header" onclick="toggleRound('${r.id}')">
-        <div class="round-icon">${r.icon}</div>
-        <div style="flex:1">
-          <div class="round-badge">${isEn?r.badgeEn:r.badge}</div>
-          <div class="round-title">${isEn?r.titleEn:r.title}</div>
-        </div>
-        <div class="round-arrow">›</div>
-      </div>
-      ${openRound===r.id?`<div class="round-body">
-        <div class="round-quote">「${isEn?r.quoteEn:r.quote}」</div>
-        <div id="demo-${r.id}">${renderDemo(r)}</div>
-      </div>`:''}
-    </div>
-  `).join('');
-
-  const bars=ROUNDS.map((_,i)=>`<div class="progress-bar-item${i<readCount?' done':''}"></div>`).join('');
-  const ctaReady = readCount >= ROUNDS.length;
-  const ctaPartial = readCount >= 2 && !ctaReady;  // 2〜3ラウンド読んだ状態
-
-  // ボタンスタイル：全読み→シマー、部分読み→通常オレンジ
-  const ctaBtnStyle = ctaReady
-    ? 'background-image:linear-gradient(90deg,#ff6b35,#ff9055,#ff6b35);background-size:200% auto;animation:shimmer 2s linear infinite;color:#fff;border:none;'
-    : 'background:#ff6b35;color:#fff;border:none;';
-
-  return `
-    <div id="article">
-      <div class="article-header">
-        <div class="article-tag">INTERACTIVE ARTICLE</div>
-        <h1 class="article-title">${titleLines[0]}<br>${titleLines[1]||''}</h1>
-        <div class="author-row">
-          <div class="author-avatar">🥋</div>
-          <div><div class="author-name">karate papa</div><div class="author-date">${t().authorDate}</div></div>
-        </div>
-      </div>
-      <div class="article-body">
-        <p class="article-lead">${t().articleLead}</p>
-        <div class="article-hint"><span>💡</span><span>${t().articleHint}</span></div>
-      </div>
-      <div class="rounds">${roundsHTML}</div>
-      <div class="progress-row">${bars}<div class="progress-count">${readCount}/${ROUNDS.length}</div></div>
-      ${readCount>=2?`
-      <div class="cta-box">
-        <div class="cta-emoji">👊</div>
-        <div class="cta-title">${t().tryYourself}</div>
-        <div class="cta-desc">${t().tryDesc}</div>
-        <button id="cta-btn" class="${ctaReady?'ready':''}"
-          style="${ctaBtnStyle}border-radius:12px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;transition:all 0.3s;"
-          onclick="showDojo()">
-          ${ctaReady ? t().enterDojo : t().enterDojo}
-        </button>
-        ${ctaPartial?`
-        <div style="text-align:center;margin-top:10px">
-          <button onclick="skipToEnd()" style="background:transparent;border:none;color:#555;font-size:11.5px;cursor:pointer;font-family:inherit;text-decoration:underline;padding:4px 8px;">
-            ${lang==='ja'?'残りのラウンドをスキップする →':'Skip remaining rounds →'}
-          </button>
-        </div>`:''}
-        <div class="cta-zero">${t().zeroProg}</div>
-      </div>`:''}
-      <div class="author-footer">
-        <div class="author-footer-row">
-          <div class="author-footer-avatar">🥋</div>
-          <div><div class="author-footer-name">karate papa</div><div class="author-footer-desc">${t().authorDesc}</div></div>
-        </div>
-        <div class="author-footer-cta">${t().authorCTA}</div>
-        <div style="margin-top:14px;background:#111;border:1px solid #ff6b3533;border-radius:10px;padding:12px 14px;">
-          <div style="font-size:12px;color:#ff6b35;font-weight:700;margin-bottom:4px">
-            💬 ${lang==='ja'?'困ったことがあればすぐ聞いてください':'Got a question? Ask anytime'}
-          </div>
-          <div style="font-size:11.5px;color:#666;line-height:1.7">
-            ${lang==='ja'
-              ? 'コメント欄に書いてもらえれば、できる限り早く返します。「作れるかな？」という相談も大歓迎です。'
-              : "Drop a comment and I'll reply as fast as I can. 'Can I even make this?' questions are very welcome."}
-          </div>
-        </div>
-        <div style="margin-top:12px;font-size:11px;color:#333">
-          <a href="./terms.html" style="color:#444;text-decoration:none">📜 ${lang==='ja'?'利用規約':'Terms of Service'}</a>
-        </div>
-      </div>
-    </div>`;
-}
-
-function renderDemo(r) {
-  if(r.specItems) return renderSpecDemo(r);
-  if(r.codeLines) return renderCodeDemo(r);
-  if(r.exchanges && r.exchanges[0].from) return renderDebugDemo(r);
-  return renderBattleDemo(r);
-}
-
-function renderBattleDemo(r) {
-  const isEn=lang==='en';
-  const shown=demoShown[r.id]||0;
-  const ex=r.exchanges;
-  const bubbles=ex.slice(0,shown).map(e=>{
-    const isPapa=e.speaker==='パパさん';
-    return `<div class="bubble-row${isPapa?' right':''}">
-      ${!isPapa?`<div class="bubble-avatar">${e.avatar}</div>`:''}
-      <div>
-        ${!isPapa?`<div class="bubble-speaker" style="color:${e.color}">${e.speaker}</div>`:''}
-        <div class="bubble ${isPapa?'user':'ai'}" style="${!isPapa?`border:1px solid ${e.color}44`:''}">${isEn?(e.textEn||e.text):e.text}</div>
-      </div>
-      ${isPapa?`<div class="bubble-avatar">${e.avatar}</div>`:''}
-    </div>`;
+// -----------------------------------------------
+function renderArticle(){
+  var isEn=(lang==='en');
+  var tl=t().articleTitle.split('\n');
+  var roundsHTML=ROUNDS.map(function(r){
+    var isOpen=(openRound===r.id);
+    var bd=(isEn?r.badgeEn:r.badgeJa);
+    var ti=(isEn?r.titleEn:r.titleJa);
+    var qt=(isEn?r.quoteEn:r.quoteJa);
+    var body='';
+    if(isOpen){
+      body='<div class="round-body"><div class="round-quote">「'+qt+'」</div><div id="demo-'+r.id+'">'+renderDemo(r)+'</div></div>';
+    }
+    return '<div class="round-card'+(isOpen?' open':'')+'">'
+      +'<div class="round-hdr" onclick="toggleRound(\''+r.id+'\')">'
+      +'<div class="round-icon-wrap">'+r.icon+'</div>'
+      +'<div style="flex:1"><div class="round-badge-text">'+bd+'</div><div class="round-title">'+ti+'</div></div>'
+      +'<div class="round-arrow">›</div>'
+      +'</div>'+body+'</div>';
   }).join('');
-  const typing=shown<ex.length?`<div class="typing-indicator">● ${lang==='ja'?'議論中...':'discussing...'}</div>`:'';
-  return `<div class="demo-battle">${bubbles}${typing}</div>`;
+
+  var bars=ROUNDS.map(function(_,i){ return '<div class="prog-bar'+(i<readCount?' done':'')+'"></div>'; }).join('');
+  var ctaReady=(readCount>=ROUNDS.length);
+  var ctaPartial=(readCount>=2 && !ctaReady);
+  var ctaBtn='<button id="cta-btn" class="'+(ctaReady?'ready':'')+'"'
+    +' style="'+(ctaReady?'background:#ff6b35;color:#fff;border:none;background-image:linear-gradient(90deg,#ff6b35,#ff9055,#ff6b35);background-size:200% auto;animation:shimmer 2s linear infinite;':'background:#ff6b35;color:#fff;border:none;')+'"'
+    +' onclick="showDojo()">'+t().enterDojo+'</button>';
+  var skipBtn=ctaPartial?'<div class="skip-link"><button onclick="skipAll()">'+t().skipLink+'</button></div>':'';
+  var ctaHtml=readCount>=2?'<div class="cta-box"><div class="cta-emoji">👊</div><div class="cta-title">'+t().tryYourself+'</div><div class="cta-desc">'+t().tryDesc+'</div>'+ctaBtn+skipBtn+'<div class="cta-zero">'+t().zeroProg+'</div></div>':'';
+
+  return '<div id="article">'
+    +'<div class="art-header">'
+    +'<div class="art-tag">INTERACTIVE ARTICLE</div>'
+    +'<h1 class="art-title">'+tl[0]+'<br>'+(tl[1]||'')+'</h1>'
+    +'<div class="author-row"><div class="author-av">🥋</div><div><div class="author-name">karate papa</div><div class="author-date">'+t().authorDate+'</div></div></div>'
+    +'</div>'
+    +'<div class="art-body">'
+    +'<p class="art-lead">'+t().articleLead+'</p>'
+    +'<div class="art-hint"><span>💡</span><span>'+t().articleHint+'</span></div>'
+    +'</div>'
+    +'<div class="rounds">'+roundsHTML+'</div>'
+    +'<div class="prog-row">'+bars+'<div class="prog-count">'+readCount+'/'+ROUNDS.length+'</div></div>'
+    +ctaHtml
+    +'<div class="art-footer">'
+    +'<div class="art-footer-row"><div class="art-footer-av">🥋</div><div><div class="art-footer-name">karate papa</div><div class="art-footer-desc">'+t().authorDesc+'</div></div></div>'
+    +'<div class="art-footer-cta">'+t().authorCTA+'</div>'
+    +'<div class="support-box"><div class="support-box-title">'+t().supportTitle+'</div><div class="support-box-desc">'+t().supportDesc+'</div></div>'
+    +'<div class="terms-link"><a href="./terms.html">📜 '+(isEn?'Terms of Service':'利用規約')+'</a></div>'
+    +'</div>'
+    +'</div>';
 }
 
-function renderSpecDemo(r) {
-  const isEn=lang==='en';
-  return r.specItems.map((item,i)=>`
-    <div class="spec-item" style="animation-delay:${i*0.08}s;margin-bottom:9px">
-      <div class="spec-icon">${item.icon}</div>
-      <div><div class="spec-label">${isEn?item.labelEn:item.label}</div><div class="spec-value">${isEn?item.valueEn:item.value}</div></div>
-    </div>`).join('');
-}
-
-function renderCodeDemo(r) {
-  const shown=demoShown[r.id]||0;
-  const lines=r.codeLines.slice(0,shown).map(l=>{
-    const col=l.startsWith('//')?'#6a9955':/^</.test(l.trim())?'#4ec9b0':l.includes('{')?'#dcdcaa':'#d4d4d4';
-    return `<div class="code-line" style="color:${col}">${l||'&nbsp;'}</div>`;
-  }).join('');
-  const cursor=shown<r.codeLines.length?'<span class="code-cursor">▌</span>':'';
-  return `<div class="code-demo">${lines}${cursor}</div>`;
-}
-
-function renderDebugDemo(r) {
-  const isEn=lang==='en';
-  const shown=demoShown[r.id]||0;
-  const bubbles=r.exchanges.slice(0,shown).map(e=>`
-    <div class="bubble-row${e.from==='user'?' right':''}">
-      ${e.from==='ai'?'<div class="bubble-avatar">🥋</div>':''}
-      <div class="bubble ${e.from==='user'?'user':'ai'}">${isEn?(e.textEn||e.text):e.text}</div>
-    </div>`).join('');
-  const typing=shown<r.exchanges.length?`<div class="typing-indicator">● ${lang==='ja'?'返信中...':'replying...'}</div>`:'';
-  return `<div class="demo-battle">${bubbles}${typing}</div>`;
-}
-
-function bindArticle() {
-  // デモアニメーションを開始
+function bindArticle(){
   if(openRound) startDemoAnim(openRound);
 }
 
-function toggleRound(id) {
-  const wasOpen=openRound===id;
+function toggleRound(id){
+  var wasOpen=(openRound===id);
   openRound=wasOpen?null:id;
-  if(!wasOpen) { readCount++; demoShown[id]=0; }
+  if(!wasOpen){ readCount++; demoShown[id]=0; }
   render();
   if(!wasOpen) startDemoAnim(id);
 }
 
-// スキップ：残りを全部既読にして道場へ直行
-function skipToEnd() {
-  readCount = ROUNDS.length;
+function skipAll(){
+  readCount=ROUNDS.length;
   render();
-  setTimeout(() => showDojo(), 300);
+  setTimeout(function(){ showDojo(); },300);
 }
 
-function startDemoAnim(id) {
-  const r=ROUNDS.find(r=>r.id===id);
+function renderDemo(r){
+  if(r.type==='spec')  return renderSpecDemo(r);
+  if(r.type==='code')  return renderCodeDemo(r);
+  if(r.type==='debug') return renderDebugDemo(r);
+  return renderBattleDemo(r);
+}
+
+function renderBattleDemo(r){
+  var isEn=(lang==='en');
+  var shown=demoShown[r.id]||0;
+  var html='<div class="demo-chat">';
+  for(var i=0;i<Math.min(shown,r.exchanges.length);i++){
+    var e=r.exchanges[i];
+    var isMe=(e.who==='パパさん'||e.who==='user');
+    var txt=(isEn&&e.en)?e.en:e.ja;
+    if(isMe){
+      html+='<div class="bubble-row right"><div class="bubble me">'+txt+'</div><div class="bubble-av">'+e.av+'</div></div>';
+    } else {
+      html+='<div class="bubble-row">'
+        +'<div class="bubble-av">'+e.av+'</div>'
+        +'<div><div class="bubble-name" style="color:'+e.col+'">'+e.who+'</div>'
+        +'<div class="bubble them" style="border:1px solid '+e.col+'44">'+txt+'</div></div>'
+        +'</div>';
+    }
+  }
+  if(shown<r.exchanges.length) html+='<div class="typing">● '+(isEn?'discussing…':'議論中…')+'</div>';
+  html+='</div>';
+  return html;
+}
+
+function renderSpecDemo(r){
+  var isEn=(lang==='en');
+  return r.specItems.map(function(it,i){
+    return '<div class="spec-item" style="animation-delay:'+(i*0.08)+'s">'
+      +'<div class="spec-icon">'+it.icon+'</div>'
+      +'<div><div class="spec-label">'+(isEn?it.labelEn:it.labelJa)+'</div>'
+      +'<div class="spec-value">'+(isEn?it.valEn:it.valJa)+'</div></div>'
+      +'</div>';
+  }).join('');
+}
+
+function renderCodeDemo(r){
+  var shown=demoShown[r.id]||0;
+  var html='<div class="code-box">';
+  r.codeLines.slice(0,shown).forEach(function(line){
+    var col=line.match(/^\/\//)?'#6a9955':line.match(/^\s*</)&&!line.match(/script/)&&!line.match(/style/)?'#4ec9b0':line.indexOf('{')>=0?'#dcdcaa':'#d4d4d4';
+    html+='<div style="color:'+col+'">'+line+'</div>';
+  });
+  if(shown<r.codeLines.length) html+='<span class="code-cursor">▌</span>';
+  html+='</div>';
+  return html;
+}
+
+function renderDebugDemo(r){
+  var isEn=(lang==='en');
+  var shown=demoShown[r.id]||0;
+  var html='<div class="demo-chat">';
+  for(var i=0;i<Math.min(shown,r.exchanges.length);i++){
+    var e=r.exchanges[i];
+    var txt=(isEn&&e.en)?e.en:e.ja;
+    if(e.who==='user'){
+      html+='<div class="bubble-row right"><div class="bubble me">'+txt+'</div></div>';
+    } else {
+      html+='<div class="bubble-row"><div class="bubble-av">🥋</div><div class="bubble them">'+txt+'</div></div>';
+    }
+  }
+  if(shown<r.exchanges.length) html+='<div class="typing">● '+(isEn?'replying…':'返信中…')+'</div>';
+  html+='</div>';
+  return html;
+}
+
+function startDemoAnim(id){
+  var r=ROUNDS.find(function(r){ return r.id===id; });
   if(!r) return;
   if(demoTimers[id]) clearInterval(demoTimers[id]);
-  const maxShown=r.exchanges?r.exchanges.length:(r.codeLines?r.codeLines.length:0);
-  if(!maxShown) return;
-  const interval=r.codeLines?75:880;
-  demoTimers[id]=setInterval(()=>{
+  var max=(r.type==='code')?r.codeLines.length:(r.exchanges?r.exchanges.length:0);
+  if(!max) return;
+  var interval=(r.type==='code')?75:880;
+  demoTimers[id]=setInterval(function(){
     demoShown[id]=(demoShown[id]||0)+1;
-    const el=document.getElementById('demo-'+id);
+    var el=document.getElementById('demo-'+id);
     if(el) el.innerHTML=renderDemo(r);
-    if(demoShown[id]>=maxShown) { clearInterval(demoTimers[id]); delete demoTimers[id]; }
+    if(demoShown[id]>=max){ clearInterval(demoTimers[id]); delete demoTimers[id]; }
   },interval);
 }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // 道場ウェルカム
-// ═══════════════════════════════════════════
-function renderDojoWelcome() {
-  const tl=t().dojoTitle.split('\n');
-  return `<div class="center">
-    <div class="center-card">
-      <div class="step-badge">${t().stepSubtitle}</div>
-      <div class="big-emoji">👊</div>
-      <div class="center-title">${tl[0]}<br>${tl[1]||''}</div>
-      <div class="center-desc">${t().dojoDesc}</div>
-      <button class="btn-primary" onclick="startInterview()">${t().startBtn}</button>
-      <button class="btn-ghost" style="margin-top:10px;color:#444" onclick="showArticle()">${t().backToArticle}</button>
-    </div>
-  </div>`;
+// -----------------------------------------------
+function renderWelcome(){
+  var tl=t().dojoTitle.split('\n');
+  return '<div class="center"><div class="center-card">'
+    +'<div class="step-badge">'+t().stepSubtitle+'</div>'
+    +'<div class="big-emoji">👊</div>'
+    +'<div class="c-title">'+tl[0]+'<br>'+(tl[1]||'')+'</div>'
+    +'<div class="c-desc">'+t().dojoDesc+'</div>'
+    +'<button class="btn-p" onclick="startInterview()">'+t().startBtn+'</button>'
+    +'<button class="btn-g" style="margin-top:10px;color:#444" onclick="showArticle()">'+t().backToArticle+'</button>'
+    +'</div></div>';
 }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // インタビュー
-// ═══════════════════════════════════════════
-function startInterview() {
+// -----------------------------------------------
+function startInterview(){
   qIndex=0; answers={}; messages=[];
   addMsg('ai',t().questions[0].text,t().questions[0].hint);
   phase='interview'; render();
 }
 
-function addMsg(from,text,hint,isRedirect,isLast) {
-  messages.push({from,text,hint,isRedirect,isLast});
+function addMsg(from,text,hint,isRedirect,isLast){
+  messages.push({from:from,text:text,hint:hint,isRedirect:isRedirect,isLast:isLast});
 }
 
-function renderInterview() {
-  const pct=((qIndex+1)/t().questions.length*100)+'%';
-  const msgs=messages.map(m=>{
-    if(m.from==='ai') return `
-      <div class="msg-row ai">
-        <div class="msg-avatar">🥋</div>
-        <div>
-          <div class="msg-bubble ai">${m.text.split('\n').map(l=>`<p style="margin-bottom:2px">${l}</p>`).join('')}</div>
-          ${m.hint?`<div class="msg-hint">💡 ${m.hint}</div>`:''}
-          ${m.isRedirect?`<button class="btn-small" style="margin-top:9px" onclick="continueRedirect()">${t().redirectBtn}</button>`:''}
-        </div>
-      </div>`;
-    return `<div class="msg-row user"><div class="msg-bubble user">${m.text}</div></div>`;
+function renderInterview(){
+  var pct=Math.round((qIndex+1)/t().questions.length*100);
+  var lastMsg=messages[messages.length-1];
+  var inputOff=lastMsg&&(lastMsg.isLast||lastMsg.isRedirect);
+  var msgsHTML=messages.map(function(m){
+    if(m.from==='ai'){
+      var lines=m.text.split('\n').map(function(l){ return '<p style="margin-bottom:2px">'+l+'</p>'; }).join('');
+      var hint=m.hint?'<div class="msg-hint">💡 '+m.hint+'</div>':'';
+      var redir=m.isRedirect?'<button class="btn-s" style="margin-top:9px" onclick="continueRedirect()">'+t().redirectBtn+'</button>':'';
+      return '<div class="msg-ai"><div class="msg-av">🥋</div><div><div class="msg-bubble-ai">'+lines+'</div>'+hint+redir+'</div></div>';
+    } else {
+      return '<div class="msg-user"><div class="msg-bubble-user">'+m.text+'</div></div>';
+    }
   }).join('');
-  const lastMsg=messages[messages.length-1];
-  const inputOff=lastMsg&&(lastMsg.isLast||lastMsg.isRedirect);
-  return `
-    <div id="interview">
-      <div id="progress-bar"><div id="progress-fill" style="width:${pct}"></div></div>
-      <div id="step-label">${t().stepLabel||''}STEP ${qIndex+1} / ${t().questions.length}</div>
-      <div id="messages">${msgs}<div id="msg-bottom"></div></div>
-      ${!inputOff?`<div id="input-area">
-        ${TURNSTILE_SITE_KEY ? `<div id="turnstile-container"></div>` : ''}
-        <input id="chat-input" placeholder="${t().questions[Math.min(qIndex,t().questions.length-1)].ph}" onkeydown="handleKey(event)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false">
-        <button class="btn-send" onclick="sendMsg()">${t().send}</button>
-      </div>`:''}
-    </div>`;
+  var qs=t().questions;
+  var ph=qs[Math.min(qIndex,qs.length-1)].ph;
+  var inputHTML=!inputOff?'<div id="input-area"><input id="chat-inp" placeholder="'+ph+'" onkeydown="handleKey(event)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"><button class="btn-send" onclick="sendMsg()">'+t().send+'</button></div>':'';
+  return '<div id="interview">'
+    +'<div id="prog-bar"><div id="prog-fill" style="width:'+pct+'%"></div></div>'
+    +'<div id="step-lbl">STEP '+(qIndex+1)+' / '+qs.length+'</div>'
+    +'<div id="messages">'+msgsHTML+'<div id="msg-btm"></div></div>'
+    +inputHTML
+    +'</div>';
 }
 
-function bindInterview() {
-  const inp=document.getElementById('chat-input');
-  if(inp) setTimeout(()=>inp.focus(),100);
+function bindInterview(){
+  var inp=document.getElementById('chat-inp');
+  if(inp) setTimeout(function(){ inp.focus(); },100);
 }
 
-function scrollBottom() {
-  setTimeout(()=>{
-    const el=document.getElementById('msg-bottom');
+function scrollBottom(){
+  setTimeout(function(){
+    var el=document.getElementById('msg-btm');
     if(el) el.scrollIntoView({behavior:'smooth'});
   },50);
 }
 
-function handleKey(e) {
+function handleKey(e){
   if(e.key==='Enter'&&!isComposing) sendMsg();
 }
 
-function sendMsg() {
-  const inp=document.getElementById('chat-input');
+function sendMsg(){
+  var inp=document.getElementById('chat-inp');
   if(!inp||!inp.value.trim()) return;
-  const val=inp.value.trim();
+  var val=inp.value.trim();
 
-  // 複数人チェック
-  if(/(みんなで|複数人|他人と|グループで|リアルタイムで共有|real.?time|multi.?user|share with team)/i.test(val)) {
+  if(/みんなで|複数人|他人と|グループで|リアルタイムで共有|multi.user|share with team/i.test(val)){
     addMsg('user',val);
     addMsg('ai',t().redirectMsg,t().redirectHint,true);
-    saveProgress({stage:'interview',qIndex,answers});
+    saveProgress({stage:'interview',qIndex:qIndex,answers:answers});
     phase='interview'; render(); return;
   }
 
-  const q=t().questions[qIndex];
+  var q=t().questions[qIndex];
   answers[q.id]=val;
-  const next=qIndex+1;
   addMsg('user',val);
+  var next=qIndex+1;
 
-  if(next>=t().questions.length) {
-    // フロント側レート制限チェック（1日1回）
-    if (checkFrontendRate()) {
-      addMsg('ai', lang==='ja'
-        ? '本日のアプリ生成はすでに行いました。また明日来てください！押忍🥋'
-        : 'You\'ve already generated an app today. Come back tomorrow! Osu 🥋'
-      );
-      saveProgress({stage:'interview',qIndex,answers});
+  if(next>=t().questions.length){
+    if(checkRate()){
+      addMsg('ai',lang==='ja'?'本日のアプリ生成はすでに行いました。また明日来てください！押忍🥋':'You\'ve already generated an app today. Come back tomorrow! Osu 🥋');
       phase='interview'; render(); return;
     }
     addMsg('ai',t().doneMsg,null,false,true);
-    saveProgress({stage:'interview',qIndex,answers});
+    saveProgress({stage:'interview',qIndex:qIndex,answers:answers});
     phase='interview'; render();
-    setTimeout(()=>{
-      phase='loading'; loadStep=0;
-      // ローディング中にページを閉じた時のために保存
-      saveProgress({stage:'loading', answers, qIndex});
-      render(); startLoading();
-    },1400);
+    setTimeout(function(){ phase='loading'; loadStep=0; saveProgress({stage:'loading',answers:answers,qIndex:qIndex}); render(); startLoading(); },1400);
   } else {
     qIndex=next;
     addMsg('ai',t().questions[next].text,t().questions[next].hint);
-    saveProgress({stage:'interview',qIndex,answers});
+    saveProgress({stage:'interview',qIndex:qIndex,answers:answers});
     phase='interview'; render();
   }
 }
 
-function continueRedirect() {
+function continueRedirect(){
   addMsg('ai',t().questions[qIndex].text,t().questions[qIndex].hint);
   phase='interview'; render();
 }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // ローディング
-// ═══════════════════════════════════════════
-function startLoading() {
+// -----------------------------------------------
+function startLoading(){
   if(loadTimer) clearTimeout(loadTimer);
   tickLoader();
 }
 
-function tickLoader() {
-  if(loadStep>=t().loadingMsgs.length-1) {
-    loadTimer=setTimeout(async()=>{
-      try {
-        const spec=await callBackend(answers);
-        if(spec.status==='hold')    { holdMsg=spec.hold_reason||''; phase='hold'; render(); return; }
-        if(spec.status==='blocked') { holdMsg=spec.blocked_reason||''; phase='blocked'; render(); return; }
-        generatedApp=spec;
-        saveProgress({stage:'result',answers,generatedApp:spec});
+function tickLoader(){
+  var msgs=t().loadingMsgs;
+  if(loadStep>=msgs.length-1){
+    loadTimer=setTimeout(async function(){
+      try{
+        var spec=await callBackend(answers);
+        if(spec.status==='hold')   { holdMsg=spec.hold_reason||''; phase='hold';    render(); return; }
+        if(spec.status==='blocked'){ holdMsg=spec.blocked_reason||''; phase='blocked'; render(); return; }
+        genApp=spec;
+        saveProgress({stage:'result',answers:answers,app:spec});
+        checkedItems={};
         phase='result'; render();
-      } catch(e) {
-        phase=e.message==='RATE_LIMIT'?'rateLimit':e.message==='CAPTCHA_FAILED'?'captchaFail':'error';
+      }catch(e){
+        if(e.message==='RATE_LIMIT'||e.message==='RATE_LIMIT_USER') phase='rateLimit';
+        else phase='error';
         render();
       }
     },1800);
     return;
   }
-  loadTimer=setTimeout(()=>{ loadStep++; updateLoadingUI(); tickLoader(); },1500);
+  loadTimer=setTimeout(function(){ loadStep++; updateLoadingUI(); tickLoader(); },1500);
 }
 
-function updateLoadingUI() {
-  const msgs=t().loadingMsgs;
-  const emojiEl=document.getElementById('loading-emoji');
-  const textEl=document.getElementById('loading-text');
-  if(emojiEl) emojiEl.textContent=msgs[loadStep].icon;
-  if(textEl)  textEl.textContent=msgs[loadStep].text;
-  const dots=document.querySelectorAll('.loading-dot');
-  dots.forEach((d,i)=>d.classList.toggle('active',i<=loadStep));
+function updateLoadingUI(){
+  var msgs=t().loadingMsgs;
+  var em=document.getElementById('loading-emoji');
+  var tx=document.getElementById('loading-text');
+  if(em) em.textContent=msgs[loadStep].icon;
+  if(tx) tx.textContent=msgs[loadStep].text;
+  document.querySelectorAll('.ldot').forEach(function(d,i){ d.classList.toggle('on',i<=loadStep); });
 }
 
-function renderLoading() {
-  const msgs=t().loadingMsgs;
-  const dots=msgs.map((_,i)=>`<div class="loading-dot${i<=loadStep?' active':''}"></div>`).join('');
-  return `<div id="loading">
-    <div id="loading-inner">
-      <div id="loading-emoji">${msgs[loadStep].icon}</div>
-      <div id="loading-text">${msgs[loadStep].text}</div>
-      <div id="loading-dots">${dots}</div>
-      <div id="loading-sub">${t().loadingSub}</div>
-    </div>
-  </div>`;
+function renderLoading(){
+  var msgs=t().loadingMsgs;
+  var dots=msgs.map(function(_,i){ return '<div class="ldot'+(i<=loadStep?' on':'')+'"></div>'; }).join('');
+  return '<div id="loading"><div id="loading-inner">'
+    +'<div id="loading-emoji">'+msgs[loadStep].icon+'</div>'
+    +'<div id="loading-text">'+msgs[loadStep].text+'</div>'
+    +'<div id="loading-dots">'+dots+'</div>'
+    +'<div id="loading-sub">'+t().loadingSub+'</div>'
+    +'</div></div>';
 }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // 結果
-// ═══════════════════════════════════════════
-function renderResult() {
-  if(!generatedApp) return renderError();
-  const a=generatedApp;
-  const design=a.design||getDesign(a.feel);
-  const items=a.items||[];
-  const itemsHTML=items.map((item,i)=>`
-    <div class="check-item" id="ci-${i}" onclick="toggleCheck(${i})">
-      <span class="check-icon" id="ck-${i}">⬜</span>
-      <span class="check-label" id="cl-${i}">${item}</span>
-    </div>`).join('');
-
-  return `<div id="result">
-    <div id="result-header">
-      <div id="result-emoji">🎉</div>
-      <div id="result-title">${a.app_name}</div>
-      <div id="result-desc">${a.one_liner||''}</div>
-      ${a.warnings&&a.warnings.length?`<div id="result-warnings" style="display:block">⚠️ ${a.warnings.join(' / ')}</div>`:''}
-    </div>
-    <div id="phone-frame" style="border-color:${design.accent}33;box-shadow:0 10px 40px ${design.accent}22">
-      <div id="phone-header" style="border-bottom-color:${design.accent}22;color:${design.accent}">${a.app_name}</div>
-      <div id="phone-body">${itemsHTML}<div id="all-done-msg" style="color:${design.accent}">${a.done_message}</div></div>
-    </div>
-    <div id="result-preview-note">${t().resultNote}</div>
-    ${renderIconSection(design)}
-
-    <!-- ── 無料版ダウンロード ── -->
-    <div style="background:#0f0f0f;border:1px solid ${design.accent}33;border-radius:14px;padding:16px">
-      <div style="font-size:13px;font-weight:700;color:${design.accent};margin-bottom:6px">
-        📥 ${lang==='ja'?'無料版をダウンロード':'Download Free Version'}
-      </div>
-      <div style="font-size:11.5px;color:#555;line-height:1.7;margin-bottom:12px">
-        ${lang==='ja'
-          ? '基本のチェックリストアプリ。サーバー不要でスマホ内で動きます。'
-          : 'Basic checklist app. Works on your phone with no server needed.'}
-      </div>
-      <button id="download-btn" class="btn-primary"
-        style="background:${design.accent};padding:11px 0;font-size:13.5px"
-        onclick="downloadHTML()">
-        ${t().downloadBtn}
-      </button>
-    </div>
-
-    <!-- ── プロ版案内 ── -->
-    <div style="background:linear-gradient(135deg,#1a0f00,#150a1a);border:1px solid #ff6b3555;border-radius:14px;padding:16px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:10px;right:12px;background:#ff6b35;color:#fff;font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px;letter-spacing:1px">PRO</div>
-      <div style="font-size:13px;font-weight:700;color:#ff6b35;margin-bottom:8px">
-        ✨ ${lang==='ja'?'もっと使いやすくしたい方へ':'Want more power?'}
-      </div>
-      <div style="font-size:11.5px;color:#888;line-height:1.8;margin-bottom:14px">
-        ${lang==='ja'
-          ? 'プロ版には以下の機能が全て入っています：'
-          : 'Pro version includes all of the following:'}
-      </div>
-      <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px">
-        ${[
-          lang==='ja' ? ['✏️','項目を自由に編集・追加・並び替え'] : ['✏️','Edit, add & reorder items freely'],
-          lang==='ja' ? ['🔄','毎日・毎週の自動リセット']         : ['🔄','Auto-reset daily or weekly'],
-          lang==='ja' ? ['📂','複数リストで場面を使い分け']        : ['📂','Multiple lists for different contexts'],
-          lang==='ja' ? ['📊','達成履歴・連続記録・完了率']        : ['📊','History, streaks & completion rate'],
-          lang==='ja' ? ['🎨','アイコン・カラーを自分好みに変更']  : ['🎨','Custom icon & color theme'],
-          lang==='ja' ? ['📲','QRコードで家族・同僚に共有']       : ['📲','Share via QR code'],
-        ].map(([icon,text])=>`
-          <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#ccc">
-            <span style="font-size:16px;width:22px">${icon}</span>${text}
-          </div>`).join('')}
-      </div>
-      <button class="btn-primary"
-        style="background:linear-gradient(90deg,#ff6b35,#ff9055);padding:12px 0;font-size:14px"
-        onclick="downloadHTML(true)">
-        🚀 ${lang==='ja'?'プロ版をダウンロード（無料）':'Download Pro Version (Free)'}
-      </button>
-      <div style="font-size:10.5px;color:#444;text-align:center;margin-top:8px">
-        ${lang==='ja'?'現在無料公開中・将来的に有料予定':'Currently free · Paid plan coming soon'}
-      </div>
-    </div>
-
-    <!-- ── 共有案内 ── -->
-    <div style="background:#0a0f1a;border:1px solid #5c9eff33;border-radius:14px;padding:16px">
-      <div style="font-size:13px;font-weight:700;color:#5c9eff;margin-bottom:8px">
-        🌐 ${lang==='ja'?'誰かに使わせたい場合':'Want to share with others?'}
-      </div>
-      <div style="font-size:11.5px;color:#666;line-height:1.8;margin-bottom:12px">
-        ${lang==='ja'
-          ? 'HTMLファイルをGitHub Pagesに上げると、URLが発行されます。そのURLを送るだけで誰でも使えます。'
-          : 'Upload the HTML to GitHub Pages to get a URL. Anyone with the link can use your app instantly.'}
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
-        ${[
-          lang==='ja'?'① GitHubアカウントを作る（無料）':'① Create a free GitHub account',
-          lang==='ja'?'② リポジトリを作ってHTMLをアップ':'② Create a repo and upload the HTML',
-          lang==='ja'?'③ Settings → Pages → main → Save':'③ Settings → Pages → main → Save',
-          lang==='ja'?'④ URLが発行される（1〜2分後）':'④ Your URL is ready in 1–2 minutes',
-        ].map((step,i)=>`
-          <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#aaa">
-            <span style="background:#5c9eff22;color:#5c9eff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${i+1}</span>
-            ${step.replace(/^[①-④]\s/,'')}
-          </div>`).join('')}
-      </div>
-      <div style="background:#111;border-radius:8px;padding:10px 12px;font-size:11px;color:#444;line-height:1.7">
-        💡 ${lang==='ja'
-          ? 'わからなくなったらスクショしてAIに聞けばOK。パパさんの記事の通りです。'
-          : "If you get stuck, screenshot it and ask an AI. That's exactly what the article teaches."}
-      </div>
-    </div>
-
-    <div id="result-actions">
-      <button id="retry-btn" class="btn-primary" style="background:${design.accent}" onclick="resetAll()">${t().retryBtn}</button>
-      <button id="bug-btn" class="btn-ghost" style="color:#555" onclick="handleBug()">${t().bugIdle}</button>
-      <button id="back-btn2" class="btn-ghost" style="font-size:12px;color:#3a3a3a" onclick="showArticle()">${t().backToArticle}</button>
-    </div>
-  </div>`;
+// -----------------------------------------------
+function renderResult(){
+  if(!genApp) return renderError();
+  var a=genApp, d=a.design||getDesign(a.feel);
+  var items=a.items||[];
+  var itemsHTML=items.map(function(item,i){
+    var done=checkedItems[i];
+    return '<div class="check-item'+(done?' done':'')+'" onclick="toggleCheck('+i+')">'
+      +'<span class="check-icon" style="color:'+(done?d.accent:'#555')+'">'+(done?'✅':'⬜')+'</span>'
+      +'<span class="check-label'+(done?' done':'')+'">'+item+'</span>'
+      +'</div>';
+  }).join('');
+  var allDone=items.every(function(_,i){ return checkedItems[i]; });
+  var doneMsgStyle=allDone?'display:block':'display:none';
+  var isJa=(lang==='ja');
+  return '<div id="result">'
+    +'<div class="result-head"><div class="result-emoji">🎉</div><div class="result-title">'+a.app_name+'</div><div class="result-desc">'+(a.one_liner||'')+'</div></div>'
+    +'<div class="phone-frame" style="border-color:'+d.accent+'33;box-shadow:0 10px 40px '+d.accent+'22">'
+    +'<div class="phone-hdr" style="color:'+d.accent+';border-bottom-color:'+d.accent+'22">'+a.app_name+'</div>'
+    +'<div class="phone-body">'+itemsHTML
+    +'<div class="alldone-msg" style="color:'+d.accent+';'+doneMsgStyle+'">'+a.done_message+'</div>'
+    +'</div></div>'
+    +'<div class="result-note">'+t().resultNote+'</div>'
+    +'<div class="dl-card" style="background:#0f0f0f;border:1px solid '+d.accent+'33">'
+    +'<div class="dl-card-title" style="color:'+d.accent+'">📥 '+(isJa?'無料版をダウンロード':'Download Free Version')+'</div>'
+    +'<div class="dl-card-desc">'+(isJa?'基本のチェックリストアプリ。サーバー不要でスマホ内で動きます。':'Basic checklist app. Works on your phone with no server.')+'</div>'
+    +'<button id="dl-btn" class="btn-p" style="background:'+d.accent+';padding:11px 0;font-size:13.5px" onclick="downloadHTML()">'+t().downloadBtn+'</button>'
+    +'</div>'
+    +'<div class="dl-card" style="background:linear-gradient(135deg,#1a0f00,#150a1a);border:1px solid #ff6b3555;position:relative">'
+    +'<span class="pro-tag">PRO</span>'
+    +'<div class="dl-card-title" style="color:#ff6b35">✨ '+(isJa?'もっと使いやすくしたい方へ':'Want more power?')+'</div>'
+    +'<div class="dl-card-desc">'+(isJa?'プロ版には以下の機能が全て入っています：':'Pro version includes all of the following:')+'</div>'
+    +['✏️ '+(isJa?'項目を自由に編集・追加・並び替え':'Edit, add & reorder items'),
+      '🔄 '+(isJa?'毎日・毎週の自動リセット':'Auto-reset daily or weekly'),
+      '📂 '+(isJa?'複数リストで場面を使い分け':'Multiple lists for different contexts'),
+      '📊 '+(isJa?'達成履歴・連続記録・完了率':'History, streaks & completion rate'),
+      '🎨 '+(isJa?'アイコン・カラーを自分好みに変更':'Custom icon & color theme'),
+      '📲 '+(isJa?'QRコードで家族・同僚に共有':'Share via QR code')
+     ].map(function(f){ return '<div class="pro-feature"><span class="pro-feature-icon">'+f.slice(0,2)+'</span>'+f.slice(2)+'</div>'; }).join('')
+    +'<button class="btn-p" style="background:linear-gradient(90deg,#ff6b35,#ff9055);padding:12px 0;font-size:14px;margin-top:4px" onclick="alert(\''+(isJa?'プロ版は近日実装予定です！お楽しみに💪':'Pro version coming soon! Stay tuned 💪')+'\')">'+t().proDownload+'</button>'
+    +'<div style="font-size:10.5px;color:#444;text-align:center;margin-top:8px">'+(isJa?'現在準備中':'Coming soon')+'</div>'
+    +'</div>'
+    +'<div class="dl-card" style="background:#0a0f1a;border:1px solid #5c9eff33">'
+    +'<div class="dl-card-title" style="color:#5c9eff">🌐 '+(isJa?'誰かに使わせたい場合':'Want to share with others?')+'</div>'
+    +'<div class="dl-card-desc">'+(isJa?'パパさんのサーバーに置いてURLを発行するサービスは近日実装予定です。':'A URL publishing service on karate papa\'s server is coming soon.')+'</div>'
+    +'<div style="font-size:11px;color:#444;background:#111;border-radius:8px;padding:10px 12px;line-height:1.7">'
+    +'💡 '+(isJa?'今すぐ試したい方は、HTMLファイルをLINEやメールで友人に送れます。':'For now, you can send the HTML file via LINE or email.')+'</div>'
+    +'</div>'
+    +'<div class="result-actions">'
+    +'<button class="btn-p" style="background:'+d.accent+'" onclick="resetAll()">'+t().retryBtn+'</button>'
+    +'<button class="btn-g" style="color:'+(bugPhase!=='idle'?d.accent:'#555')+'" onclick="handleBug()" '+(bugPhase!=='idle'?'disabled':'')+'>'+getBugText()+'</button>'
+    +'<button class="btn-g" style="font-size:12px;color:#3a3a3a" onclick="showArticle()">'+t().backToArticle+'</button>'
+    +'</div>'
+    +'</div>';
 }
 
-function bindResult() {
-  // チェック状態を復元
-  if(generatedApp&&generatedApp.storage_key) {
-    try {
-      const saved=JSON.parse(localStorage.getItem(generatedApp.storage_key)||'{}');
-      Object.keys(saved).forEach(i=>{ if(saved[i]) applyCheck(parseInt(i),true); });
-    } catch(e){}
-  }
-}
-
-let checkedItems={};
-function toggleCheck(i) {
+function toggleCheck(i){
   checkedItems[i]=!checkedItems[i];
-  applyCheck(i,checkedItems[i]);
-  if(generatedApp) try{localStorage.setItem(generatedApp.storage_key,JSON.stringify(checkedItems));}catch(e){}
-  const items=generatedApp&&generatedApp.items||[];
-  const allDone=items.every((_,j)=>checkedItems[j]);
-  const msg=document.getElementById('all-done-msg');
-  if(msg) msg.style.display=allDone?'block':'none';
-}
-function applyCheck(i,checked) {
-  checkedItems[i]=checked;
-  const design=generatedApp&&generatedApp.design||{accent:'#ff6b35'};
-  const ci=document.getElementById('ci-'+i);
-  const ck=document.getElementById('ck-'+i);
-  const cl=document.getElementById('cl-'+i);
-  if(ci) ci.style.background=checked?design.accent+'18':'transparent';
-  if(ck) { ck.textContent=checked?'✅':'⬜'; ck.style.color=checked?design.accent:'#555'; }
-  if(cl) cl.className='check-label'+(checked?' done':'');
+  if(genApp) try{ localStorage.setItem(genApp.storage_key,JSON.stringify(checkedItems)); }catch(e){}
+  var c=document.getElementById('content');
+  c.innerHTML=renderResult();
 }
 
-function handleBug() {
+function getBugText(){
+  if(bugPhase==='fixing') return t().bugFixing;
+  if(bugPhase==='fixed')  return t().bugFixed;
+  return t().bugIdle;
+}
+var bugTimer=null;
+function handleBug(){
   if(bugPhase!=='idle') return;
   bugPhase='fixing';
-  const btn=document.getElementById('bug-btn');
-  if(btn) btn.textContent=t().bugFixing;
-  if(bugTimer) clearTimeout(bugTimer);
-  bugTimer=setTimeout(()=>{ bugPhase='fixed'; const b=document.getElementById('bug-btn'); if(b)b.textContent=t().bugFixed; },2500);
-  bugTimer=setTimeout(()=>{ bugPhase='idle';  const b=document.getElementById('bug-btn'); if(b)b.textContent=t().bugIdle; },5500);
+  var c=document.getElementById('content'); c.innerHTML=renderResult();
+  bugTimer=setTimeout(function(){ bugPhase='fixed'; var ct=document.getElementById('content'); ct.innerHTML=renderResult(); },2500);
+  bugTimer=setTimeout(function(){ bugPhase='idle';  var ct=document.getElementById('content'); ct.innerHTML=renderResult(); },5500);
 }
 
-// ═══════════════════════════════════════════
-// hold / rateLimit / error
-// ═══════════════════════════════════════════
-function renderHold() {
-  return `<div class="error-screen">
-    <div class="error-card">
-      <div class="error-emoji">🥋</div>
-      <div style="font-size:11px;color:#ff6b35;font-weight:700;letter-spacing:1.5px;margin-bottom:12px">${t().holdSenseiStop}</div>
-      <div class="error-title">${t().holdTitle}</div>
-      <div class="hold-msg-box">${holdMsg||t().holdDefault}</div>
-      <button class="btn-primary" onclick="holdRetry()">${t().holdRetry}</button>
-      <button class="btn-ghost" style="margin-top:10px;color:#444" onclick="resetAll()">${t().holdReset}</button>
-    </div>
-  </div>`;
+// -----------------------------------------------
+// エラー系
+// -----------------------------------------------
+function renderHold(){
+  var isEn=(lang==='en');
+  return '<div class="err-screen"><div class="err-card">'
+    +'<div class="err-emoji">🥋</div>'
+    +'<div style="font-size:11px;color:#ff6b35;font-weight:700;letter-spacing:1.5px;margin-bottom:12px">'+t().holdSenseiStop+'</div>'
+    +'<div class="err-title">'+t().holdTitle+'</div>'
+    +'<div class="hold-box">'+(holdMsg||t().holdDefault)+'</div>'
+    +'<button class="btn-p" onclick="holdRetry()">'+t().holdRetry+'</button>'
+    +'<button class="btn-g" style="margin-top:10px;color:#444" onclick="resetAll()">'+t().holdReset+'</button>'
+    +'</div></div>';
 }
-function holdRetry() {
+function holdRetry(){
   addMsg('ai',t().holdRedoMsg,t().holdHint);
   qIndex=2; phase='interview'; render();
 }
 
-function renderRateLimit() {
-  return `<div class="error-screen">
-    <div class="error-card">
-      <div class="error-emoji">⏳</div>
-      <div class="error-title">${t().rateLimitTitle}</div>
-      <div class="error-desc">${t().rateLimitDesc}<br>${t().rateLimitSub}</div>
-      <button class="btn-ghost" style="color:#555" onclick="showArticle()">${t().backToArticle}</button>
-    </div>
-  </div>`;
+function renderBlocked(){
+  return '<div class="err-screen"><div class="err-card">'
+    +'<div class="err-emoji">🛑</div>'
+    +'<div class="err-title">'+t().blockedTitle+'</div>'
+    +'<div class="hold-box">'+(holdMsg||(lang==='ja'?'このリクエストは利用規約に違反しています。':'This request violates our terms of service.'))+'</div>'
+    +'<button class="btn-p" onclick="resetAll()">'+t().blockedReset+'</button>'
+    +'</div></div>';
 }
 
-function renderBlocked() {
-  const isEn=lang==='en';
-  return `<div class="error-screen">
-    <div class="error-card">
-      <div class="error-emoji">🛑</div>
-      <div style="font-size:11px;color:#ff6b35;font-weight:700;letter-spacing:1.5px;margin-bottom:12px">
-        ${isEn?'REQUEST BLOCKED':'リクエストをブロックしました'}
-      </div>
-      <div class="error-title">${isEn?'Cannot create this app':'このアプリは作成できません'}</div>
-      <div class="hold-msg-box">${holdMsg||( isEn?'This request violates our terms of service.':'このリクエストは利用規約に違反しています。')}</div>
-      <p style="font-size:11px;color:#444;margin-bottom:16px;line-height:1.7">
-        ${isEn?'Please check our <a href="./terms.html" style="color:#ff6b35">Terms of Service</a>.':'<a href="./terms.html" style="color:#ff6b35">利用規約</a>をご確認ください。'}
-      </p>
-      <button class="btn-primary" onclick="resetAll()">${isEn?'Try a different idea':'別のアイデアで試す'}</button>
-      <button class="btn-ghost" style="margin-top:10px;color:#444" onclick="showArticle()">${t().backToArticle}</button>
-    </div>
-  </div>`;
+function renderRateLimit(){
+  return '<div class="err-screen"><div class="err-card">'
+    +'<div class="err-emoji">⏳</div>'
+    +'<div class="err-title">'+t().rateLimitTitle+'</div>'
+    +'<div class="err-desc">'+t().rateLimitDesc+'<br>'+t().rateLimitSub+'</div>'
+    +'<button class="btn-g" style="color:#555" onclick="showArticle()">'+t().backToArticle+'</button>'
+    +'</div></div>';
 }
 
-function renderCaptchaFail() {
-  const isEn=lang==='en';
-  return `<div class="error-screen">
-    <div class="error-card">
-      <div class="error-emoji">🤖</div>
-      <div class="error-title">${isEn?'Bot detected':'ボット判定されました'}</div>
-      <div class="error-desc">${isEn?'Please reload the page and try again.':'ページを再読み込みして、もう一度試してください。'}</div>
-      <button class="btn-primary" onclick="location.reload()">${isEn?'Reload':'再読み込み'}</button>
-    </div>
-  </div>`;
+function renderError(){
+  return '<div class="err-screen"><div class="err-card">'
+    +'<div class="err-emoji">😵</div>'
+    +'<div class="err-title">'+t().errorTitle+'</div>'
+    +'<div class="err-desc">'+t().errorDesc.replace('\n','<br>')+'</div>'
+    +'<button class="btn-p" onclick="startInterview()">'+t().retryFight+'</button>'
+    +'</div></div>';
 }
 
-function renderError() {
-  return `<div class="error-screen">
-    <div class="error-card">
-      <div class="error-emoji">😵</div>
-      <div class="error-title">${t().errorTitle}</div>
-      <div class="error-desc">${t().errorDesc.replace('\n','<br>')}</div>
-      <button class="btn-primary" onclick="startInterview()">${t().retryFight}</button>
-    </div>
-  </div>`;
-}
-
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // リセット
-// ═══════════════════════════════════════════
-function resetAll() {
+// -----------------------------------------------
+function resetAll(){
   clearProgress(); qIndex=0; answers={}; messages=[];
-  loadStep=0; generatedApp=null; holdMsg=''; checkedItems={};
-  selectedIconIndex=0; iconCandidates=[];
+  loadStep=0; genApp=null; holdMsg=''; checkedItems={};
   if(loadTimer) clearTimeout(loadTimer);
-  phase='welcome'; render();
+  if(bugTimer)  clearTimeout(bugTimer);
+  bugPhase='idle'; phase='welcome'; render();
 }
 
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 // 起動
-// ═══════════════════════════════════════════
+// -----------------------------------------------
 render();
 </script>
+
 </body>
 </html>
