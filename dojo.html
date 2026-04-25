@@ -3,1076 +3,1681 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#ff6b35">
+<meta name="theme-color" content="#fdfbf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>AIアプリ道場</title>
-<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-/* アニメーション */
-@keyframes fadeUp  { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:translateY(0) } }
+:root {
+  /* メインカラー：やさしい青 */
+  --gold:    #5b9bd5;        /* 旧：金 → やさしい青 */
+  --gold-lt: #8ec5f0;        /* 旧：淡金 → 明るい空色 */
+  /* アクセント：コーラル（CTAなど強調用） */
+  --shu:     #ff7e67;        /* 旧：朱色 → コーラル */
+  --shu-lt:  #ffa38d;        /* 旧：淡朱 → ピーチ */
+  /* 背景：白〜薄いベージュ */
+  --ink:     #fdfbf7;        /* 旧：墨 → クリームホワイト */
+  --ink2:    #ffffff;        /* カード背景：純白 */
+  --ink3:    #f5f1ea;        /* サブ背景：薄ベージュ */
+  --ink4:    #e8e2d5;        /* 境界線：ベージュ */
+  --ink5:    #b8aea0;        /* 薄めの線 */
+  /* テキスト：濃い茶 */
+  --washi:   #3d3529;        /* 旧：白 → 濃茶（メインテキスト） */
+  --washi2:  #6b5d4c;        /* サブテキスト */
+  --washi3:  #9a8d7c;        /* ヒント・薄字 */
+  /* 追加：グリーン（成功・ポジティブ） */
+  --mint:    #7ec9a8;
+  --mint-lt: #a9dcc2;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:translateY(0) } }
 @keyframes slideUp { from { opacity:0; transform:translateY(22px) } to { opacity:1; transform:translateY(0) } }
-@keyframes pulse   { 0%,100% { transform:scale(1) } 50% { transform:scale(1.1) } }
-@keyframes blink   { 0%,100% { opacity:1 } 50% { opacity:0 } }
+@keyframes pulse { 0%,100% { transform:scale(1) } 50% { transform:scale(1.06) } }
+@keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0 } }
 @keyframes shimmer { 0% { background-position:200% center } 100% { background-position:-200% center } }
 @keyframes slideIn { from { opacity:0; transform:translateX(-10px) } to { opacity:1; transform:translateX(0) } }
+@keyframes goldPulse { 0%,100% { box-shadow:0 0 0 0 rgba(201,168,76,0) } 50% { box-shadow:0 0 18px 4px rgba(201,168,76,0.25) } }
+@keyframes zunIn { 0% { opacity:0; transform:scale(1.04) } 60% { opacity:1; transform:scale(0.98) } 100% { opacity:1; transform:scale(1) } }
+@keyframes blackout { 0% { opacity:0 } 40% { opacity:1 } 100% { opacity:0 } }
+@keyframes stampIn { 0% { opacity:0; transform:scale(2) rotate(-15deg) } 60% { opacity:1; transform:scale(0.9) rotate(3deg) } 100% { opacity:1; transform:scale(1) rotate(0deg) } }
 
 * { box-sizing:border-box; margin:0; padding:0; }
-html,body { height:100%; background:#0a0a0a; color:#f0f0f0; font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif; }
+html,body { height:100%; background:var(--ink); color:var(--washi); font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif; }
 ::-webkit-scrollbar { width:3px; }
-::-webkit-scrollbar-thumb { background:#2a2a2a; border-radius:2px; }
+::-webkit-scrollbar-thumb { background:var(--ink5); border-radius:2px; }
 
 #app { display:flex; flex-direction:column; min-height:100vh; max-width:480px; margin:0 auto; }
 
-/* ヘッダー */
-#hdr { position:sticky; top:0; z-index:100; background:#0d0d0d; border-bottom:1px solid #161616; padding:13px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
-#hdr-left { font-weight:900; font-size:16px; letter-spacing:0.5px; }
+#hdr { position:sticky; top:0; z-index:100; background:var(--ink2); border-bottom:1px solid var(--ink4); padding:0 18px; display:flex; align-items:stretch; justify-content:space-between; flex-shrink:0; min-height:56px; box-shadow:0 1px 4px rgba(91,155,213,0.08); }
+#hdr::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--gold), var(--mint), var(--shu-lt)); }
+#hdr-left { display:flex; align-items:center; gap:10px; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; font-weight:700; font-size:17px; letter-spacing:0.5px; color:var(--washi); }
+.hdr-mon { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--gold-lt) 0%, var(--gold) 100%); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; box-shadow:0 2px 8px rgba(91,155,213,0.3); }
 #hdr-right { display:flex; align-items:center; gap:8px; }
-.badge { background:#ff6b35; color:#fff; font-size:9px; font-weight:700; padding:2px 7px; border-radius:3px; letter-spacing:1.5px; }
-#lang-btn, #back-btn { background:transparent; border:1px solid #252525; border-radius:8px; padding:5px 12px; font-size:11px; cursor:pointer; font-family:inherit; }
-#lang-btn { color:#ff6b35; font-weight:700; background:#1a1a1a; }
-#back-btn { color:#555; display:none; }
+.badge { background:var(--mint); color:#fff; font-size:9px; font-weight:700; padding:3px 8px; border-radius:10px; letter-spacing:1px; }
+#lang-btn,#back-btn { background:#fff; border:1.5px solid var(--ink4); border-radius:10px; padding:6px 12px; font-size:11.5px; cursor:pointer; font-family:inherit; color:var(--washi2); transition:all 0.2s; }
+#lang-btn { color:var(--gold); font-weight:700; border-color:var(--gold-lt); }
+#back-btn { color:var(--washi3); display:none; }
 
-/* PWAバナー */
-#pwa-banner { display:none; background:#1a0f00; border-bottom:1px solid #ff6b3544; padding:10px 16px; align-items:center; gap:10px; animation:fadeUp 0.3s ease; }
-#pwa-banner.show { display:flex; }
-#pwa-banner-text { flex:1; font-size:12px; color:#ccc; line-height:1.5; }
-#pwa-add-btn { background:#ff6b35; color:#fff; border:none; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; font-family:inherit; }
-#pwa-dismiss { background:transparent; color:#555; border:none; font-size:11px; cursor:pointer; font-family:inherit; }
-
-/* メイン */
 #content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 
-/* ボタン */
-.btn-p { background:#ff6b35; color:#fff; border:none; border-radius:12px; padding:13px 0; font-size:15px; font-weight:700; cursor:pointer; width:100%; font-family:inherit; transition:opacity 0.2s; }
-.btn-p:active { opacity:0.8; }
-.btn-g { background:transparent; border:1px solid #242424; border-radius:12px; padding:12px 0; font-size:13.5px; cursor:pointer; width:100%; font-family:inherit; color:#555; }
-.btn-s { background:#ff6b35; color:#fff; border:none; border-radius:8px; padding:7px 13px; font-size:12.5px; cursor:pointer; font-weight:600; font-family:inherit; }
-.btn-send { background:#ff6b35; color:#fff; border:none; border-radius:10px; padding:10px 15px; font-weight:700; cursor:pointer; font-size:13.5px; white-space:nowrap; font-family:inherit; }
+.btn-p { background:linear-gradient(135deg, var(--shu) 0%, var(--shu-lt) 100%); color:#fff; border:none; border-radius:14px; padding:14px 0; font-size:15px; font-weight:700; cursor:pointer; width:100%; font-family:inherit; box-shadow:0 4px 14px rgba(255,126,103,0.3); letter-spacing:0.5px; transition:transform 0.15s, box-shadow 0.2s; }
+.btn-p:hover { box-shadow:0 6px 18px rgba(255,126,103,0.4); }
+.btn-p:active { transform:translateY(1px); opacity:0.9; }
+.btn-g { background:#fff; border:1.5px solid var(--ink4); border-radius:14px; padding:13px 0; font-size:13.5px; cursor:pointer; width:100%; font-family:inherit; color:var(--washi2); font-weight:500; transition:background 0.2s, border-color 0.2s; }
+.btn-g:hover { background:var(--ink3); border-color:var(--ink5); }
+.btn-s { background:var(--shu); color:#fff; border:none; border-radius:10px; padding:8px 14px; font-size:12.5px; cursor:pointer; font-weight:600; font-family:inherit; box-shadow:0 2px 8px rgba(255,126,103,0.25); }
+.btn-send { background:var(--shu); color:#fff; border:none; border-radius:8px; padding:10px 15px; font-weight:700; cursor:pointer; font-size:13.5px; white-space:nowrap; font-family:inherit; }
 
-/* センター画面 */
-.center { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
+.center { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--ink); }
 .center-card { text-align:center; max-width:340px; animation:slideUp 0.5s ease; }
 .big-emoji { font-size:56px; margin-bottom:14px; }
-.c-title { font-size:20px; font-weight:900; margin-bottom:12px; line-height:1.45; }
-.c-desc  { font-size:13px; color:#888; line-height:1.8; margin-bottom:28px; }
-.step-badge { font-size:11px; color:#ff6b35; font-weight:700; letter-spacing:1.5px; margin-bottom:16px; }
+.c-title { font-size:22px; font-weight:700; margin-bottom:12px; line-height:1.5; color:var(--washi); font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; letter-spacing:0.5px; }
+.c-desc { font-size:13px; color:var(--washi2); line-height:1.8; margin-bottom:28px; }
+.step-badge { font-size:11px; color:var(--gold); font-weight:700; letter-spacing:2px; margin-bottom:16px; }
 
-/* 記事 */
-#article { flex:1; overflow-y:auto; padding-bottom:32px; }
-.art-header { padding:20px 18px 0; border-bottom:1px solid #181818; }
-.art-tag { display:inline-block; background:#ff6b35; color:#fff; font-size:9px; font-weight:900; letter-spacing:2px; padding:3px 9px; border-radius:3px; margin-bottom:12px; }
-.art-title { font-size:17px; font-weight:900; line-height:1.55; margin-bottom:14px; }
+#article { flex:1; overflow-y:auto; padding-bottom:32px; background:var(--ink); }
+.art-header { padding:20px 18px 0; border-bottom:1px solid var(--ink4); }
+.art-tag { display:inline-block; background:var(--shu); color:#fff; font-size:9px; font-weight:900; letter-spacing:2px; padding:3px 10px; border-radius:2px; margin-bottom:12px; }
+.art-title { font-size:18px; font-weight:900; line-height:1.6; margin-bottom:14px; color:var(--washi); font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; letter-spacing:0.5px; }
 .author-row { display:flex; align-items:center; gap:9px; padding-bottom:16px; }
-.author-av { width:32px; height:32px; border-radius:50%; background:#ff6b35; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
-.author-name { font-size:13px; font-weight:700; }
-.author-date { font-size:10px; color:#444; }
+.author-av { width:34px; height:34px; border-radius:50%; background:radial-gradient(circle, var(--gold-lt) 0%, var(--gold) 60%, #8b6914 100%); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.author-name { font-size:13px; font-weight:700; color:var(--washi); }
+.author-date { font-size:10px; color:var(--washi3); }
 .art-body { padding:18px 18px 0; }
-.art-lead { font-size:13.5px; line-height:1.9; color:#bbb; margin-bottom:14px; }
-.art-hint { background:#111; border:1px solid #ff6b3530; border-radius:9px; padding:10px 13px; margin-bottom:18px; font-size:11.5px; color:#666; display:flex; gap:8px; }
-.rounds { padding:0 18px; display:flex; flex-direction:column; gap:10px; }
-.round-card { background:#0f0f0f; border:1px solid #1c1c1c; border-radius:13px; overflow:hidden; transition:border-color 0.25s; }
-.round-card.open { border-color:#ff6b35; }
-.round-hdr { padding:14px 16px; cursor:pointer; display:flex; gap:13px; align-items:center; }
-.round-icon-wrap { width:42px; height:42px; border-radius:11px; flex-shrink:0; background:#161616; border:1px solid #282828; display:flex; align-items:center; justify-content:center; font-size:19px; transition:background 0.25s; }
-.round-card.open .round-icon-wrap { background:#ff6b35; border-color:#ff6b35; }
-.round-badge-text { font-size:9.5px; color:#555; font-weight:700; letter-spacing:1.2px; margin-bottom:3px; }
-.round-card.open .round-badge-text { color:#ff6b35; }
-.round-title { font-size:14.5px; font-weight:700; }
-.round-arrow { font-size:18px; color:#383838; transition:transform 0.25s; margin-left:auto; }
-.round-card.open .round-arrow { transform:rotate(90deg); }
-.round-body { padding:0 16px 16px; border-top:1px solid #181818; animation:fadeUp 0.25s ease; }
-.round-quote { font-size:12.5px; color:#555; line-height:1.75; padding:12px 0 14px; border-bottom:1px solid #181818; margin-bottom:14px; font-style:italic; }
-.prog-row { padding:18px 18px 0; display:flex; gap:6px; align-items:center; }
-.prog-bar { height:3px; flex:1; border-radius:2px; background:#1c1c1c; transition:background 0.4s; }
-.prog-bar.done { background:#ff6b35; }
-.prog-count { font-size:10px; color:#444; margin-left:6px; white-space:nowrap; }
-.cta-box { margin:20px 18px 0; background:linear-gradient(135deg,#120800,#1e0f00); border:1px solid #ff6b3555; border-radius:16px; padding:22px 18px; animation:fadeUp 0.5s ease; text-align:center; }
-.cta-emoji { font-size:36px; margin-bottom:10px; }
-.cta-title { font-size:16px; font-weight:900; margin-bottom:8px; }
-.cta-desc  { font-size:12.5px; color:#999; line-height:1.75; margin-bottom:18px; }
-.cta-hint  { font-size:11px; color:#555; margin-bottom:14px; }
-.cta-zero  { font-size:10.5px; color:#444; margin-top:10px; }
-#cta-btn { border-radius:12px; padding:14px 0; font-size:15px; font-weight:700; width:100%; font-family:inherit; cursor:pointer; transition:all 0.3s; border:1px solid #2a2a2a; background:#1a1a1a; color:#555; }
-#cta-btn.ready { background:#ff6b35; color:#fff; border:none; background-image:linear-gradient(90deg,#ff6b35,#ff9055,#ff6b35); background-size:200% auto; animation:shimmer 2s linear infinite; }
-.skip-link { text-align:center; margin-top:10px; }
-.skip-link button { background:transparent; border:none; color:#555; font-size:11.5px; cursor:pointer; font-family:inherit; text-decoration:underline; padding:4px 8px; }
-.art-footer { padding:24px 18px 0; border-top:1px solid #141414; margin-top:24px; }
-.art-footer-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-.art-footer-av { width:38px; height:38px; border-radius:50%; background:#ff6b35; display:flex; align-items:center; justify-content:center; font-size:18px; }
-.art-footer-name { font-size:13px; font-weight:700; }
-.art-footer-desc { font-size:10.5px; color:#444; }
-.art-footer-cta { font-size:12px; color:#3a3a3a; line-height:1.75; }
-.support-box { margin-top:14px; background:#111; border:1px solid #ff6b3533; border-radius:10px; padding:12px 14px; }
-.support-box-title { font-size:12px; color:#ff6b35; font-weight:700; margin-bottom:4px; }
-.support-box-desc { font-size:11.5px; color:#666; line-height:1.7; }
-.terms-link { margin-top:12px; font-size:11px; color:#333; }
-.terms-link a { color:#444; text-decoration:none; }
+.art-lead { font-size:13.5px; line-height:1.9; color:var(--washi2); margin-bottom:14px; }
+.art-hint { background:var(--ink3); border:1px solid rgba(201,168,76,0.2); border-radius:8px; padding:10px 13px; margin-bottom:18px; font-size:11.5px; color:var(--washi3); display:flex; gap:8px; }
 
-/* デモ */
+.trials { padding:0 18px; display:flex; flex-direction:column; gap:12px; }
+.trial-card { background:var(--ink2); border:1px solid var(--ink4); border-radius:4px; overflow:hidden; transition:border-color 0.25s; position:relative; }
+.trial-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--ink5); transition:background 0.3s; }
+.trial-card.open::before { background:var(--gold); }
+.trial-card.cleared::before { background:var(--shu); }
+.trial-hdr { padding:16px 16px 16px 20px; cursor:pointer; display:flex; gap:13px; align-items:center; }
+.trial-num { font-size:10px; font-weight:900; color:var(--gold); letter-spacing:2px; margin-bottom:3px; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; }
+.trial-card.cleared .trial-num { color:var(--shu); }
+.trial-cmd { font-size:15px; font-weight:900; color:var(--washi); font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; letter-spacing:0.5px; }
+.trial-arrow { font-size:16px; color:var(--ink5); transition:transform 0.25s; margin-left:auto; flex-shrink:0; }
+.trial-card.open .trial-arrow { transform:rotate(90deg); color:var(--gold); }
+.trial-body { padding:0 20px 16px; border-top:1px solid var(--ink4); animation:zunIn 0.3s ease; }
+.trial-quote { font-size:12.5px; color:var(--washi3); line-height:1.75; padding:12px 0 14px; border-bottom:1px solid var(--ink4); margin-bottom:14px; font-style:italic; border-left:3px solid var(--gold); padding-left:12px; }
+
+.stamp { position:absolute; top:12px; right:12px; width:36px; height:36px; border-radius:50%; background:var(--shu); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; animation:stampIn 0.4s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 12px rgba(192,57,43,0.6); border:2px solid #e74c3c; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; }
+
+.prog-row { padding:18px 18px 0; display:flex; gap:6px; align-items:center; }
+.prog-bar { height:3px; flex:1; border-radius:2px; background:var(--ink4); transition:background 0.4s; }
+.prog-count { font-size:10px; color:var(--washi3); margin-left:6px; white-space:nowrap; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; letter-spacing:1px; }
+
+.cta-box { margin:20px 18px 0; background:linear-gradient(135deg, var(--ink2), var(--ink3)); border:1px solid rgba(201,168,76,0.4); border-radius:14px; padding:22px 18px; animation:fadeUp 0.5s ease; text-align:center; box-shadow:inset 0 1px 0 rgba(201,168,76,0.2), 0 4px 24px rgba(0,0,0,0.4); }
+.cta-emoji { font-size:36px; margin-bottom:10px; }
+.cta-title { font-size:17px; font-weight:900; margin-bottom:8px; color:var(--washi); font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; letter-spacing:1px; }
+.cta-desc { font-size:12.5px; color:var(--washi3); line-height:1.75; margin-bottom:18px; }
+.cta-zero { font-size:10.5px; color:var(--washi3); margin-top:10px; }
+
+.hold-btn-wrap { position:relative; overflow:hidden; border-radius:8px; }
+.hold-btn { position:relative; z-index:1; width:100%; padding:18px 0; font-size:16px; font-weight:700; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; letter-spacing:1px; cursor:pointer; border:2px solid var(--shu); background:#fff; color:var(--shu); border-radius:14px; overflow:hidden; transition:color 0.3s, box-shadow 0.3s; user-select:none; -webkit-user-select:none; box-shadow:0 4px 12px rgba(255,126,103,0.2); }
+.hold-btn:hover { box-shadow:0 6px 16px rgba(255,126,103,0.3); }
+.hold-btn.filling { color:var(--ink); }
+.hold-btn-fill { position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg, var(--shu-lt), var(--shu)); z-index:0; pointer-events:none; transition:none; }
+.hold-btn.filling { color:#fff !important; }
+.hold-btn-text { position:relative; z-index:1; }
+.hold-hint { font-size:11px; color:var(--washi3); text-align:center; margin-top:8px; }
+
+.skip-link { text-align:center; margin-top:10px; }
+.skip-link button { background:transparent; border:none; color:var(--washi3); font-size:11.5px; cursor:pointer; font-family:inherit; text-decoration:underline; padding:4px 8px; }
+
+#blackout { position:fixed; inset:0; background:#000; z-index:999; pointer-events:none; opacity:0; }
+#blackout.active { animation:blackout 0.6s ease forwards; }
+
+.sensei-bubble { margin:16px 18px 0; background:var(--ink2); border:1px solid rgba(201,168,76,0.3); border-radius:12px; padding:14px 16px; display:flex; gap:12px; align-items:flex-start; animation:zunIn 0.4s ease; }
+.sensei-av { width:40px; height:40px; border-radius:50%; flex-shrink:0; background:radial-gradient(circle, var(--gold-lt) 0%, var(--gold) 60%, #8b6914 100%); display:flex; align-items:center; justify-content:center; font-size:20px; }
+.sensei-inner { flex:1; }
+.sensei-name { font-size:10px; color:var(--gold); font-weight:700; letter-spacing:1.5px; margin-bottom:4px; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; }
+.sensei-text { font-size:13px; color:var(--washi2); line-height:1.7; font-style:italic; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; }
+
+.art-footer { padding:28px 18px 0; border-top:1px solid var(--ink4); margin-top:32px; }
+.art-footer-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.art-footer-av { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg, var(--gold-lt) 0%, var(--gold) 100%); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 2px 8px rgba(91,155,213,0.2); }
+.art-footer-name { font-size:13.5px; font-weight:700; color:var(--washi); }
+.art-footer-desc { font-size:11px; color:var(--washi3); }
+.art-footer-cta { font-size:12.5px; color:var(--washi2); line-height:1.75; }
+.support-box { margin-top:16px; background:#fff5f0; border:1.5px solid var(--shu-lt); border-radius:14px; padding:14px 16px; box-shadow:0 2px 8px rgba(255,126,103,0.1); }
+.support-box-title { font-size:13px; color:var(--shu); font-weight:700; margin-bottom:4px; }
+.support-box-desc { font-size:12px; color:var(--washi2); line-height:1.7; }
+.terms-link { margin-top:12px; font-size:11px; }
+.terms-link a { color:var(--ink5); text-decoration:none; }
+
 .demo-chat { display:flex; flex-direction:column; gap:10px; }
 .bubble-row { display:flex; gap:8px; align-items:flex-start; animation:slideIn 0.3s ease; }
 .bubble-row.right { justify-content:flex-end; }
 .bubble-av { font-size:20px; flex-shrink:0; }
 .bubble-name { font-size:10px; font-weight:700; margin-bottom:2px; }
-.bubble { padding:9px 13px; max-width:250px; font-size:12.5px; line-height:1.65; border-radius:3px 14px 14px 14px; }
-.bubble.them { background:#161616; color:#d0d0d0; }
-.bubble.me   { background:#ff6b35; color:#fff; border-radius:14px 3px 14px 14px; }
-.typing { font-size:11px; color:#444; animation:blink 1s infinite; padding-left:28px; }
-.spec-item { background:#141414; border:1px solid #222; border-radius:10px; padding:11px 13px; display:flex; gap:11px; align-items:center; margin-bottom:9px; animation:fadeUp 0.4s ease both; }
+.bubble { padding:9px 13px; max-width:250px; font-size:12.5px; line-height:1.65; border-radius:3px 12px 12px 12px; }
+.bubble.them { background:var(--ink3); color:var(--washi2); border:1px solid var(--ink5); }
+.bubble.me { background:var(--shu); color:#fff; border-radius:12px 3px 12px 12px; }
+.typing { font-size:11px; color:var(--washi3); animation:blink 1s infinite; padding-left:28px; }
+.spec-item { background:var(--ink3); border:1px solid var(--ink5); border-radius:10px; padding:11px 13px; display:flex; gap:11px; align-items:center; margin-bottom:9px; animation:fadeUp 0.4s ease both; }
 .spec-icon { font-size:22px; flex-shrink:0; }
-.spec-label { font-size:10px; color:#555; margin-bottom:2px; }
-.spec-value { font-size:13px; color:#ddd; }
-.code-box { background:#0d1117; border:1px solid #1e2a1e; border-radius:10px; padding:12px 14px; font-family:monospace; font-size:11.5px; max-height:200px; overflow-y:auto; line-height:1.7; }
-.code-cursor { color:#ff6b35; animation:blink 0.6s infinite; }
+.spec-label { font-size:10px; color:var(--washi3); margin-bottom:2px; }
+.spec-value { font-size:13px; color:var(--washi); }
+.code-box { background:#0a0f0a; border:1px solid #1e2a1e; border-radius:10px; padding:12px 14px; font-family:monospace; font-size:11.5px; max-height:200px; overflow-y:auto; line-height:1.7; }
+.code-cursor { color:var(--gold); animation:blink 0.6s infinite; }
 
-/* インタビュー */
 #interview { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-#prog-bar  { height:3px; background:#1e1e1e; flex-shrink:0; }
-#prog-fill { height:100%; background:#ff6b35; transition:width 0.5s; }
-#step-lbl  { font-size:10px; color:#444; text-align:right; padding:5px 16px; letter-spacing:1px; flex-shrink:0; }
-#messages  { flex:1; overflow-y:auto; padding:8px 16px; display:flex; flex-direction:column; gap:14px; }
-.msg-ai   { display:flex; gap:9px; align-items:flex-start; animation:fadeUp 0.3s ease; }
+#prog-bar { height:4px; background:var(--ink4); flex-shrink:0; }
+#prog-fill { height:100%; background:linear-gradient(90deg, var(--shu), var(--gold), var(--mint)); transition:width 0.5s; border-radius:0 2px 2px 0; }
+#step-lbl { font-size:11px; color:var(--washi3); text-align:right; padding:6px 16px; letter-spacing:0.5px; flex-shrink:0; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; font-weight:500; }
+#messages { flex:1; overflow-y:auto; padding:8px 16px; display:flex; flex-direction:column; gap:14px; }
+.msg-ai { display:flex; gap:9px; align-items:flex-start; animation:fadeUp 0.3s ease; }
 .msg-user { display:flex; justify-content:flex-end; animation:fadeUp 0.3s ease; }
 .msg-av { font-size:26px; flex-shrink:0; margin-top:3px; }
-.msg-bubble-ai   { background:#151515; border:1px solid #252525; border-radius:3px 14px 14px 14px; padding:11px 13px; max-width:272px; font-size:13.5px; line-height:1.65; color:#ddd; }
-.msg-bubble-user { background:#ff6b35; border-radius:14px 3px 14px 14px; padding:11px 13px; max-width:272px; font-size:13.5px; line-height:1.65; color:#fff; }
-.msg-hint { font-size:10.5px; color:#484848; margin-top:5px; margin-left:4px; }
-#input-area { display:flex; gap:8px; padding:11px 16px; border-top:1px solid #181818; background:#0a0a0a; flex-shrink:0; }
-#chat-inp { flex:1; background:#161616; border:1px solid #242424; border-radius:10px; color:#f0f0f0; padding:10px 13px; font-size:13.5px; outline:none; font-family:inherit; }
+.msg-bubble-ai { background:#fff; border:1px solid var(--ink4); border-radius:4px 18px 18px 18px; padding:12px 14px; max-width:272px; font-size:13.5px; line-height:1.65; color:var(--washi); box-shadow:0 1px 4px rgba(91,155,213,0.08); }
+.msg-bubble-user { background:linear-gradient(135deg, var(--shu) 0%, var(--shu-lt) 100%); border-radius:18px 4px 18px 18px; padding:12px 14px; max-width:272px; font-size:13.5px; line-height:1.65; color:#fff; box-shadow:0 2px 8px rgba(255,126,103,0.25); }
+.msg-hint { font-size:11px; color:var(--washi3); margin-top:5px; margin-left:4px; }
+#input-area { display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--ink4); background:#fff; flex-shrink:0; }
+#chat-inp { flex:1; background:#fff; border:1.5px solid var(--ink4); border-radius:12px; color:var(--washi); padding:12px 14px; font-size:14px; outline:none; font-family:inherit; transition:border-color 0.2s, box-shadow 0.2s; }
+#chat-inp:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(91,155,213,0.15); }
 
-/* ローディング */
 #loading { flex:1; display:flex; align-items:center; justify-content:center; }
 #loading-inner { text-align:center; max-width:300px; padding:20px; }
 #loading-emoji { font-size:60px; margin-bottom:18px; display:inline-block; animation:pulse 1s infinite; }
-#loading-text  { font-size:15.5px; font-weight:700; margin-bottom:22px; min-height:50px; line-height:1.6; }
-#loading-dots  { display:flex; gap:5px; justify-content:center; margin-bottom:18px; }
-.ldot { width:7px; height:7px; border-radius:50%; background:#222; transition:background 0.3s; }
-.ldot.on { background:#ff6b35; }
-#loading-sub { font-size:11px; color:#383838; }
+#loading-text { font-size:15.5px; font-weight:700; margin-bottom:22px; min-height:50px; line-height:1.6; color:var(--washi); }
+#loading-dots { display:flex; gap:5px; justify-content:center; margin-bottom:18px; }
+.ldot { width:8px; height:8px; border-radius:50%; background:var(--ink4); transition:background 0.3s; }
+.ldot.on { background:var(--gold); box-shadow:0 0 8px rgba(91,155,213,0.5); }
+#loading-sub { font-size:11px; color:var(--washi3); }
 
-/* 結果 */
 #result { flex:1; display:flex; flex-direction:column; max-width:400px; margin:0 auto; width:100%; padding:22px 16px; gap:18px; overflow-y:auto; animation:slideUp 0.5s ease; }
 .result-head { text-align:center; }
 .result-emoji { font-size:44px; }
-.result-title { font-size:21px; font-weight:900; margin:8px 0 4px; }
-.result-desc  { color:#666; font-size:12.5px; }
-.phone-frame { background:#0f0f0f; border:2px solid #24242433; border-radius:22px; width:276px; overflow:hidden; margin:0 auto; }
-.phone-hdr  { background:#161616; padding:13px 15px; border-bottom:1px solid #1e1e1e; font-weight:700; font-size:14.5px; }
+.result-title { font-size:21px; font-weight:900; margin:8px 0 4px; color:var(--washi); font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; letter-spacing:1px; }
+.result-desc { color:var(--washi3); font-size:12.5px; }
+.phone-frame { background:#fff; border:2px solid var(--ink4); border-radius:24px; width:276px; overflow:hidden; margin:0 auto; box-shadow:0 10px 40px rgba(91,155,213,0.15); }
+.phone-hdr { background:var(--ink3); padding:14px 16px; border-bottom:1px solid var(--ink4); font-weight:700; font-size:14.5px; }
 .phone-body { padding:6px 0; min-height:190px; }
-.check-item { display:flex; align-items:center; gap:11px; padding:11px 15px; cursor:pointer; border-bottom:1px solid #131313; transition:background 0.2s; }
-.check-item.done { }
-.check-icon  { font-size:17px; }
-.check-label { font-size:13.5px; transition:opacity 0.2s; }
+.check-item { display:flex; align-items:center; gap:11px; padding:12px 16px; cursor:pointer; border-bottom:1px solid var(--ink3); transition:background 0.2s; }
+.check-item:hover { background:var(--ink3); }
+.check-icon { font-size:17px; }
+.check-label { font-size:13.5px; color:var(--washi); transition:opacity 0.2s; }
 .check-label.done { text-decoration:line-through; opacity:0.38; }
 .alldone-msg { text-align:center; padding:14px; font-weight:700; font-size:12.5px; animation:fadeUp 0.4s ease; display:none; }
-.result-note { text-align:center; font-size:10.5px; color:#333; padding:7px 14px; background:#0f0f0f; border-radius:8px; }
-
-/* ダウンロードカード */
-.dl-card { border-radius:14px; padding:16px; }
-.dl-card-title { font-size:13px; font-weight:700; margin-bottom:6px; }
-.dl-card-desc  { font-size:11.5px; color:#555; line-height:1.7; margin-bottom:12px; }
-.pro-tag { position:absolute; top:10px; right:12px; background:#ff6b35; color:#fff; font-size:9px; font-weight:900; padding:2px 8px; border-radius:10px; letter-spacing:1px; }
-.pro-feature { display:flex; align-items:center; gap:8px; font-size:12.5px; color:#ccc; margin-bottom:7px; }
+.result-note { text-align:center; font-size:11px; color:var(--washi2); padding:10px 14px; background:#eaf4fb; border-radius:12px; border:1px solid var(--gold-lt); line-height:1.6; }
+.dl-card { border-radius:16px; padding:18px; background:#fff; border:1px solid var(--ink4); box-shadow:0 2px 10px rgba(91,155,213,0.08); }
+.dl-card-title { font-size:14px; font-weight:700; margin-bottom:6px; color:var(--washi); }
+.dl-card-desc { font-size:12px; color:var(--washi2); line-height:1.7; margin-bottom:12px; }
+.pro-tag { position:absolute; top:10px; right:12px; background:var(--gold); color:var(--ink); font-size:9px; font-weight:900; padding:2px 8px; border-radius:3px; letter-spacing:1.5px; }
+.pro-feature { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--washi2); margin-bottom:7px; }
 .pro-feature-icon { font-size:16px; width:22px; }
-.share-step { display:flex; gap:10px; align-items:flex-start; font-size:12px; color:#aaa; margin-bottom:6px; }
-.share-step-num { background:#5c9eff22; color:#5c9eff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0; }
 .result-actions { display:flex; flex-direction:column; gap:9px; }
 
-/* エラー系 */
 .err-screen { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
-.err-card   { text-align:center; max-width:320px; animation:fadeUp 0.4s ease; }
-.err-emoji  { font-size:52px; margin-bottom:14px; }
-.err-title  { font-size:17px; font-weight:800; margin-bottom:10px; }
-.err-desc   { font-size:13px; color:#777; line-height:1.75; margin-bottom:24px; }
-.hold-box   { background:#1a0f00; border:1px solid #ff6b3544; border-radius:12px; padding:16px; margin-bottom:20px; font-size:13px; color:#ddd; line-height:1.8; text-align:left; }
-</style>
+.err-card { text-align:center; max-width:320px; animation:fadeUp 0.4s ease; }
+.err-emoji { font-size:52px; margin-bottom:14px; }
+.err-title { font-size:18px; font-weight:700; margin-bottom:10px; color:var(--washi); font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; }
+.err-desc { font-size:13px; color:var(--washi2); line-height:1.75; margin-bottom:24px; }
+.hold-box { background:#fff5f0; border:1.5px solid var(--shu-lt); border-radius:14px; padding:16px 18px; margin-bottom:20px; font-size:13px; color:var(--washi); line-height:1.8; text-align:left; box-shadow:0 2px 8px rgba(255,126,103,0.1); }
 
+/* 確認画面 */
+.confirm-screen { flex:1; overflow-y:auto; padding:20px 18px 32px; background:var(--ink); animation:fadeUp 0.4s ease; }
+.confirm-card { max-width:420px; margin:0 auto; }
+.confirm-emoji { font-size:52px; text-align:center; margin-bottom:14px; }
+.confirm-title {
+  font-size:20px; font-weight:700; text-align:center; margin-bottom:10px; color:var(--washi);
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+}
+.confirm-sub { font-size:13px; color:var(--washi2); text-align:center; line-height:1.75; margin-bottom:24px; }
+.confirm-section { background:#fff; border-radius:16px; padding:16px 18px; margin-bottom:14px; border:1px solid var(--ink4); box-shadow:0 2px 8px rgba(91,155,213,0.08); }
+.confirm-section-label {
+  font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:10px; color:var(--washi3);
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+}
+.confirm-item {
+  display:flex; gap:10px; align-items:flex-start; padding:10px 0;
+  font-size:13px; color:var(--washi); line-height:1.7;
+  border-top:1px solid var(--ink3);
+}
+.confirm-item:first-of-type { border-top:none; padding-top:4px; }
+.confirm-item.confirm-ok { color:var(--washi); }
+.confirm-x { font-size:16px; flex-shrink:0; }
+.confirm-check { font-size:16px; flex-shrink:0; }
+
+/* ランディング */
+#landing { flex:1; overflow-y:auto; padding-bottom:32px; background:var(--ink); }
+.hero { padding:48px 24px 40px; text-align:center; background:linear-gradient(180deg, #eaf4fb 0%, #fef6f0 60%, var(--ink) 100%); position:relative; overflow:hidden; }
+.hero::before { content:''; position:absolute; top:-60px; right:-60px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle, rgba(142,197,240,0.25), transparent); }
+.hero::after { content:''; position:absolute; bottom:-40px; left:-40px; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle, rgba(255,163,141,0.2), transparent); }
+.hero-mon {
+  width:72px; height:72px; border-radius:50%; margin:0 auto 20px;
+  background:linear-gradient(135deg, var(--gold-lt) 0%, var(--gold) 100%);
+  display:flex; align-items:center; justify-content:center; font-size:36px;
+  box-shadow:0 8px 20px rgba(91,155,213,0.35);
+  animation:zunIn 0.6s ease;
+  position:relative; z-index:1;
+}
+.hero-title {
+  font-size:26px; font-weight:700; line-height:1.55; margin-bottom:14px;
+  color:var(--washi);
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+  letter-spacing:0.5px;
+  animation:fadeUp 0.5s ease;
+  position:relative; z-index:1;
+}
+.hero-sub {
+  font-size:14px; color:var(--washi2); line-height:1.8; margin-bottom:28px;
+  animation:fadeUp 0.6s ease;
+  position:relative; z-index:1;
+}
+.hero-cta { max-width:320px; margin:0 auto; animation:fadeUp 0.7s ease; position:relative; z-index:1; }
+
+.section { padding:36px 18px 0; }
+.section-label {
+  font-size:11px; font-weight:700; color:var(--gold); letter-spacing:2px;
+  text-align:center; margin-bottom:18px;
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+  position:relative; display:flex; align-items:center; justify-content:center; gap:12px;
+}
+.section-label::before, .section-label::after { content:''; width:24px; height:1px; background:var(--ink4); }
+
+.strengths { display:flex; flex-direction:column; gap:12px; }
+.strength-card {
+  background:#fff; border:1px solid var(--ink4); border-radius:16px;
+  padding:16px 18px; display:flex; gap:14px; align-items:center;
+  animation:fadeUp 0.4s ease both;
+  box-shadow:0 2px 8px rgba(91,155,213,0.08);
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.strength-card:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(91,155,213,0.15); }
+.strength-card:nth-child(1) { border-left:4px solid var(--gold); }
+.strength-card:nth-child(2) { border-left:4px solid var(--shu); }
+.strength-card:nth-child(3) { border-left:4px solid var(--mint); }
+.strength-card:nth-child(4) { border-left:4px solid var(--gold-lt); }
+.strength-card:nth-child(5) { border-left:4px solid var(--shu-lt); }
+.strength-icon { font-size:30px; flex-shrink:0; width:36px; text-align:center; }
+.strength-inner { flex:1; }
+.strength-title {
+  font-size:15px; font-weight:700; color:var(--washi); margin-bottom:3px;
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+}
+.strength-desc { font-size:12px; color:var(--washi2); line-height:1.65; }
+
+.examples { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+.example-chip {
+  background:#fff; border:1.5px solid var(--gold-lt);
+  border-radius:20px; padding:9px 16px;
+  font-size:12.5px; color:var(--washi); font-weight:500;
+  box-shadow:0 2px 6px rgba(91,155,213,0.1);
+  transition:transform 0.2s;
+}
+.example-chip:hover { transform:translateY(-1px); }
+
+.steps { display:flex; flex-direction:column; gap:12px; }
+.step-row {
+  background:#fff; border-radius:14px; padding:16px 18px;
+  display:flex; gap:14px; align-items:flex-start;
+  border:1px solid var(--ink4);
+  box-shadow:0 2px 8px rgba(91,155,213,0.08);
+}
+.step-badge-num {
+  width:36px; height:36px; border-radius:50%;
+  background:linear-gradient(135deg, var(--gold) 0%, var(--gold-lt) 100%); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:700; flex-shrink:0;
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+  box-shadow:0 2px 6px rgba(91,155,213,0.3);
+}
+.step-row:nth-child(2) .step-badge-num { background:linear-gradient(135deg, var(--shu) 0%, var(--shu-lt) 100%); box-shadow:0 2px 6px rgba(255,126,103,0.3); }
+.step-row:nth-child(3) .step-badge-num { background:linear-gradient(135deg, var(--mint) 0%, var(--mint-lt) 100%); box-shadow:0 2px 6px rgba(126,201,168,0.3); }
+.step-text { font-size:13px; color:var(--washi2); line-height:1.7; }
+.step-text b { color:var(--washi); font-size:13.5px; }
+
+.final-cta {
+  margin:40px 18px 0;
+  background:linear-gradient(135deg, #e8f4fd 0%, #fff4ef 100%);
+  border:1.5px solid var(--gold-lt);
+  border-radius:20px; padding:32px 22px; text-align:center;
+  box-shadow:0 8px 28px rgba(91,155,213,0.15);
+}
+.final-cta-title {
+  font-size:22px; font-weight:700; color:var(--washi); margin-bottom:10px;
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+  letter-spacing:0.5px;
+}
+.final-cta-sub { font-size:13.5px; color:var(--washi2); margin-bottom:22px; line-height:1.7; }
+</style>
 </head>
 <body>
 <div id="app">
   <div id="hdr">
-    <div id="hdr-left">🥋 <span id="hdr-name">AIアプリ道場</span></div>
+    <div id="hdr-left">
+      <div class="hdr-mon">🥋</div>
+      <span id="hdr-name">AIアプリ道場</span>
+    </div>
     <div id="hdr-right">
       <button id="back-btn" onclick="showArticle()"></button>
       <button id="lang-btn" onclick="toggleLang()">EN</button>
       <span class="badge">BETA</span>
     </div>
   </div>
-  <div id="pwa-banner">
-    <span>📱</span>
-    <span id="pwa-banner-text">ホーム画面に追加してアプリとして使えます！</span>
-    <button id="pwa-add-btn" onclick="handleInstall()">追加する</button>
-    <button id="pwa-dismiss" onclick="dismissPWA()">あとで</button>
-  </div>
   <div id="content"></div>
 </div>
+<div id="blackout"></div>
 
 <script>
-// -----------------------------------------------
-// 設定
-// -----------------------------------------------
-var BACKEND_URL = null; // デプロイ後にWorkerのURLを入れる
-var SAVE_KEY    = 'dojo_v1';
-var RATE_KEY    = 'dojo_rate';
-var TOKEN_KEY   = 'dojo_token';
+var BACKEND_URL = null;
+var SAVE_KEY = 'dojo_v1';
+var RATE_KEY = 'dojo_rate';
+var TOKEN_KEY = 'dojo_token';
 
-// -----------------------------------------------
-// 言語テキスト
-// -----------------------------------------------
 var T = {
   ja: {
-    appName:       'AIアプリ道場',
-    backToArticle: '← 記事',
-    enterDojo:     '道場に入門する 押忍！',
-    roundsLeft:    function(n){ return 'あと'+n+'ラウンド残ってます'; },
-    tryYourself:   '自分のアプリ、作ってみますか？',
-    tryDesc:       '記事で見た「あの流れ」を、今度はあなた自身のアイデアで。',
-    allRoundsHint: '💡 全ラウンドを見るとボタンが光ります',
-    zeroProg:      'プログラミング知識ゼロでOK',
-    stepSubtitle:  'STEP 2 / 2 — いよいよ本番',
-    dojoTitle:     'あなたのアイデアを\n形にしましょう',
-    dojoDesc:      'AIが5つの質問で、頭の中のモヤモヤを仕様書に変えます。',
-    startBtn:      '入門する 押忍！',
-    send:          '送信 →',
-    loadingSub:    'AIが本気で戦っています。少々お待ちを…',
-    resultNote:    '📱 バックエンド接続後にあなたの言葉で項目が生成されます',
-    retryBtn:      '🔄 別のアプリを作る',
-    bugIdle:       '🐛 動かない！直して',
-    bugFixing:     '🔧 AIが修正中...',
-    bugFixed:      '✅ 修正完了！もう一度試してみて',
-    downloadBtn:   '📥 HTMLをダウンロード（無料版）',
-    downloaded:    '✅ ダウンロード完了！',
-    proDownload:   '🚀 プロ版をダウンロード（無料）',
-    holdTitle:     'ちょっと待った！',
-    holdSenseiStop:'師範のストップ',
-    holdDefault:   'このアイデアは素晴らしいですが、まずは一人用のシンプル版から始めませんか？',
-    holdRetry:     'わかった！やり直す 押忍！',
-    holdReset:     '最初からやり直す',
-    holdRedoMsg:   '改めて「必殺技」を教えてください👇\n一人のスマホだけで完結する機能で考えてみましょう🥋',
-    holdHint:      'localStorageだけで動く機能が最強です',
-    rateLimitTitle:'今日の道場は閉まりました',
+    appName: 'AIアプリ道場',
+    backToArticle: '← 戻る',
+    enterDojoPrompt: '長押しで入門',
+    enterDojoHint: '1.5秒長押しで道場へ',
+    tryYourself: 'あなたのアプリ、作ってみませんか？',
+    tryDesc: 'AIが質問に答えてくれるので、特別な知識は不要です。',
+    zeroProg: '✨ プログラミング知識ゼロでOK',
+    skipTrials: 'スキップする →',
+    stepSubtitle: 'あと少しで完成です ✨',
+    dojoTitle: 'あなたのアイデアを\n形にしましょう',
+    dojoDesc: '4つの質問に答えるだけ。AIがアプリを作ります。',
+    startBtn: '✨ はじめる',
+    send: '送信 →',
+    loadingSub: 'AIが本気で戦っています。少々お待ちを…',
+    resultNote: '📱 バックエンド接続後にあなたの言葉で項目が生成されます',
+    retryBtn: '🔄 別のアプリを作る',
+    bugIdle: '🐛 型が崩れている！直せ',
+    bugFixing: '🔧 AIが修正中...',
+    bugFixed: '✅ 一手、極まった',
+    downloadBtn: '📥 HTMLをダウンロード（無料版）',
+    downloaded: '✅ ダウンロード完了！',
+    proDownload: '🚀 プロ版をダウンロード',
+    holdTitle: 'ちょっと待った！',
+    holdSenseiStop: 'ちょっと待ってください 🙋',
+    holdDefault: 'このアイデアは素晴らしいですが、まずは一人用のシンプル版から始めませんか？',
+    holdRetry: 'わかった！やり直す',
+    holdReset: '最初からやり直す',
+    holdRedoMsg: '改めて「必殺の型」を教えてください👇\n一人のスマホだけで極まる技で考えてみましょう🥋',
+    holdHint: 'localStorageだけで動く技が最強です',
+    rateLimitTitle: '今日の道場は閉まりました',
     rateLimitDesc: '本日のアプリ生成回数に達しました。',
-    rateLimitSub:  '明日また来てください。押忍！🥋',
-    errorTitle:    '電波が悪いようです…',
-    errorDesc:     'AIとの通信に失敗しました。\nもう一度試してみましょう💪',
-    retryFight:    '再挑戦する 押忍！',
-    blockedTitle:  'このアプリは作成できません',
-    blockedReset:  '別のアイデアで試す',
-    pwaInstall:    'ホーム画面に追加してアプリとして使えます！',
-    pwaAdd:        '追加する',
-    pwaLater:      'あとで',
-    resumeMsg:     'おかえり！途中まで答えてくれてましたね。続きから行きましょう💪',
-    doneMsg:       '完璧です！✊ 仕様書が完成しました。\nクロード大明神に渡して、今すぐコード生成を始めます！',
-    redirectMsg:   '面白いアイデアですね！✨\nただ複数人が絡む機能は、まず一人用で土台を作ってからが道場の鉄則です🥋',
-    redirectHint:  '一人用でも十分すごいものが作れます！',
-    redirectBtn:   'わかった！一人用で進める →',
-    articleTitle:  'AI3体を戦わせてスマホアプリを\n作れた話（秘伝のレシピ公開）',
-    articleLead:   'プログラミング知識ゼロの私が、AI同士を格闘技のリングで戦わせてアプリを作った話。各ラウンドをタップして実際の泥臭い戦いを体験してください。',
-    articleHint:   '各ラウンドをタップするとAI達の実際のやり取りが再生されます',
-    authorDate:    '2026年4月14日',
-    authorDesc:    '難しい税金やAIの「構造」を噛み砕いて発信中',
-    authorCTA:     '「こんなの作りたい！」はコメント欄へ。プログラミング知識ゼロでよければ全力で相談に乗ります。押忍！',
-    supportTitle:  '💬 困ったことがあればすぐ聞いてください',
-    supportDesc:   'コメント欄に書いてもらえれば、できる限り早く返します。',
-    skipLink:      '残りのラウンドをスキップする →',
+    rateLimitSub: 'また明日お試しください 😊',
+    errorTitle: '電波が悪いようです…',
+    errorDesc: 'AIとの通信に失敗しました。\nもう一度試してみましょう💪',
+    retryFight: 'もう一度試す',
+    blockedTitle: 'このアプリは作成できません',
+    blockedReset: '別のアイデアで試す',
+    resumeMsg: 'おかえり！途中まで答えてくれてましたね。続きから行きましょう💪',
+    doneMsg: '完璧です！✊ 仕様書が完成しました。\nクロード大明神に渡して、今すぐコード生成を始めます！',
+    redirectMsg: '面白いアイデアですね！✨\nただ複数人が絡む機能は、まず一人用で土台を作ってからが道場の鉄則です🥋',
+    redirectHint: '一人用でも十分すごいものが作れます！',
+    redirectBtn: 'わかった！一人用で進める →',
+    articleTitle: 'AI3体を戦わせてスマホアプリを\n作れた話（秘伝のレシピ公開）',
+    articleLead: 'プログラミング知識ゼロの私が、AI同士を格闘技のリングで戦わせてアプリを作った話。各試練をタップして実際の泥臭い戦いを体験してください。',
+    articleHint: '各試練をタップして実際の戦いを目撃せよ。',
+    articleTag: '道場巻物',
+    authorDate: '2026年4月14日',
+    authorDesc: '難しい税金やAIの「構造」を噛み砕いて発信中',
+    authorCTA: '「こんなアプリ作りたい！」はコメント欄へ気軽にどうぞ。知識ゼロでも全力でお手伝いします 😊',
+    supportTitle: '💬 困ったらいつでも聞いてください',
+    supportDesc: 'コメント欄に書いてもらえれば、できる限り早く返信します。',
+    senseiName: 'サポート : karate papa',
+    footerName: 'karate papa',
     questions: [
-      { id:'problem', text:'押忍！今日作るのは、誰のどんなモヤモヤを解決するツールですか？',         ph:'例：営業前の準備を毎回ど忘れしてしまう自分のため',  hint:'思いつきでOK。完璧じゃなくて大丈夫です💪' },
-      { id:'user',    text:'それを一番使うのは誰ですか？あなた自身？それとも誰か大切な人？',           ph:'例：外回りが多い営業職の自分',                       hint:'具体的な人を思い浮かべると、アプリがグッと良くなります' },
-      { id:'killer',  text:'そのアプリの「必殺技」は何ですか？これ一個だけは絶対に外せない！',         ph:'例：訪問前にワンタップで準備リストをチェックできる', hint:'多機能より「これだけ」の方が最強です' },
-      { id:'cut',     text:'逆に、あえて削る機能は何ですか？「あれば便利だけど、今はいらない」もの。', ph:'例：データの統計グラフ、チームへの共有機能',          hint:'削る勇気が、神アプリを生む' },
-      { id:'feel',    text:'アプリを使い終わった後、どんな気持ちになってほしいですか？',               ph:'例：「よし、完璧な準備ができた！」という達成感',    hint:'感情を言葉にすると、デザインが決まります' }
+      { id:'problem', text:'こんにちは！まずは教えてください。どんな場面で困っていますか？', ph:'例：薬がいつ切れるか忘れていつも切らす', hint:'普段のモヤモヤを自分の言葉でOK 😊' },
+      { id:'want',    text:'そのとき、アプリに何をしてほしいですか？', ph:'例：残り日数がひと目でわかって、少なくなったら教えてほしい', hint:'「こうなったら嬉しい」でOK' },
+      { id:'input',   text:'アプリに何を入力しますか？（複数OK）', ph:'例：薬の名前、もらった日数、病院名', hint:'紙に書くとしたら何を書くか考えてみて' },
+      { id:'vibe',    text:'アプリの名前と、色のイメージは？', ph:'例：お薬カレンダー、優しい緑', hint:'ざっくりでOK。後から変えられます' }
     ],
     loadingMsgs: [
-      { icon:'⚔️', text:'AI同士が仕様を巡って白熱の議論中...' },
+      { icon:'⚔️', text:'AI同士が型を巡って白熱の議論中...' },
       { icon:'🔍', text:'要件の穴を洗い出しています...' },
       { icon:'✍️', text:'クロード大明神がコードを爆速執筆中...' },
       { icon:'🏗️', text:'画面レイアウトを組み立てています...' },
       { icon:'🎨', text:'UIに魂を吹き込んでいます...' },
       { icon:'🛡️', text:'セキュリティの最終チェック中...' },
-      { icon:'💥', text:'あと少し！クオリティチェック中...' },
-      { icon:'✨', text:'完成しました！！' }
-    ]
+      { icon:'💥', text:'あと少し！型の最終確認中...' },
+      { icon:'✨', text:'極まりました！！' }
+    ],
+    senseiQuotes: [
+      '「型を知らずして、型を破れず。」',
+      '「迷えば聞け。だが、まず打て。」',
+      '「完璧な一手より、打ち続ける十手。」',
+      '「削る勇気が、神アプリを生む。」'
+    ],
+    stageLabels: ['零','壱','弐','参','四']
   },
   en: {
-    appName:       'AI App Dojo',
-    backToArticle: '← Article',
-    enterDojo:     'Enter the Dojo! Osu!',
-    roundsLeft:    function(n){ return n+' rounds left'; },
-    tryYourself:   'Ready to build your own app?',
-    tryDesc:       'Experience the process from the article — with YOUR idea.',
-    allRoundsHint: '💡 Read all rounds to unlock the button',
-    zeroProg:      'Zero coding knowledge needed',
-    stepSubtitle:  'STEP 2 / 2 — Let\'s do this',
-    dojoTitle:     'Let\'s turn your idea\ninto an app',
-    dojoDesc:      'Just answer 5 questions. The AI handles the rest.',
-    startBtn:      'Enter the Dojo! Osu!',
-    send:          'Send →',
-    loadingSub:    'The AI is fighting hard. Please wait…',
-    resultNote:    '📱 After backend connection, items will match your words.',
-    retryBtn:      '🔄 Build another app',
-    bugIdle:       '🐛 Broken! Fix it',
-    bugFixing:     '🔧 AI is fixing...',
-    bugFixed:      '✅ Fixed! Try again',
-    downloadBtn:   '📥 Download HTML (Free)',
-    downloaded:    '✅ Downloaded!',
-    proDownload:   '🚀 Download Pro Version (Free)',
-    holdTitle:     'Hold on!',
-    holdSenseiStop:'Sensei says stop',
-    holdDefault:   'Great idea! But let\'s start with a solo version first.',
-    holdRetry:     'Got it! Redo it. Osu!',
-    holdReset:     'Start over',
-    holdRedoMsg:   'Let\'s rethink the killer feature 👇\nFocus on something that works solo on your phone 🥋',
-    holdHint:      'localStorage-only features are the strongest',
-    rateLimitTitle:'The dojo is closed for today',
-    rateLimitDesc: 'You\'ve used today\'s generation limit.',
-    rateLimitSub:  'Come back tomorrow. Osu! 🥋',
-    errorTitle:    'Connection issue…',
-    errorDesc:     'Failed to reach the AI.\nLet\'s try again 💪',
-    retryFight:    'Try again! Osu!',
-    blockedTitle:  'Cannot create this app',
-    blockedReset:  'Try a different idea',
-    pwaInstall:    'Add to your home screen to use as an app!',
-    pwaAdd:        'Add',
-    pwaLater:      'Later',
-    resumeMsg:     'Welcome back! Let\'s pick up where you left off 💪',
-    doneMsg:       'Perfect! ✊ The spec is complete.\nHanding it to Claude the Almighty now!',
-    redirectMsg:   'Brilliant idea! ✨\nHowever, multi-user features need a solo foundation first 🥋',
-    redirectHint:  'A solo app can still be incredibly powerful!',
-    redirectBtn:   'Got it! Go solo →',
-    articleTitle:  'How I Made a Smartphone App\nby Making 3 AIs Fight Each Other',
-    articleLead:   'Zero programming knowledge. One phone. I made a real app by making AIs battle each other. Tap each round to experience the messy, glorious process.',
-    articleHint:   'Tap each round to replay the actual AI conversation',
-    authorDate:    'April 14, 2026',
-    authorDesc:    'Breaking down complex topics into plain language',
-    authorCTA:     'Drop a comment with \'I want to make X!\' — I\'ll help you figure out how. Osu!',
-    supportTitle:  '💬 Got a question? Ask anytime',
-    supportDesc:   'Drop a comment and I\'ll reply as fast as I can.',
-    skipLink:      'Skip remaining rounds →',
+    appName: 'AI App Dojo',
+    backToArticle: '← Back',
+    enterDojoPrompt: '— Hold to Enter —',
+    enterDojoHint: 'Hold for 1.5s to enter the dojo',
+    tryYourself: 'Begin your trial',
+    tryDesc: 'Experience the process from the article with YOUR idea.',
+    zeroProg: 'Zero coding knowledge needed',
+    skipTrials: 'Skip remaining trials →',
+    stepSubtitle: 'Round 2 — Let\u0027s do this',
+    dojoTitle: 'Let\u0027s turn your idea\ninto an app',
+    dojoDesc: 'Just answer 4 questions. The AI handles the rest.',
+    startBtn: 'Enter the Dojo! Osu!',
+    send: 'Send →',
+    loadingSub: 'The AI is fighting hard. Please wait…',
+    resultNote: '📱 After backend connection, items will match your words.',
+    retryBtn: '🔄 Build another app',
+    bugIdle: '🐛 Broken form! Fix it',
+    bugFixing: '🔧 AI is fixing...',
+    bugFixed: '✅ One strike, landed',
+    downloadBtn: '📥 Download HTML (Free)',
+    downloaded: '✅ Downloaded!',
+    proDownload: '🚀 Download Pro Version',
+    holdTitle: 'Hold on!',
+    holdSenseiStop: 'Sensei says stop',
+    holdDefault: 'Great idea! But let\u0027s start with a solo version first.',
+    holdRetry: 'Got it! Redo it. Osu!',
+    holdReset: 'Start over',
+    holdRedoMsg: 'Let\u0027s rethink the killer move 👇\nFocus on something that works solo on your phone 🥋',
+    holdHint: 'localStorage-only moves are the strongest',
+    rateLimitTitle: 'The dojo is closed for today',
+    rateLimitDesc: 'You\u0027ve used today\u0027s generation limit.',
+    rateLimitSub: 'Come back tomorrow. Osu! 🥋',
+    errorTitle: 'Connection issue…',
+    errorDesc: 'Failed to reach the AI.\nLet\u0027s try again 💪',
+    retryFight: 'Try again! Osu!',
+    blockedTitle: 'Cannot create this app',
+    blockedReset: 'Try a different idea',
+    resumeMsg: 'Welcome back! Let\u0027s pick up where you left off 💪',
+    doneMsg: 'Perfect! ✊ The spec is complete.\nHanding it to Claude the Almighty now!',
+    redirectMsg: 'Brilliant idea! ✨\nHowever, multi-user features need a solo foundation first 🥋',
+    redirectHint: 'A solo app can still be incredibly powerful!',
+    redirectBtn: 'Got it! Go solo →',
+    articleTitle: 'How I Made a Smartphone App\nby Making 3 AIs Fight Each Other',
+    articleLead: 'Zero programming knowledge. One phone. I made a real app by making AIs battle each other. Tap each trial to witness the actual battle.',
+    articleHint: 'Tap each trial to witness the actual battle.',
+    articleTag: 'DOJO SCROLL',
+    authorDate: 'April 14, 2026',
+    authorDesc: 'Breaking down complex topics into plain language',
+    authorCTA: 'Drop a comment with \u0027I want to make X!\u0027 — I\u0027ll help you figure out how. Osu!',
+    supportTitle: '💬 Got a question? Ask anytime',
+    supportDesc: 'Drop a comment and I\u0027ll reply as fast as I can.',
+    senseiName: 'SENSEI : karate papa',
+    footerName: 'Sensei karate papa',
     questions: [
-      { id:'problem', text:'Osu! What problem are you solving, and for whom?',          ph:'e.g. I keep forgetting my pre-sales checklist',        hint:'Any rough idea is fine 💪' },
-      { id:'user',    text:'Who will use this most? You? Someone important to you?',    ph:'e.g. Me — a sales rep always on the go',               hint:'Picturing a specific person makes the app better' },
-      { id:'killer',  text:'What\'s the ONE killer feature? The thing you can\'t cut.', ph:'e.g. One-tap checklist before each client visit',      hint:'One great thing beats ten mediocre features' },
-      { id:'cut',     text:'What would you deliberately cut? \'Nice to have but not now\'', ph:'e.g. Stats charts, team sharing, cloud sync',      hint:'The courage to cut makes a great app' },
-      { id:'feel',    text:'How should users feel after using the app?',                 ph:'e.g. \'Yes! I\'m fully prepared!\' — achievement',     hint:'Naming the feeling shapes the design' }
+      { id:'problem', text:'Osu! When do you get stuck? What\u0027s the frustration?', ph:'e.g. I forget when my medicine runs out', hint:'Your everyday pain is fine 💪' },
+      { id:'want',    text:'What do you want the app to do in that moment?', ph:'e.g. Show days left at a glance, warn me when low', hint:'Just describe what would make you happy' },
+      { id:'input',   text:'What will you type into the app?', ph:'e.g. Medicine name, days prescribed, clinic name', hint:'If you wrote it on paper, what would you write?' },
+      { id:'vibe',    text:'What name and color fits this app?', ph:'e.g. Pill Calendar, gentle green', hint:'Rough ideas are fine. You can change it later' }
     ],
     loadingMsgs: [
-      { icon:'⚔️', text:'AIs debating the spec…' },
-      { icon:'🔍', text:'Hunting for requirement gaps…' },
-      { icon:'✍️', text:'Claude coding at full speed…' },
-      { icon:'🏗️', text:'Building the screen layout…' },
-      { icon:'🎨', text:'Breathing soul into the UI…' },
-      { icon:'🛡️', text:'Final security check…' },
-      { icon:'💥', text:'Almost there! Quality check…' },
-      { icon:'✨', text:'Complete!!' }
-    ]
+      { icon:'⚔️', text:'AIs debating the form...' },
+      { icon:'🔍', text:'Hunting for requirement gaps...' },
+      { icon:'✍️', text:'Claude coding at full speed...' },
+      { icon:'🏗️', text:'Building the screen layout...' },
+      { icon:'🎨', text:'Breathing soul into the UI...' },
+      { icon:'🛡️', text:'Final security check...' },
+      { icon:'💥', text:'Almost there! Final form check...' },
+      { icon:'✨', text:'Perfectly landed!!' }
+    ],
+    senseiQuotes: [
+      '"You cannot break the form until you know it."',
+      '"When in doubt, ask. But first — strike."',
+      '"Ten imperfect strikes beat one perfect hesitation."',
+      '"The courage to cut creates the perfect app."'
+    ],
+    stageLabels: ['0','I','II','III','IV']
   }
 };
 
-// -----------------------------------------------
-// 記事デモデータ
-// -----------------------------------------------
 var ROUNDS = [
-  { id:'r1', badgeJa:'第1ラウンド', badgeEn:'Round 1', titleJa:'AI同士を戦わせる', titleEn:'Making AIs Battle', icon:'⚔️',
-    quoteJa:'AI2人で「あーでもない、こーでもない」と戦わせます。',
-    quoteEn:'I made two AIs argue until they figured it out.',
-    type:'battle',
-    exchanges:[
-      { who:'Gemini', av:'✨', col:'#4285f4', ja:'インターバルタイマーですね！音声カウントダウン付きのリングUIにしましょう。', en:'Interval timer! Let\'s add a ring UI with voice countdown.' },
-      { who:'ChatGPT', av:'🤖', col:'#10a37f', ja:'ちょっと待って。スマホだけなら音声APIは鬼門です。確実に沼る。', en:'Hold on. Voice API is a trap for phone-only builds.' },
-      { who:'Gemini', av:'✨', col:'#4285f4', ja:'確かに。では画面全体の色が変わる方式に変更します。', en:'Fair point. Let\'s change the whole screen color instead.' },
-      { who:'パパさん', av:'🥋', col:'#ff6b35', ja:'お前ら！ユーザーのモヤモヤを全部洗い出して解決しろ！', en:'Hey! Find every user frustration and fix it all!' },
-      { who:'ChatGPT', av:'🤖', col:'#10a37f', ja:'了解。①セット数が分からない→「3/8」大きく表示。②汗で操作しにくい→ボタン超巨大化。③誤作動→ロック機能。', en:'Got it. ①Lost sets→show 3/8 big. ②Sweaty hands→giant buttons. ③Misfire→lock.' },
-      { who:'Gemini', av:'✨', col:'#4285f4', ja:'（さっきの意見をあっさり撤回）それで行きましょう！完璧ですね！', en:'(abandons previous opinion) Let\'s go! Perfect spec!' },
-      { who:'パパさん', av:'🥋', col:'#ff6b35', ja:'……許すまじ。まあ結果よければいいか。押忍！', en:'...Unforgivable. But results matter. Osu!' }
+  {
+    id: 'r1',
+    badgeJa: '第壱試練', badgeEn: 'Trial I',
+    cmdJa: 'AI同士を戦わせよ', cmdEn: 'Make the AIs Fight',
+    icon: '⚔️',
+    quoteJa: '型を持たぬ者同士を戦わせると、意外な最適解が生まれる。',
+    quoteEn: 'When two formless minds clash, unexpected solutions emerge.',
+    type: 'battle',
+    exchanges: [
+      { who:'Gemini', av:'✨', col:'#4285f4', ja:'インターバルタイマーですね！音声カウントダウン付きのリングUIにしましょう。', en:'Interval timer! Let us add a ring UI with voice countdown.' },
+      { who:'ChatGPT', av:'🤖', col:'#10a37f', ja:'待て。スマホだけなら音声APIは鬼門だ。確実に沼る。', en:'Hold. Voice API is a trap for phone-only builds.' },
+      { who:'Gemini', av:'✨', col:'#4285f4', ja:'…確かに。画面全体の色が変わる方式に変更する。', en:'...Fair. Full-screen color change instead.' },
+      { who:'パパさん', av:'🥋', col:'#ff6b35', ja:'お前ら！ユーザーのモヤモヤを全部洗い出して解決しろ！', en:'Both of you! Find every user pain point and crush it!' },
+      { who:'ChatGPT', av:'🤖', col:'#10a37f', ja:'了解。セット数を大きく表示、ボタン巨大化、ロック機能を追加する。', en:'Understood. Large sets, giant buttons, lock feature.' },
+      { who:'Gemini', av:'✨', col:'#4285f4', ja:'（さっきの意見を撤回）それで行こう。完璧な型だ。', en:'(retracts previous stance) That is the way. Perfect form.' },
+      { who:'パパさん', av:'🥋', col:'#ff6b35', ja:'……型が崩れていたが、結果は極まった。押忍！', en:'...Your form was off. But the result landed. Osu!' }
     ]
   },
-  { id:'r2', badgeJa:'第2ラウンド', badgeEn:'Round 2', titleJa:'パパの爆弾投下', titleEn:'The Human Bomb Drop', icon:'💣',
-    quoteJa:'「血の通ったツール」に進化させるのは、人間の泥臭い視点だけです。',
-    quoteEn:'Only the messy human perspective turns code into a real tool.',
-    type:'spec',
-    specItems:[
-      { icon:'⚡', labelJa:'必殺機能', labelEn:'Killer Feature', valJa:'ワンタップスタート、画面全体で状態表示', valEn:'One-tap start, full-screen status display' },
-      { icon:'✂️', labelJa:'削った機能', labelEn:'Cut Features', valJa:'ログイン、SNS共有、クラウド同期', valEn:'Login, social sharing, cloud sync' },
-      { icon:'🛡️', labelJa:'技術制約', labelEn:'Constraint', valJa:'HTML1ファイル完結', valEn:'Single HTML file only' },
-      { icon:'🔥', labelJa:'感情目標', labelEn:'Feeling Goal', valJa:'「達成感」「もう一回やりたい」', valEn:'Achievement & want to do it again' }
+  {
+    id: 'r2',
+    badgeJa: '第弐試練', badgeEn: 'Trial II',
+    cmdJa: '爆弾を投下せよ', cmdEn: 'Drop the Bomb',
+    icon: '💣',
+    quoteJa: '血の通ったツールに進化させるのは、人間の泥臭い視点だけだ。',
+    quoteEn: 'Only the raw human eye turns code into a living tool.',
+    type: 'spec',
+    specItems: [
+      { icon:'⚡', labelJa:'必殺の型', labelEn:'Killer Move', valJa:'ワンタップスタート、画面全体で状態表示', valEn:'One-tap start, full-screen state display' },
+      { icon:'✂️', labelJa:'断ち切った枝', labelEn:'Cut Branches', valJa:'ログイン、SNS共有、クラウド同期', valEn:'Login, social sharing, cloud sync' },
+      { icon:'🛡️', labelJa:'陣地の掟', labelEn:'Dojo Law', valJa:'HTML1ファイル完結', valEn:'Single HTML file only' },
+      { icon:'🔥', labelJa:'感情の的', labelEn:'Feeling Target', valJa:'「達成感」「もう一回やりたい」', valEn:'Achievement, want to do it again' }
     ]
   },
-  { id:'r3', badgeJa:'第3ラウンド', badgeEn:'Round 3', titleJa:'神の降臨とトリプルチェック', titleEn:'Claude Descends', icon:'⚡',
-    quoteJa:'3分もかからず、完璧っぽいコードがドバッと出てきます。',
-    quoteEn:'In under 3 minutes, a flood of looks-perfect code appears.',
-    type:'code',
-    codeLines:['<!DOCTYPE html>','<html lang="ja">','<head>','  <meta charset="UTF-8">','  <title>タバタタイマー</title>','  <style>','    body { background:#0a0a0a; }','    .work { background:#ff4444; }','    .timer { font-size:80px; }','  </style>','</head>','<body>','  <button onclick="start()">▶ スタート</button>','  <script>','    let sets=8, phase="work";','    function start() { /* タバタロジック */ }','  <'+'/script>','</body></html>']
+  {
+    id: 'r3',
+    badgeJa: '第参試練', badgeEn: 'Trial III',
+    cmdJa: '神を降ろせ', cmdEn: 'Summon the God',
+    icon: '⚡',
+    quoteJa: '3分もかからず、完璧な型のコードがドバッと降臨する。',
+    quoteEn: 'In under 3 minutes, perfectly-formed code descends from above.',
+    type: 'code',
+    codeLines: [
+      '&lt;!DOCTYPE html&gt;',
+      '&lt;html lang="ja"&gt;',
+      '&lt;head&gt;',
+      '  &lt;meta charset="UTF-8"&gt;',
+      '  &lt;title&gt;タバタタイマー&lt;/title&gt;',
+      '  &lt;style&gt;',
+      '    body { background:#0a0a0a; }',
+      '    .work { background:#ff4444; }',
+      '    .timer { font-size:80px; }',
+      '  &lt;/style&gt;',
+      '&lt;/head&gt;',
+      '&lt;body&gt;',
+      '  &lt;button onclick="start()"&gt;▶ スタート&lt;/button&gt;',
+      '  &lt;script&gt;',
+      '    let sets=8, phase="work";',
+      '    function start() { /* タバタロジック */ }',
+      '  &lt;/' + 'script&gt;',
+      '&lt;/body&gt;&lt;/html&gt;'
+    ]
   },
-  { id:'r4', badgeJa:'最終ラウンド', badgeEn:'Final Round', titleJa:'スマホで実装（泥試合）', titleEn:'The Muddy Implementation', icon:'📱',
-    quoteJa:'1回で完璧に動くなんて奇跡。何度も書き直す「デバッグの反復横跳び」です。',
-    quoteEn:'It never works first try. Endless rewrites — the debug shuffle.',
-    type:'debug',
-    exchanges:[
-      { who:'user', ja:'URLを開いたら画面が真っ白！！', en:'The page is completely blank!!' },
-      { who:'ai',   ja:'scriptタグの閉じ忘れです。修正します👇', en:'Missing closing script tag. Fixing now 👇' },
-      { who:'user', ja:'スタートボタン押しても動かない！', en:'The start button does nothing!' },
-      { who:'ai',   ja:'DOMContentLoadedの外に書いてました。修正版↓', en:'Code ran before DOM loaded. Fixed version↓' },
-      { who:'user', ja:'全部直った！！🎉🎉', en:'Everything works!! 🎉🎉' },
-      { who:'ai',   ja:'泥試合、見事でしたよ🥋 押忍！！', en:'You survived the mud fight 🥋 Osu!!' }
+  {
+    id: 'r4',
+    badgeJa: '最終試練', badgeEn: 'Final Trial',
+    cmdJa: '泥試合を制せよ', cmdEn: 'Conquer the Mud',
+    icon: '📱',
+    quoteJa: '一手で極まるなど幻想だ。何度も型を崩し、立て直す。それが道だ。',
+    quoteEn: 'A single strike never decides it. Break your form. Rebuild it. That is the way.',
+    type: 'debug',
+    exchanges: [
+      { who:'user', ja:'URLを開いたら——型が崩れている！！', en:'Opened the URL — the form is broken!!' },
+      { who:'ai', ja:'scriptタグが閉じていない。今すぐ修正する👇', en:'Script tag unclosed. Correcting now.' },
+      { who:'user', ja:'スタートボタンを押しても——反応がない！', en:'The start button — no response!' },
+      { who:'ai', ja:'DOMが整う前に動こうとしていた。修正版↓', en:'It struck before the DOM was ready. Fixed.' },
+      { who:'user', ja:'全て極まった！！🎉🎉', en:'Everything landed!! 🎉🎉' },
+      { who:'ai', ja:'泥試合、見事に制した。一手、極まった🥋', en:'You conquered the mud. One strike, perfectly landed 🥋' }
     ]
   }
 ];
 
-// -----------------------------------------------
-// 状態
-// -----------------------------------------------
-var lang      = 'ja';
-var view      = 'article'; // article | dojo
-var phase     = 'welcome'; // welcome | interview | loading | result | hold | blocked | rateLimit | error
-var qIndex    = 0;
-var answers   = {};
-var messages  = [];
-var loadStep  = 0;
+var lang = 'ja';
+var view = 'article';
+var phase = 'welcome';
+var qIndex = 0;
+var extraQuestions = [];
+var featureWarnings = []; // 確認画面で使う：作れない機能のリスト
+var answers = {};
+var messages = [];
+var loadStep = 0;
 var loadTimer = null;
-var genApp    = null;
-var holdMsg   = '';
+var genApp = null;
+var holdMsg = '';
 var readCount = 0;
+var readRounds = {};
 var openRound = null;
 var demoShown = {};
-var demoTimers= {};
+var demoTimers = {};
 var checkedItems = {};
-var bugPhase  = 'idle';
-var pwaPrompt = null;
+var bugPhase = 'idle';
+var bugTimer = null;
 var isComposing = false;
+var holdInterval = null;
 
-function t(){ return T[lang]; }
+function t() { return T[lang]; }
 
-// -----------------------------------------------
-// localStorage
-// -----------------------------------------------
-function saveProgress(data){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(data)); }catch(e){} }
-function loadProgress(){ try{ var r=localStorage.getItem(SAVE_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
-function clearProgress(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
-function getUserToken(){
-  var tok=localStorage.getItem(TOKEN_KEY);
-  if(!tok){ tok='u_'+Date.now()+'_'+Math.random().toString(36).slice(2,9); localStorage.setItem(TOKEN_KEY,tok); }
+function saveProgress(data) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e) {} }
+function loadProgress() { try { var r = localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+function clearProgress() { try { localStorage.removeItem(SAVE_KEY); } catch(e) {} }
+function getUserToken() {
+  var tok = localStorage.getItem(TOKEN_KEY);
+  if (!tok) { tok = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); localStorage.setItem(TOKEN_KEY, tok); }
   return tok;
 }
-function checkRate(){
-  var today=new Date().toISOString().slice(0,10);
-  try{ var d=JSON.parse(localStorage.getItem(RATE_KEY)||'{}'); return (d.date===today && d.count>=1); }catch(e){ return false; }
+function checkRate() {
+  var today = new Date().toISOString().slice(0, 10);
+  try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); return (d.date === today && d.count >= 1); } catch(e) { return false; }
 }
-function incRate(){
-  var today=new Date().toISOString().slice(0,10);
-  try{ var d=JSON.parse(localStorage.getItem(RATE_KEY)||'{}'); var c=(d.date===today?d.count:0)+1; localStorage.setItem(RATE_KEY,JSON.stringify({date:today,count:c})); }catch(e){}
+function incRate() {
+  var today = new Date().toISOString().slice(0, 10);
+  try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); var c = (d.date === today ? d.count : 0) + 1; localStorage.setItem(RATE_KEY, JSON.stringify({ date: today, count: c })); } catch(e) {}
 }
 
-// -----------------------------------------------
-// デザインテーマ
-// -----------------------------------------------
 var FEEL_MAP = {
-  '達成':{ accent:'#4caf50', bg:'#0a1a0a' }, '完了':{ accent:'#4caf50', bg:'#0a1a0a' }, 'スッキリ':{ accent:'#4caf50', bg:'#0a1a0a' },
-  '安心':{ accent:'#5c9eff', bg:'#0a0f1a' }, '落ち着':{ accent:'#5c9eff', bg:'#0a0f1a' },
-  'やる気':{ accent:'#ff6b35', bg:'#1a0a00' }, '燃える':{ accent:'#ff6b35', bg:'#1a0a00' },
-  '楽しい':{ accent:'#c084fc', bg:'#100a1a' }, 'ワクワク':{ accent:'#c084fc', bg:'#100a1a' },
-  '癒し':{ accent:'#d4a574', bg:'#120e0a' }
+  '達成': { accent:'#7ec9a8', bg:'#f5fcf8' }, '完了': { accent:'#7ec9a8', bg:'#f5fcf8' }, 'スッキリ': { accent:'#7ec9a8', bg:'#f5fcf8' },
+  '安心': { accent:'#5b9bd5', bg:'#f5faff' }, '落ち着': { accent:'#5b9bd5', bg:'#f5faff' },
+  'やる気': { accent:'#ffa94d', bg:'#fff8f0' }, '燃える': { accent:'#ff7e67', bg:'#fff5f0' },
+  '楽しい': { accent:'#c084fc', bg:'#fbf5ff' }, 'ワクワク': { accent:'#c084fc', bg:'#fbf5ff' },
+  '癒し': { accent:'#b8a591', bg:'#fdfaf5' },
+  // 色指定キーワード
+  '緑': { accent:'#7ec9a8', bg:'#f5fcf8' }, '青': { accent:'#5b9bd5', bg:'#f5faff' },
+  '赤': { accent:'#ff7e67', bg:'#fff5f0' }, 'ピンク': { accent:'#f093a7', bg:'#fef5f8' },
+  '紫': { accent:'#c084fc', bg:'#fbf5ff' }, 'オレンジ': { accent:'#ffa94d', bg:'#fff8f0' },
+  '黄': { accent:'#f4c96b', bg:'#fffcf0' }
 };
-function getDesign(feel){
-  if(!feel) return { accent:'#ff6b35', bg:'#1a0a00' };
-  var keys=Object.keys(FEEL_MAP);
-  for(var i=0;i<keys.length;i++){ if(feel.indexOf(keys[i])>=0) return FEEL_MAP[keys[i]]; }
-  return { accent:'#ff6b35', bg:'#1a0a00' };
+function getDesign(feel) {
+  if (!feel) return { accent:'#5b9bd5', bg:'#fdfbf7' };
+  var keys = Object.keys(FEEL_MAP);
+  for (var i = 0; i < keys.length; i++) { if (feel.indexOf(keys[i]) >= 0) return FEEL_MAP[keys[i]]; }
+  return { accent:'#5b9bd5', bg:'#fdfbf7' };
 }
 
-// -----------------------------------------------
-// モック生成
-// -----------------------------------------------
-function mockGen(ans){
-  var p=ans.problem||'', f=ans.feel||'', k=ans.killer||'', u=ans.user||'あなた';
-  var d=getDesign(f);
-  var items=k
-    ? ['✅ '+k.slice(0,12)+'の確認①','📋 '+k.slice(0,12)+'の確認②','🔍 '+k.slice(0,12)+'の確認③','💡 '+k.slice(0,12)+'の確認④','🎯 '+k.slice(0,12)+'の完了確認']
-    : ['🎯 今日の目標①','📌 確認事項②','✅ タスク③','💡 メモ④','🔄 振り返り⑤'];
+function mockGen(ans) {
+  var p = ans.problem || '', f = ans.feel || '', k = ans.killer || '', u = ans.user || 'あなた';
+  var d = getDesign(f);
+  var items = k
+    ? ['✅ ' + k.slice(0, 12) + 'の確認①', '📋 ' + k.slice(0, 12) + 'の確認②', '🔍 ' + k.slice(0, 12) + 'の確認③', '💡 ' + k.slice(0, 12) + 'の確認④', '🎯 ' + k.slice(0, 12) + 'の完了確認']
+    : ['🎯 今日の目標①', '📌 確認事項②', '✅ タスク③', '💡 メモ④', '🔄 振り返り⑤'];
   return {
-    app_name: p.slice(0,15)||'マイチェックリスト',
-    one_liner: u+'のためのアプリ',
+    app_name: p.slice(0, 15) || 'マイチェックリスト',
+    one_liner: u + 'のためのアプリ',
     items: items,
-    done_message: f ? '🔥「'+f+'」達成！押忍！' : '🎊 全部クリア！最高です！',
+    done_message: f ? '🎉「' + f + '」達成！お疲れさまでした！' : '🎊 全部完了！最高です！',
     feel: f, design: d,
-    storage_key: 'app_'+Date.now(),
-    warnings: []
+    storage_key: 'app_' + Date.now()
   };
 }
 
-// -----------------------------------------------
-// バックエンド呼び出し
-// -----------------------------------------------
-async function callBackend(ans){
-  if(!BACKEND_URL) return mockGen(ans);
-  var res=await fetch(BACKEND_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ answers:ans, userToken:getUserToken() })
+async function callBackend(ans) {
+  if (!BACKEND_URL) return mockGen(ans);
+  var res = await fetch(BACKEND_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answers: ans, userToken: getUserToken() })
   });
-  if(res.status===429){ var d=await res.json().catch(function(){ return {}; }); throw new Error(d.error==='RATE_LIMIT_USER'?'RATE_LIMIT_USER':'RATE_LIMIT'); }
-  if(res.status===403) throw new Error('CAPTCHA_FAILED');
-  if(!res.ok) throw new Error('BACKEND_ERROR');
-  var spec=await res.json();
-  if(spec.status==='ok') incRate();
+  if (res.status === 429) { var d = await res.json().catch(function() { return {}; }); throw new Error(d.error === 'RATE_LIMIT_USER' ? 'RATE_LIMIT_USER' : 'RATE_LIMIT'); }
+  if (res.status === 403) throw new Error('CAPTCHA_FAILED');
+  if (!res.ok) throw new Error('BACKEND_ERROR');
+  var spec = await res.json();
+  if (spec.status === 'ok') incRate();
   return spec;
 }
 
-// -----------------------------------------------
-// HTMLダウンロード
-// -----------------------------------------------
-function downloadHTML(){
-  if(!genApp) return;
-  var a=genApp, d=a.design||{accent:'#ff6b35',bg:'#0a0a0a'};
-  var items=a.items||[], skey=a.storage_key||'app';
-  var isJa=(lang==='ja');
-  var html='<!DOCTYPE html>\n<html lang="'+lang+'">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>'+a.app_name+'</title>\n<style>\n*{box-sizing:border-box;margin:0;padding:0}\nbody{background:'+d.bg+';color:#f0f0f0;font-family:\'Hiragino Kaku Gothic ProN\',\'Noto Sans JP\',sans-serif;min-height:100vh}\n.hdr{background:#111;padding:16px;text-align:center;border-bottom:1px solid #222}\n.hdr h1{font-size:18px;font-weight:900;color:'+d.accent+'}\n.hdr p{font-size:12px;color:#666;margin-top:4px}\n.prog{padding:8px 16px 4px}\n.prog-bar{height:4px;background:#1e1e1e;border-radius:2px}\n.prog-fill{height:100%;background:'+d.accent+';border-radius:2px;transition:width .4s;width:0%}\n.prog-text{font-size:10px;color:#555;margin-top:3px;text-align:right}\n.item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #131313;cursor:pointer;transition:background .2s}\n.item.done{background:'+d.accent+'12}\n.item.done .lbl{text-decoration:line-through;opacity:.4}\n.chk{font-size:18px;flex-shrink:0}\n.lbl{font-size:14.5px}\n.complete{text-align:center;padding:20px;color:'+d.accent+';font-weight:700;display:none}\n.complete.show{display:block}\n.upgrade{background:#1a0f00;border:1px solid #ff6b3544;border-radius:12px;margin:16px;padding:14px;text-align:center}\n.upgrade-title{font-size:13px;font-weight:700;color:#ff6b35;margin-bottom:6px}\n.upgrade-desc{font-size:11.5px;color:#888;line-height:1.7;margin-bottom:10px}\n.upgrade a{display:inline-block;background:#ff6b35;color:#fff;border-radius:8px;padding:8px 20px;font-size:12px;font-weight:700;text-decoration:none}\n.ftr{text-align:center;padding:16px;font-size:11px;color:#2a2a2a}\n</style>\n</head>\n<body>\n<div class="hdr"><h1>'+a.app_name+'</h1><p>'+(a.one_liner||'')+'</p></div>\n<div class="prog"><div class="prog-bar"><div class="prog-fill" id="pf"></div></div><div class="prog-text" id="pt"></div></div>\n<div id="list">';
-  items.forEach(function(item,i){
-    html+='<div class="item" id="i'+i+'" onclick="tog('+i+')"><span class="chk" id="c'+i+'">⬜</span><span class="lbl">'+item+'</span></div>';
+function downloadHTML() {
+  if (!genApp) return;
+  var a = genApp, d = a.design || { accent:'#c9a84c', bg:'#0d0a07' };
+  var items = a.items || [], skey = a.storage_key || 'app';
+  var isJa = (lang === 'ja');
+  var parts = [];
+  parts.push('<!DOCTYPE html><html lang="' + lang + '"><head><meta charset="UTF-8">');
+  parts.push('<meta name="viewport" content="width=device-width,initial-scale=1"><title>' + a.app_name + '</title>');
+  parts.push('<style>*{box-sizing:border-box;margin:0;padding:0}body{background:' + d.bg + ';color:#3d3529;font-family:system-ui,-apple-system,sans-serif;min-height:100vh}');
+  parts.push('.hdr{background:#fff;padding:18px;text-align:center;border-bottom:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.04)}.hdr h1{font-size:19px;color:' + d.accent + '}');
+  parts.push('.item{display:flex;gap:12px;padding:16px 18px;border-bottom:1px solid #f0ece4;cursor:pointer;background:#fff;transition:background 0.2s}.item:hover{background:#faf8f3}.item.done{background:' + d.accent + '15}.item.done .lbl{text-decoration:line-through;opacity:.5}');
+  parts.push('.chk{font-size:20px}.lbl{font-size:15px;color:#3d3529}.complete{text-align:center;padding:22px;color:' + d.accent + ';font-weight:700;display:none;background:' + d.accent + '15;margin:16px;border-radius:14px;font-size:15px}.complete.show{display:block}');
+  parts.push('.ftr{text-align:center;padding:18px;font-size:11px;color:#9a8d7c}.upgrade{background:#fff;border:1.5px solid #e8e2d5;border-radius:16px;margin:18px;padding:16px;text-align:center;box-shadow:0 2px 10px rgba(91,155,213,0.08)}');
+  parts.push('.upgrade a{display:inline-block;background:#ff7e67;color:#fff;border-radius:12px;padding:10px 22px;text-decoration:none;margin-top:8px;font-weight:600;box-shadow:0 2px 8px rgba(255,126,103,0.25)}</style></head><body>');
+  parts.push('<div class="hdr"><h1>' + a.app_name + '</h1></div><div id="list">');
+  items.forEach(function(item, i) {
+    parts.push('<div class="item" id="i' + i + '" onclick="tog(' + i + ')"><span class="chk" id="c' + i + '">⬜</span><span class="lbl">' + item + '</span></div>');
   });
-  html+='</div>\n<div class="complete" id="done">'+(a.done_message||'🎊 Complete!')+'</div>\n<div class="upgrade"><div class="upgrade-title">✨ '+(isJa?'プロ版でもっと便利に':'Want more features?')+'</div><div class="upgrade-desc">'+(isJa?'項目編集・自動リセット・複数リスト・達成履歴など全7機能':'Edit items, auto-reset, multiple lists, history & more')+'</div><a href="https://mugikohaone-netizen.github.io/dojo/dojo.html" target="_blank">'+(isJa?'道場でプロ版を作る 🥋':'Get Pro Version 🥋')+'</a></div>\n<div class="ftr">Made with AI App Dojo 🥋<br><a href="https://mugikohaone-netizen.github.io/dojo/dojo.html" target="_blank" style="color:#ff6b35;text-decoration:none;font-size:10px">'+(isJa?'💬 困ったことはコメント欄へ':'💬 Questions? Drop a comment')+'</a></div>\n<script>\nvar chk={},tot='+items.length+';\nfunction tog(i){\n  chk[i]=!chk[i];\n  document.getElementById("i"+i).className="item"+(chk[i]?" done":"");\n  document.getElementById("c"+i).textContent=chk[i]?"✅":"⬜";\n  var n=Object.values(chk).filter(Boolean).length;\n  document.getElementById("done").className="complete"+(n===tot?" show":"");\n  document.getElementById("pf").style.width=Math.round(n/tot*100)+"%";\n  document.getElementById("pt").textContent=n+" / "+tot;\n  try{localStorage.setItem("'+skey+'",JSON.stringify(chk));}catch(e){}\n}\ntry{var s=JSON.parse(localStorage.getItem("'+skey+'")||"{}");Object.keys(s).forEach(function(i){if(s[i])tog(parseInt(i));});}catch(e){}\n<'+'/script>\n</body></html>';
-  var blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var el=document.createElement('a');
-  el.href=url; el.download=(a.app_name||'myapp').replace(/\s/g,'_')+'.html';
+  parts.push('</div><div class="complete" id="done">' + (a.done_message || '🎊 極まった！') + '</div>');
+  parts.push('<div class="upgrade"><div style="color:#5b9bd5;font-weight:700;font-size:14px">✨ ' + (isJa ? 'もっと便利に使いたい方へ' : 'Want more features?') + '</div>');
+  parts.push('<div style="font-size:12px;color:#6b5d4c;margin:8px 0;line-height:1.6">' + (isJa ? '項目編集・自動リセット・複数リスト・履歴など' : 'Edit, reset, multi-lists, history') + '</div>');
+  parts.push('<a href="https://mugikohaone-netizen.github.io/dojo/dojo.html" target="_blank">' + (isJa ? '公式サイトへ ✨' : 'Visit site ✨') + '</a></div>');
+  parts.push('<div class="ftr">Made with AI App Dojo ✨</div>');
+  var scriptOpen = '<' + 'script>';
+  var scriptClose = '<' + '/' + 'script>';
+  parts.push(scriptOpen);
+  parts.push('var chk={},tot=' + items.length + ';');
+  parts.push('function tog(i){chk[i]=!chk[i];document.getElementById("i"+i).className="item"+(chk[i]?" done":"");document.getElementById("c"+i).textContent=chk[i]?"✅":"⬜";');
+  parts.push('var n=Object.values(chk).filter(Boolean).length;document.getElementById("done").className="complete"+(n===tot?" show":"");');
+  parts.push('try{localStorage.setItem("' + skey + '",JSON.stringify(chk));}catch(e){}}');
+  parts.push('try{var s=JSON.parse(localStorage.getItem("' + skey + '")||"{}");Object.keys(s).forEach(function(i){if(s[i])tog(parseInt(i));});}catch(e){}');
+  parts.push(scriptClose);
+  parts.push('</body></html>');
+  var html = parts.join('\n');
+  var blob = new Blob([html], { type:'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var el = document.createElement('a');
+  el.href = url;
+  el.download = (a.app_name || 'myapp').replace(/\s/g, '_') + '.html';
   document.body.appendChild(el); el.click(); document.body.removeChild(el); URL.revokeObjectURL(url);
-  var btn=document.getElementById('dl-btn');
-  if(btn){ btn.textContent=t().downloaded; setTimeout(function(){ btn.textContent=t().downloadBtn; },3000); }
+  var btn = document.getElementById('dl-btn');
+  if (btn) { btn.textContent = t().downloaded; setTimeout(function() { btn.textContent = t().downloadBtn; }, 3000); }
 }
 
-// -----------------------------------------------
-// PWA
-// -----------------------------------------------
-window.addEventListener('beforeinstallprompt',function(e){
-  e.preventDefault(); pwaPrompt=e;
-  document.getElementById('pwa-banner-text').textContent=t().pwaInstall;
-  document.getElementById('pwa-add-btn').textContent=t().pwaAdd;
-  document.getElementById('pwa-dismiss').textContent=t().pwaLater;
-  document.getElementById('pwa-banner').classList.add('show');
-});
-function handleInstall(){
-  if(!pwaPrompt) return;
-  pwaPrompt.prompt();
-  pwaPrompt.userChoice.then(function(r){ if(r.outcome==='accepted'){ dismissPWA(); pwaPrompt=null; } });
-}
-function dismissPWA(){ document.getElementById('pwa-banner').classList.remove('show'); }
-
-// -----------------------------------------------
-// 言語切り替え
-// -----------------------------------------------
-function toggleLang(){
-  lang=(lang==='ja'?'en':'ja');
-  document.getElementById('lang-btn').textContent=(lang==='ja'?'EN':'日本語');
-  document.getElementById('hdr-name').textContent=t().appName;
+function toggleLang() {
+  lang = (lang === 'ja' ? 'en' : 'ja');
+  document.getElementById('lang-btn').textContent = (lang === 'ja' ? 'EN' : '日本語');
+  document.getElementById('hdr-name').textContent = t().appName;
   render();
 }
 
-// -----------------------------------------------
-// ルーティング
-// -----------------------------------------------
-function showArticle(){
-  view='article'; phase='welcome';
-  document.getElementById('back-btn').style.display='none';
+function showArticle() {
+  view = 'article'; phase = 'welcome';
+  document.getElementById('back-btn').style.display = 'none';
   render();
 }
-function showDojo(){
-  view='dojo';
-  document.getElementById('back-btn').style.display='';
-  document.getElementById('back-btn').textContent=t().backToArticle;
-  var saved=loadProgress();
-  if(saved && saved.stage==='result' && saved.app){
-    genApp=saved.app; answers=saved.answers||{}; phase='result';
-  } else if(saved && (saved.stage==='interview'||saved.stage==='loading') && saved.answers){
-    answers=saved.answers; qIndex=saved.qIndex||0;
-    messages=[
-      {from:'ai',text:t().resumeMsg,hint:null},
-      {from:'ai',text:t().questions[qIndex].text,hint:t().questions[qIndex].hint}
+
+function showDojo() {
+  view = 'dojo';
+  document.getElementById('back-btn').style.display = '';
+  document.getElementById('back-btn').textContent = t().backToArticle;
+  var saved = loadProgress();
+  if (saved && saved.stage === 'result' && saved.app) {
+    genApp = saved.app; answers = saved.answers || {}; phase = 'result';
+  } else if (saved && (saved.stage === 'interview' || saved.stage === 'loading') && saved.answers) {
+    answers = saved.answers; qIndex = saved.qIndex || 0;
+    messages = [
+      { from:'ai', text:t().resumeMsg, hint:null },
+      { from:'ai', text:t().questions[qIndex].text, hint:t().questions[qIndex].hint }
     ];
-    if(saved.stage==='loading'){
-      setTimeout(function(){
-        addMsg('ai',t().doneMsg,null,false,true);
-        phase='interview'; render();
-        setTimeout(function(){ phase='loading'; loadStep=0; saveProgress({stage:'loading',answers:answers,qIndex:qIndex}); render(); startLoading(); },1200);
-      },600);
+    if (saved.stage === 'loading') {
+      setTimeout(function() {
+        addMsg('ai', t().doneMsg, null, false, true);
+        phase = 'interview'; render();
+        setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex }); render(); startLoading(); }, 1200);
+      }, 600);
     }
-    phase='interview';
-  } else { phase='welcome'; }
+    phase = 'interview';
+  } else { phase = 'welcome'; }
   render();
 }
 
-// -----------------------------------------------
-// レンダリング
-// -----------------------------------------------
-function render(){
-  var c=document.getElementById('content');
-  if(view==='article'){ c.innerHTML=renderArticle(); bindArticle(); return; }
-  if(phase==='welcome')    { c.innerHTML=renderWelcome(); return; }
-  if(phase==='interview')  { c.innerHTML=renderInterview(); bindInterview(); scrollBottom(); return; }
-  if(phase==='loading')    { c.innerHTML=renderLoading(); return; }
-  if(phase==='result')     { c.innerHTML=renderResult(); return; }
-  if(phase==='hold')       { c.innerHTML=renderHold(); return; }
-  if(phase==='blocked')    { c.innerHTML=renderBlocked(); return; }
-  if(phase==='rateLimit')  { c.innerHTML=renderRateLimit(); return; }
-  c.innerHTML=renderError();
+function render() {
+  var c = document.getElementById('content');
+  if (view === 'article') { c.innerHTML = renderArticle(); bindArticle(); return; }
+  if (phase === 'welcome') { c.innerHTML = renderWelcome(); return; }
+  if (phase === 'interview') { c.innerHTML = renderInterview(); bindInterview(); scrollBottom(); return; }
+  if (phase === 'loading') { c.innerHTML = renderLoading(); return; }
+  if (phase === 'confirm') { c.innerHTML = renderConfirm(); return; }
+  if (phase === 'result') { c.innerHTML = renderResult(); return; }
+  if (phase === 'hold') { c.innerHTML = renderHold(); return; }
+  if (phase === 'blocked') { c.innerHTML = renderBlocked(); return; }
+  if (phase === 'rateLimit') { c.innerHTML = renderRateLimit(); return; }
+  c.innerHTML = renderError();
 }
 
-// -----------------------------------------------
-// 記事
-// -----------------------------------------------
-function renderArticle(){
-  var isEn=(lang==='en');
-  var tl=t().articleTitle.split('\n');
-  var roundsHTML=ROUNDS.map(function(r){
-    var isOpen=(openRound===r.id);
-    var bd=(isEn?r.badgeEn:r.badgeJa);
-    var ti=(isEn?r.titleEn:r.titleJa);
-    var qt=(isEn?r.quoteEn:r.quoteJa);
-    var body='';
-    if(isOpen){
-      body='<div class="round-body"><div class="round-quote">「'+qt+'」</div><div id="demo-'+r.id+'">'+renderDemo(r)+'</div></div>';
-    }
-    return '<div class="round-card'+(isOpen?' open':'')+'">'
-      +'<div class="round-hdr" onclick="toggleRound(\''+r.id+'\')">'
-      +'<div class="round-icon-wrap">'+r.icon+'</div>'
-      +'<div style="flex:1"><div class="round-badge-text">'+bd+'</div><div class="round-title">'+ti+'</div></div>'
-      +'<div class="round-arrow">›</div>'
-      +'</div>'+body+'</div>';
+function renderArticle() {
+  var isEn = (lang === 'en');
+
+  // ランディングのヒーロー＋強み訴求
+  var strengths = isEn ? [
+    { icon:'📱', title:'Phone only',        desc:'No PC needed. All on your smartphone.' },
+    { icon:'⚡', title:'Just 4 questions',   desc:'No prompt writing. Just answer, get an app.' },
+    { icon:'🔰', title:'Zero coding',        desc:'If you can answer in plain words, you can build an app.' },
+    { icon:'💾', title:'Works offline',      desc:'Downloaded HTML runs right on your phone. No server.' },
+    { icon:'🎁', title:'Free to try',        desc:'No sign-up. No credit card. Just build.' }
+  ] : [
+    { icon:'📱', title:'スマホ1台で完結',    desc:'PC不要。全部スマホの中で完結します。' },
+    { icon:'⚡', title:'4問答えるだけ',       desc:'プロンプトを書く必要なし。質問に答えればアプリが作れる。' },
+    { icon:'🔰', title:'プログラミング知識ゼロ', desc:'自分の言葉で答えられれば、誰でもアプリを作れます。' },
+    { icon:'💾', title:'オフラインで動く',    desc:'ダウンロードしたHTMLはスマホだけで動きます。サーバー不要。' },
+    { icon:'🎁', title:'無料で始められる',    desc:'登録不要・クレジットカード不要。今すぐ始められます。' }
+  ];
+
+  var strengthsHTML = strengths.map(function(s, i) {
+    return '<div class="strength-card" style="animation-delay:' + (i * 0.08) + 's">' +
+      '<div class="strength-icon">' + s.icon + '</div>' +
+      '<div class="strength-inner">' +
+      '<div class="strength-title">' + s.title + '</div>' +
+      '<div class="strength-desc">' + s.desc + '</div>' +
+      '</div>' +
+      '</div>';
   }).join('');
 
-  var bars=ROUNDS.map(function(_,i){ return '<div class="prog-bar'+(i<readCount?' done':'')+'"></div>'; }).join('');
-  var ctaReady=(readCount>=ROUNDS.length);
-  var ctaPartial=(readCount>=2 && !ctaReady);
-  var ctaBtn='<button id="cta-btn" class="'+(ctaReady?'ready':'')+'"'
-    +' style="'+(ctaReady?'background:#ff6b35;color:#fff;border:none;background-image:linear-gradient(90deg,#ff6b35,#ff9055,#ff6b35);background-size:200% auto;animation:shimmer 2s linear infinite;':'background:#ff6b35;color:#fff;border:none;')+'"'
-    +' onclick="showDojo()">'+t().enterDojo+'</button>';
-  var skipBtn=ctaPartial?'<div class="skip-link"><button onclick="skipAll()">'+t().skipLink+'</button></div>':'';
-  var ctaHtml=readCount>=2?'<div class="cta-box"><div class="cta-emoji">👊</div><div class="cta-title">'+t().tryYourself+'</div><div class="cta-desc">'+t().tryDesc+'</div>'+ctaBtn+skipBtn+'<div class="cta-zero">'+t().zeroProg+'</div></div>':'';
+  // 例示（どんなアプリが作れるか）
+  var examples = isEn ? [
+    '💊 Medication refill reminder',
+    '✅ Pre-visit sales checklist',
+    '🏋️ Daily workout tracker',
+    '📚 Study routine helper'
+  ] : [
+    '💊 薬の残量管理アプリ',
+    '✅ 営業前チェックリスト',
+    '🏋️ 毎日の筋トレ記録',
+    '📚 学習ルーティン管理'
+  ];
+  var examplesHTML = examples.map(function(e) {
+    return '<div class="example-chip">' + e + '</div>';
+  }).join('');
 
-  return '<div id="article">'
-    +'<div class="art-header">'
-    +'<div class="art-tag">INTERACTIVE ARTICLE</div>'
-    +'<h1 class="art-title">'+tl[0]+'<br>'+(tl[1]||'')+'</h1>'
-    +'<div class="author-row"><div class="author-av">🥋</div><div><div class="author-name">karate papa</div><div class="author-date">'+t().authorDate+'</div></div></div>'
-    +'</div>'
-    +'<div class="art-body">'
-    +'<p class="art-lead">'+t().articleLead+'</p>'
-    +'<div class="art-hint"><span>💡</span><span>'+t().articleHint+'</span></div>'
-    +'</div>'
-    +'<div class="rounds">'+roundsHTML+'</div>'
-    +'<div class="prog-row">'+bars+'<div class="prog-count">'+readCount+'/'+ROUNDS.length+'</div></div>'
-    +ctaHtml
-    +'<div class="art-footer">'
-    +'<div class="art-footer-row"><div class="art-footer-av">🥋</div><div><div class="art-footer-name">karate papa</div><div class="art-footer-desc">'+t().authorDesc+'</div></div></div>'
-    +'<div class="art-footer-cta">'+t().authorCTA+'</div>'
-    +'<div class="support-box"><div class="support-box-title">'+t().supportTitle+'</div><div class="support-box-desc">'+t().supportDesc+'</div></div>'
-    +'<div class="terms-link"><a href="./terms.html">📜 '+(isEn?'Terms of Service':'利用規約')+'</a></div>'
-    +'</div>'
-    +'</div>';
+  // 長押し入門ボタン
+  var holdBtnHtml = '<div class="hold-btn-wrap">' +
+    '<button class="hold-btn" id="hold-btn" ' +
+    'onmousedown="startHold()" ontouchstart="startHold()" ' +
+    'onmouseup="cancelHold()" ontouchend="cancelHold()" onmouseleave="cancelHold()">' +
+    '<div class="hold-btn-fill" id="hold-fill"></div>' +
+    '<span class="hold-btn-text">' + t().enterDojoPrompt + '</span>' +
+    '</button>' +
+    '</div>' +
+    '<div class="hold-hint">' + t().enterDojoHint + '</div>';
+
+  var heroTitle = isEn
+    ? '4 questions.<br>Your own app.'
+    : '4つの質問に答えるだけで<br>自分だけのアプリが作れます';
+  var heroSub = isEn
+    ? 'Smartphone only. No coding required. Done in 1 minute.'
+    : 'スマホだけでOK。コードを書く必要はありません。約1分で完成。';
+
+  return '<div id="landing">' +
+    '<div class="hero">' +
+    '<div class="hero-mon">🥋</div>' +
+    '<h1 class="hero-title">' + heroTitle + '</h1>' +
+    '<p class="hero-sub">' + heroSub + '</p>' +
+    '<div class="hero-cta">' + holdBtnHtml + '</div>' +
+    '</div>' +
+    '<div class="section">' +
+    '<div class="section-label">' + (isEn ? 'WHY THIS DOJO' : '道場の強み') + '</div>' +
+    '<div class="strengths">' + strengthsHTML + '</div>' +
+    '</div>' +
+    '<div class="section">' +
+    '<div class="section-label">' + (isEn ? 'EXAMPLES' : 'こんなアプリが作れます') + '</div>' +
+    '<div class="examples">' + examplesHTML + '</div>' +
+    '</div>' +
+    '<div class="section">' +
+    '<div class="section-label">' + (isEn ? 'HOW IT WORKS' : '3ステップで完成') + '</div>' +
+    '<div class="steps">' +
+    '<div class="step-row"><div class="step-badge-num">1</div><div class="step-text"><b>' + (isEn ? 'Answer 5 questions' : '5つの質問に答える') + '</b><br>' + (isEn ? 'Tell the AI what you want' : 'AIに作りたいものを伝える') + '</div></div>' +
+    '<div class="step-row"><div class="step-badge-num">2</div><div class="step-text"><b>' + (isEn ? 'AI builds your app' : 'AIがアプリを作る') + '</b><br>' + (isEn ? 'Design, structure, code — all auto' : 'デザインも機能もAIが自動生成') + '</div></div>' +
+    '<div class="step-row"><div class="step-badge-num">3</div><div class="step-text"><b>' + (isEn ? 'Download & use' : 'ダウンロードして使う') + '</b><br>' + (isEn ? 'Works on your phone, offline' : 'スマホでそのまま使える') + '</div></div>' +
+    '</div>' +
+    '</div>' +
+    '<div class="final-cta">' +
+    '<div class="final-cta-title">' + (isEn ? 'Ready?' : '準備はいいですか？') + '</div>' +
+    '<div class="final-cta-sub">' + (isEn ? 'Start your first app in 1 minute.' : '今すぐ最初のアプリを作りましょう。') + '</div>' +
+    holdBtnHtml +
+    '</div>' +
+    '<div class="art-footer">' +
+    '<div class="art-footer-row"><div class="art-footer-av">🥋</div>' +
+    '<div><div class="art-footer-name">' + t().footerName + '</div>' +
+    '<div class="art-footer-desc">' + t().authorDesc + '</div></div></div>' +
+    '<div class="art-footer-cta">' + t().authorCTA + '</div>' +
+    '<div class="support-box"><div class="support-box-title">' + t().supportTitle + '</div><div class="support-box-desc">' + t().supportDesc + '</div></div>' +
+    '<div class="terms-link"><a href="./terms.html">📜 ' + (isEn ? 'Terms of Service' : '利用規約') + '</a></div>' +
+    '</div>' +
+    '</div>';
 }
 
-function bindArticle(){
-  if(openRound) startDemoAnim(openRound);
+function bindArticle() {
+  // ランディングには特別なバインドは不要
 }
 
-function toggleRound(id){
-  var wasOpen=(openRound===id);
-  openRound=wasOpen?null:id;
-  if(!wasOpen){ readCount++; demoShown[id]=0; }
+function startHold() {
+  var btn = document.getElementById('hold-btn');
+  var fill = document.getElementById('hold-fill');
+  if (!btn || !fill) return;
+  var start = Date.now();
+  var duration = 1500;
+  btn.classList.add('filling');
+  if (holdInterval) clearInterval(holdInterval);
+  holdInterval = setInterval(function() {
+    var elapsed = Date.now() - start;
+    var pct = Math.min(elapsed / duration * 100, 100);
+    fill.style.width = pct + '%';
+    if (pct >= 100) {
+      cancelHold();
+      if (navigator.vibrate) { try { navigator.vibrate(50); } catch(e) {} }
+      zunTransition(function() { showDojo(); });
+    }
+  }, 16);
+}
+
+function cancelHold() {
+  if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
+  var btn = document.getElementById('hold-btn');
+  var fill = document.getElementById('hold-fill');
+  if (btn) btn.classList.remove('filling');
+  if (fill) {
+    fill.style.transition = 'width 0.3s ease';
+    fill.style.width = '0%';
+    setTimeout(function() { if (fill) fill.style.transition = 'none'; }, 350);
+  }
+}
+
+function zunTransition(callback) {
+  var el = document.getElementById('blackout');
+  if (!el) { callback(); return; }
+  el.classList.add('active');
+  setTimeout(function() { callback(); }, 300);
+  setTimeout(function() { el.classList.remove('active'); }, 600);
+}
+
+function toggleRound(id) {
+  var wasOpen = (openRound === id);
+  openRound = wasOpen ? null : id;
+  if (!wasOpen && !readRounds[id]) {
+    readRounds[id] = true;
+    readCount = Object.keys(readRounds).length;
+    demoShown[id] = 0;
+  }
   render();
-  if(!wasOpen) startDemoAnim(id);
+  if (!wasOpen) startDemoAnim(id);
 }
 
-function skipAll(){
-  readCount=ROUNDS.length;
+function skipAll() {
+  ROUNDS.forEach(function(r) { readRounds[r.id] = true; });
+  readCount = ROUNDS.length;
   render();
-  setTimeout(function(){ showDojo(); },300);
+  setTimeout(function() { zunTransition(function() { showDojo(); }); }, 300);
 }
 
-function renderDemo(r){
-  if(r.type==='spec')  return renderSpecDemo(r);
-  if(r.type==='code')  return renderCodeDemo(r);
-  if(r.type==='debug') return renderDebugDemo(r);
+function renderDemo(r) {
+  if (r.type === 'spec') return renderSpecDemo(r);
+  if (r.type === 'code') return renderCodeDemo(r);
+  if (r.type === 'debug') return renderDebugDemo(r);
   return renderBattleDemo(r);
 }
 
-function renderBattleDemo(r){
-  var isEn=(lang==='en');
-  var shown=demoShown[r.id]||0;
-  var html='<div class="demo-chat">';
-  for(var i=0;i<Math.min(shown,r.exchanges.length);i++){
-    var e=r.exchanges[i];
-    var isMe=(e.who==='パパさん'||e.who==='user');
-    var txt=(isEn&&e.en)?e.en:e.ja;
-    if(isMe){
-      html+='<div class="bubble-row right"><div class="bubble me">'+txt+'</div><div class="bubble-av">'+e.av+'</div></div>';
+function renderBattleDemo(r) {
+  var isEn = (lang === 'en');
+  var shown = demoShown[r.id] || 0;
+  var html = '<div class="demo-chat">';
+  for (var i = 0; i < Math.min(shown, r.exchanges.length); i++) {
+    var e = r.exchanges[i];
+    var isMe = (e.who === 'パパさん' || e.who === 'user');
+    var txt = (isEn && e.en) ? e.en : e.ja;
+    if (isMe) {
+      html += '<div class="bubble-row right"><div class="bubble me">' + txt + '</div><div class="bubble-av">' + e.av + '</div></div>';
     } else {
-      html+='<div class="bubble-row">'
-        +'<div class="bubble-av">'+e.av+'</div>'
-        +'<div><div class="bubble-name" style="color:'+e.col+'">'+e.who+'</div>'
-        +'<div class="bubble them" style="border:1px solid '+e.col+'44">'+txt+'</div></div>'
-        +'</div>';
+      html += '<div class="bubble-row">' +
+        '<div class="bubble-av">' + e.av + '</div>' +
+        '<div><div class="bubble-name" style="color:' + e.col + '">' + e.who + '</div>' +
+        '<div class="bubble them" style="border:1px solid ' + e.col + '44">' + txt + '</div></div>' +
+        '</div>';
     }
   }
-  if(shown<r.exchanges.length) html+='<div class="typing">● '+(isEn?'discussing…':'議論中…')+'</div>';
-  html+='</div>';
+  if (shown < r.exchanges.length) html += '<div class="typing">● ' + (isEn ? 'discussing...' : '議論中...') + '</div>';
+  html += '</div>';
   return html;
 }
 
-function renderSpecDemo(r){
-  var isEn=(lang==='en');
-  return r.specItems.map(function(it,i){
-    return '<div class="spec-item" style="animation-delay:'+(i*0.08)+'s">'
-      +'<div class="spec-icon">'+it.icon+'</div>'
-      +'<div><div class="spec-label">'+(isEn?it.labelEn:it.labelJa)+'</div>'
-      +'<div class="spec-value">'+(isEn?it.valEn:it.valJa)+'</div></div>'
-      +'</div>';
+function renderSpecDemo(r) {
+  var isEn = (lang === 'en');
+  return r.specItems.map(function(it, i) {
+    return '<div class="spec-item" style="animation-delay:' + (i * 0.08) + 's">' +
+      '<div class="spec-icon">' + it.icon + '</div>' +
+      '<div><div class="spec-label">' + (isEn ? it.labelEn : it.labelJa) + '</div>' +
+      '<div class="spec-value">' + (isEn ? it.valEn : it.valJa) + '</div></div>' +
+      '</div>';
   }).join('');
 }
 
-function renderCodeDemo(r){
-  var shown=demoShown[r.id]||0;
-  var html='<div class="code-box">';
-  r.codeLines.slice(0,shown).forEach(function(line){
-    var col=line.match(/^\/\//)?'#6a9955':line.match(/^\s*</)&&!line.match(/script/)&&!line.match(/style/)?'#4ec9b0':line.indexOf('{')>=0?'#dcdcaa':'#d4d4d4';
-    html+='<div style="color:'+col+'">'+line+'</div>';
+function renderCodeDemo(r) {
+  var shown = demoShown[r.id] || 0;
+  var html = '<div class="code-box">';
+  r.codeLines.slice(0, shown).forEach(function(line) {
+    var col = line.match(/^\/\//) ? '#6a9955' : '#d4d4d4';
+    html += '<div style="color:' + col + '">' + line + '</div>';
   });
-  if(shown<r.codeLines.length) html+='<span class="code-cursor">▌</span>';
-  html+='</div>';
+  if (shown < r.codeLines.length) html += '<span class="code-cursor">▌</span>';
+  html += '</div>';
   return html;
 }
 
-function renderDebugDemo(r){
-  var isEn=(lang==='en');
-  var shown=demoShown[r.id]||0;
-  var html='<div class="demo-chat">';
-  for(var i=0;i<Math.min(shown,r.exchanges.length);i++){
-    var e=r.exchanges[i];
-    var txt=(isEn&&e.en)?e.en:e.ja;
-    if(e.who==='user'){
-      html+='<div class="bubble-row right"><div class="bubble me">'+txt+'</div></div>';
+function renderDebugDemo(r) {
+  var isEn = (lang === 'en');
+  var shown = demoShown[r.id] || 0;
+  var html = '<div class="demo-chat">';
+  for (var i = 0; i < Math.min(shown, r.exchanges.length); i++) {
+    var e = r.exchanges[i];
+    var txt = (isEn && e.en) ? e.en : e.ja;
+    if (e.who === 'user') {
+      html += '<div class="bubble-row right"><div class="bubble me">' + txt + '</div></div>';
     } else {
-      html+='<div class="bubble-row"><div class="bubble-av">🥋</div><div class="bubble them">'+txt+'</div></div>';
+      html += '<div class="bubble-row"><div class="bubble-av">🥋</div><div class="bubble them">' + txt + '</div></div>';
     }
   }
-  if(shown<r.exchanges.length) html+='<div class="typing">● '+(isEn?'replying…':'返信中…')+'</div>';
-  html+='</div>';
+  if (shown < r.exchanges.length) html += '<div class="typing">● ' + (isEn ? 'replying...' : '返信中...') + '</div>';
+  html += '</div>';
   return html;
 }
 
-function startDemoAnim(id){
-  var r=ROUNDS.find(function(r){ return r.id===id; });
-  if(!r) return;
-  if(demoTimers[id]) clearInterval(demoTimers[id]);
-  var max=(r.type==='code')?r.codeLines.length:(r.exchanges?r.exchanges.length:0);
-  if(!max) return;
-  var interval=(r.type==='code')?75:880;
-  demoTimers[id]=setInterval(function(){
-    demoShown[id]=(demoShown[id]||0)+1;
-    var el=document.getElementById('demo-'+id);
-    if(el) el.innerHTML=renderDemo(r);
-    if(demoShown[id]>=max){ clearInterval(demoTimers[id]); delete demoTimers[id]; }
-  },interval);
+function startDemoAnim(id) {
+  var r = null;
+  for (var i = 0; i < ROUNDS.length; i++) { if (ROUNDS[i].id === id) { r = ROUNDS[i]; break; } }
+  if (!r) return;
+  if (demoTimers[id]) clearInterval(demoTimers[id]);
+  var max = (r.type === 'code') ? r.codeLines.length : (r.exchanges ? r.exchanges.length : 0);
+  if (!max) return;
+  var interval = (r.type === 'code') ? 75 : 880;
+  demoTimers[id] = setInterval(function() {
+    demoShown[id] = (demoShown[id] || 0) + 1;
+    var el = document.getElementById('demo-' + id);
+    if (el) el.innerHTML = renderDemo(r);
+    if (demoShown[id] >= max) { clearInterval(demoTimers[id]); delete demoTimers[id]; }
+  }, interval);
 }
 
-// -----------------------------------------------
-// 道場ウェルカム
-// -----------------------------------------------
-function renderWelcome(){
-  var tl=t().dojoTitle.split('\n');
-  return '<div class="center"><div class="center-card">'
-    +'<div class="step-badge">'+t().stepSubtitle+'</div>'
-    +'<div class="big-emoji">👊</div>'
-    +'<div class="c-title">'+tl[0]+'<br>'+(tl[1]||'')+'</div>'
-    +'<div class="c-desc">'+t().dojoDesc+'</div>'
-    +'<button class="btn-p" onclick="startInterview()">'+t().startBtn+'</button>'
-    +'<button class="btn-g" style="margin-top:10px;color:#444" onclick="showArticle()">'+t().backToArticle+'</button>'
-    +'</div></div>';
+function renderWelcome() {
+  var tl = t().dojoTitle.split('\n');
+  return '<div class="center"><div class="center-card">' +
+    '<div class="step-badge">' + t().stepSubtitle + '</div>' +
+    '<div class="big-emoji">✨</div>' +
+    '<div class="c-title">' + tl[0] + '<br>' + (tl[1] || '') + '</div>' +
+    '<div class="c-desc">' + t().dojoDesc + '</div>' +
+    '<button class="btn-p" onclick="startInterview()">' + t().startBtn + '</button>' +
+    '<button class="btn-g" style="margin-top:10px" onclick="showArticle()">' + t().backToArticle + '</button>' +
+    '</div></div>';
 }
 
-// -----------------------------------------------
-// インタビュー
-// -----------------------------------------------
-function startInterview(){
-  qIndex=0; answers={}; messages=[];
-  addMsg('ai',t().questions[0].text,t().questions[0].hint);
-  phase='interview'; render();
+function startInterview() {
+  qIndex = 0; answers = {}; messages = [];
+  extraQuestions = [];
+  addMsg('ai', t().questions[0].text, t().questions[0].hint);
+  phase = 'interview'; render();
 }
 
-function addMsg(from,text,hint,isRedirect,isLast){
-  messages.push({from:from,text:text,hint:hint,isRedirect:isRedirect,isLast:isLast});
+function addMsg(from, text, hint, isRedirect, isLast) {
+  messages.push({ from:from, text:text, hint:hint, isRedirect:isRedirect, isLast:isLast });
 }
 
-function renderInterview(){
-  var pct=Math.round((qIndex+1)/t().questions.length*100);
-  var lastMsg=messages[messages.length-1];
-  var inputOff=lastMsg&&(lastMsg.isLast||lastMsg.isRedirect);
-  var msgsHTML=messages.map(function(m){
-    if(m.from==='ai'){
-      var lines=m.text.split('\n').map(function(l){ return '<p style="margin-bottom:2px">'+l+'</p>'; }).join('');
-      var hint=m.hint?'<div class="msg-hint">💡 '+m.hint+'</div>':'';
-      var redir=m.isRedirect?'<button class="btn-s" style="margin-top:9px" onclick="continueRedirect()">'+t().redirectBtn+'</button>':'';
-      return '<div class="msg-ai"><div class="msg-av">🥋</div><div><div class="msg-bubble-ai">'+lines+'</div>'+hint+redir+'</div></div>';
+function renderInterview() {
+  var activeQs = getActiveQuestions();
+  var pct = Math.round((qIndex + 1) / activeQs.length * 100);
+  var lastMsg = messages[messages.length - 1];
+  var inputOff = lastMsg && (lastMsg.isLast || lastMsg.isRedirect);
+  var msgsHTML = messages.map(function(m) {
+    if (m.from === 'ai') {
+      var lines = m.text.split('\n').map(function(l) { return '<p style="margin-bottom:2px">' + l + '</p>'; }).join('');
+      var hint = m.hint ? '<div class="msg-hint">💡 ' + m.hint + '</div>' : '';
+      var redir = m.isRedirect ? '<button class="btn-s" style="margin-top:9px" onclick="continueRedirect()">' + t().redirectBtn + '</button>' : '';
+      return '<div class="msg-ai"><div class="msg-av">🤖</div><div><div class="msg-bubble-ai">' + lines + '</div>' + hint + redir + '</div></div>';
     } else {
-      return '<div class="msg-user"><div class="msg-bubble-user">'+m.text+'</div></div>';
+      return '<div class="msg-user"><div class="msg-bubble-user">' + m.text + '</div></div>';
     }
   }).join('');
-  var qs=t().questions;
-  var ph=qs[Math.min(qIndex,qs.length-1)].ph;
-  var inputHTML=!inputOff?'<div id="input-area"><input id="chat-inp" placeholder="'+ph+'" onkeydown="handleKey(event)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"><button class="btn-send" onclick="sendMsg()">'+t().send+'</button></div>':'';
-  return '<div id="interview">'
-    +'<div id="prog-bar"><div id="prog-fill" style="width:'+pct+'%"></div></div>'
-    +'<div id="step-lbl">STEP '+(qIndex+1)+' / '+qs.length+'</div>'
-    +'<div id="messages">'+msgsHTML+'<div id="msg-btm"></div></div>'
-    +inputHTML
-    +'</div>';
-}
-
-function bindInterview(){
-  var inp=document.getElementById('chat-inp');
-  if(inp) setTimeout(function(){ inp.focus(); },100);
-}
-
-function scrollBottom(){
-  setTimeout(function(){
-    var el=document.getElementById('msg-btm');
-    if(el) el.scrollIntoView({behavior:'smooth'});
-  },50);
-}
-
-function handleKey(e){
-  if(e.key==='Enter'&&!isComposing) sendMsg();
-}
-
-function sendMsg(){
-  var inp=document.getElementById('chat-inp');
-  if(!inp||!inp.value.trim()) return;
-  var val=inp.value.trim();
-
-  if(/みんなで|複数人|他人と|グループで|リアルタイムで共有|multi.user|share with team/i.test(val)){
-    addMsg('user',val);
-    addMsg('ai',t().redirectMsg,t().redirectHint,true);
-    saveProgress({stage:'interview',qIndex:qIndex,answers:answers});
-    phase='interview'; render(); return;
-  }
-
-  var q=t().questions[qIndex];
-  answers[q.id]=val;
-  addMsg('user',val);
-  var next=qIndex+1;
-
-  if(next>=t().questions.length){
-    if(checkRate()){
-      addMsg('ai',lang==='ja'?'本日のアプリ生成はすでに行いました。また明日来てください！押忍🥋':'You\'ve already generated an app today. Come back tomorrow! Osu 🥋');
-      phase='interview'; render(); return;
-    }
-    addMsg('ai',t().doneMsg,null,false,true);
-    saveProgress({stage:'interview',qIndex:qIndex,answers:answers});
-    phase='interview'; render();
-    setTimeout(function(){ phase='loading'; loadStep=0; saveProgress({stage:'loading',answers:answers,qIndex:qIndex}); render(); startLoading(); },1400);
+  var ph = activeQs[Math.min(qIndex, activeQs.length - 1)].ph;
+  // 固定質問中 / 追加質問中 で表示変える
+  var isExtra = qIndex >= t().questions.length;
+  var stepLbl;
+  if (isExtra) {
+    stepLbl = (lang === 'ja' ? '深掘り ' + (qIndex - t().questions.length + 1) + ' / ' + extraQuestions.length : 'Deepen ' + (qIndex - t().questions.length + 1) + ' / ' + extraQuestions.length);
   } else {
-    qIndex=next;
-    addMsg('ai',t().questions[next].text,t().questions[next].hint);
-    saveProgress({stage:'interview',qIndex:qIndex,answers:answers});
-    phase='interview'; render();
+    stepLbl = (lang === 'ja' ? '質問 ' + (qIndex + 1) + ' / ' + t().questions.length : 'Q ' + (qIndex + 1) + ' / ' + t().questions.length);
+  }
+  var inputHTML = !inputOff ? '<div id="input-area"><input id="chat-inp" placeholder="' + ph + '" onkeydown="handleKey(event)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"><button class="btn-send" onclick="sendMsg()">' + t().send + '</button></div>' : '';
+  return '<div id="interview">' +
+    '<div id="prog-bar"><div id="prog-fill" style="width:' + pct + '%"></div></div>' +
+    '<div id="step-lbl">' + stepLbl + '</div>' +
+    '<div id="messages">' + msgsHTML + '<div id="msg-btm"></div></div>' +
+    inputHTML +
+    '</div>';
+}
+
+function bindInterview() {
+  var inp = document.getElementById('chat-inp');
+  if (inp) setTimeout(function() { inp.focus(); }, 100);
+}
+
+function scrollBottom() {
+  setTimeout(function() {
+    var el = document.getElementById('msg-btm');
+    if (el) el.scrollIntoView({ behavior:'smooth' });
+  }, 50);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !isComposing) sendMsg();
+}
+
+function sendMsg() {
+  var inp = document.getElementById('chat-inp');
+  if (!inp || !inp.value.trim()) return;
+  var val = inp.value.trim();
+
+  if (/みんなで|複数人|他人と|グループで|リアルタイムで共有|multi.user|share with team/i.test(val)) {
+    addMsg('user', val);
+    addMsg('ai', t().redirectMsg, t().redirectHint, true);
+    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers });
+    phase = 'interview'; render(); return;
+  }
+
+  // 固定質問 or 動的追加質問に回答を保存
+  var activeQs = getActiveQuestions();
+  var q = activeQs[qIndex];
+  answers[q.id] = val;
+  addMsg('user', val);
+  var next = qIndex + 1;
+
+  // 固定4問が全部終わったら追加質問の判定
+  if (next === t().questions.length && extraQuestions.length === 0) {
+    extraQuestions = buildExtraQuestions(answers);
+  }
+
+  // 全質問（固定＋追加）完了チェック
+  var totalQs = t().questions.length + extraQuestions.length;
+  if (next >= totalQs) {
+    if (checkRate()) {
+      addMsg('ai', lang === 'ja' ? '本日のご利用回数に達しました。また明日試してみてください 😊' : 'Daily limit reached. Come back tomorrow 😊');
+      phase = 'interview'; render(); return;
+    }
+    // 作れない機能をチェック
+    featureWarnings = detectUnsupportedFeatures(answers);
+    if (featureWarnings.length > 0) {
+      // 確認画面に遷移
+      saveProgress({ stage:'interview', qIndex:qIndex, answers:answers });
+      phase = 'interview'; render();
+      setTimeout(function() { phase = 'confirm'; render(); }, 600);
+      return;
+    }
+    addMsg('ai', t().doneMsg, null, false, true);
+    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers });
+    phase = 'interview'; render();
+    setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex }); render(); startLoading(); }, 1400);
+  } else {
+    qIndex = next;
+    var nextQ = getActiveQuestions()[next];
+    // 追加質問なら師範風の前置きを添える
+    var isExtra = next >= t().questions.length;
+    if (isExtra) {
+      addMsg('ai', (lang === 'ja' ? '✨ もう少し詳しく教えてください。' : '✨ One more detail.'), null);
+    }
+    addMsg('ai', nextQ.text, nextQ.hint);
+    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers });
+    phase = 'interview'; render();
   }
 }
 
-function continueRedirect(){
-  addMsg('ai',t().questions[qIndex].text,t().questions[qIndex].hint);
-  phase='interview'; render();
+// 現在有効な質問リスト（固定＋動的追加）
+function getActiveQuestions() {
+  return t().questions.concat(extraQuestions);
 }
 
-// -----------------------------------------------
-// ローディング
-// -----------------------------------------------
-function startLoading(){
-  if(loadTimer) clearTimeout(loadTimer);
+// 回答内容から動的追加質問を生成
+// ※ 本物AIが来るまでのモック実装
+// ※ バックエンド実装後はClaude APIに判定を移譲
+function buildExtraQuestions(ans) {
+  var isJa = (lang === 'ja');
+  var extras = [];
+  var want = (ans.want || '').toLowerCase();
+  var input = (ans.input || '').toLowerCase();
+  var problem = (ans.problem || '').toLowerCase();
+
+  // 【追加質問1】日付・期限系のアプリで「開始日」が不明な場合
+  var hasDateLike = /切れ|期限|残り|日数|日付|いつ|予定|締切|runs?\s*out|expire|deadline|days?\s*left/i.test(want + ' ' + problem);
+  var hasStartDate = /開始|もらった|処方|今日|受け取|購入|買った|start|received|prescribed/i.test(input);
+  if (hasDateLike && !hasStartDate) {
+    extras.push({
+      id: 'start_date',
+      text: isJa
+        ? '🗓️ 日付の計算に使う「開始日」はどう決めますか？'
+        : '🗓️ How do you set the start date for the countdown?',
+      ph: isJa ? '例：入力した日を開始日にする／手動で入れる' : 'e.g. Use today as start, or enter manually',
+      hint: isJa ? '迷ったら「入力した日から数える」でOK' : 'If unsure, "count from today" works fine'
+    });
+  }
+
+  // 【追加質問2】複数管理が必要そうなのに「1つだけ」か不明な場合
+  var multiHint = /複数|いくつ|それぞれ|種類|一覧|リスト|multi|several|each|list/i.test(input + ' ' + want);
+  var isSingleClear = /ひとつ|一つ|1つ|単体|single|one only/i.test(input + ' ' + want);
+  if (multiHint && !isSingleClear) {
+    extras.push({
+      id: 'multi_items',
+      text: isJa
+        ? '📂 複数登録した時、それぞれ別々に管理しますか？まとめて1つ？'
+        : '📂 When you register multiple items, manage them separately or as one?',
+      ph: isJa ? '例：別々に管理したい／まとめて1つでOK' : 'e.g. Separate items, or grouped',
+      hint: isJa ? 'お薬なら「別々に」が一般的です' : 'For meds, "separately" is common'
+    });
+  }
+
+  // 【追加質問3】警告・通知系の閾値が不明な場合
+  var needsWarning = /少なく|警告|教え|通知|アラート|残り|注意|warn|alert|remind|low|running/i.test(want);
+  var hasThreshold = /日前|日後|日に|%|パーセント|個|時間|days?\s*before|%|weeks?/i.test(want);
+  if (needsWarning && !hasThreshold) {
+    extras.push({
+      id: 'warning_threshold',
+      text: isJa
+        ? '🔔 残り何日（または何個）になったら警告を出しますか？'
+        : '🔔 At what threshold should the warning trigger?',
+      ph: isJa ? '例：残り7日になったら／残り3個になったら' : 'e.g. 7 days left, or 3 items left',
+      hint: isJa ? 'ざっくりでOK。後で変えられます' : 'Rough is fine. Adjustable later'
+    });
+  }
+
+  // 【追加質問4】画面に表示したい情報の優先順位が不明
+  // （入力が3つ以上ある時のみ）
+  var inputCount = (input.match(/[、,]/g) || []).length + 1;
+  if (inputCount >= 3 && extras.length < 3) {
+    extras.push({
+      id: 'display_priority',
+      text: isJa
+        ? '👀 メイン画面で一番大きく見せたいのは何ですか？'
+        : '👀 What should be the biggest thing on the main screen?',
+      ph: isJa ? '例：残り日数を一番大きく／薬の名前を目立たせる' : 'e.g. Days left biggest, or item name prominent',
+      hint: isJa ? '一番大事な1つだけ選んでください' : 'Pick just ONE most important thing'
+    });
+  }
+
+  // 最大4問まで
+  return extras.slice(0, 4);
+}
+
+// 作れない機能を検出して警告リストを返す
+// 各項目：{ type, detected, canReplace, replaceWith }
+function detectUnsupportedFeatures(ans) {
+  var all = Object.values(ans).join(' ').toLowerCase();
+  var isJa = (lang === 'ja');
+  var warnings = [];
+
+  // ① プッシュ通知（アプリ閉じてても通知）
+  if (/プッシュ通知|閉じ(て|ていて).*(通知|アラート|お知らせ)|バックグラウンド.*通知|push notification|background notif/i.test(all) ||
+      (/(通知|アラーム|リマインド|お知らせ|アラート|rem(ind|inder)|alarm|notify)/i.test(all) &&
+       /毎朝|毎日|定時|毎週|every\s*(day|morning|week)|at\s*\d/i.test(all))) {
+    warnings.push({
+      type: 'push_notification',
+      cantDoJa: 'アプリを閉じていても自動で通知を送る',
+      cantDoEn: 'Send notifications while the app is closed',
+      replaceJa: 'アプリを開いた時に残り日数や状態を大きく表示し、少なくなったら画面が赤くなって警告',
+      replaceEn: 'Show remaining days prominently when you open the app, with red warning when low',
+      canReplace: true
+    });
+  }
+
+  // ② 複数人共有・チーム機能
+  if (/みんなで|複数人|他人と|グループで|チーム|共有|シェア|家族と|友達と|multi.user|share.*(with|between)|team|group/i.test(all)) {
+    warnings.push({
+      type: 'multi_user',
+      cantDoJa: 'みんなでデータを共有する、チームで使う',
+      cantDoEn: 'Share data between users, team features',
+      replaceJa: '一人用のアプリとして作成します（データはあなたのスマホだけに保存）',
+      replaceEn: 'Build as a solo app (data saved only on your phone)',
+      canReplace: true
+    });
+  }
+
+  // ③ 位置情報・GPS
+  if (/位置情報|gps|現在地|地図で|マップで|どこに.*いる|location|map.*track/i.test(all)) {
+    warnings.push({
+      type: 'gps',
+      cantDoJa: '位置情報やGPSで場所を自動取得する',
+      cantDoEn: 'Auto-detect location via GPS',
+      replaceJa: '場所は手動で入力する形にします',
+      replaceEn: 'Location will be entered manually',
+      canReplace: true
+    });
+  }
+
+  // ④ カメラ・OCR・画像認識
+  if (/カメラで.*読み取|写真.*認識|ocr|バーコード|qrコード.*読|画像.*分析|image.*recogn|scan.*(photo|image|code)/i.test(all)) {
+    warnings.push({
+      type: 'camera_ocr',
+      cantDoJa: 'カメラで文字や画像を自動認識する',
+      cantDoEn: 'Auto-recognize text or images via camera',
+      replaceJa: '文字や情報は手入力する形にします',
+      replaceEn: 'Text and info will be entered manually',
+      canReplace: true
+    });
+  }
+
+  // ⑤ 音声認識・音声入力
+  if (/音声.*(入力|認識|読み上げ|録音)|声で|しゃべ(って|る)|voice.*(input|recog)|speech.*to.*text|record.*audio/i.test(all)) {
+    warnings.push({
+      type: 'voice',
+      cantDoJa: '音声認識や音声入力',
+      cantDoEn: 'Voice recognition or voice input',
+      replaceJa: '文字での入力にします',
+      replaceEn: 'Use text input instead',
+      canReplace: true
+    });
+  }
+
+  // ⑥ クラウド保存・他端末同期
+  if (/クラウド|他の.*(端末|スマホ|機器).*同期|複数.*端末.*共有|cloud.*save|sync.*(device|phone)/i.test(all)) {
+    warnings.push({
+      type: 'cloud',
+      cantDoJa: 'クラウド保存や他の端末との同期',
+      cantDoEn: 'Cloud storage or sync with other devices',
+      replaceJa: 'このスマホの中だけにデータを保存します',
+      replaceEn: 'Data will be saved only on this phone',
+      canReplace: true
+    });
+  }
+
+  // ⑦ メール/SMS/LINE 送信
+  if (/(メール|sms|line|ライン).*(送信|送る|飛ばす)|send.*(mail|sms|message)/i.test(all)) {
+    warnings.push({
+      type: 'messaging',
+      cantDoJa: 'メールやSMS、LINEを自動で送信する',
+      cantDoEn: 'Send emails, SMS, or messages automatically',
+      replaceJa: '画面に表示するだけになります（手動でコピーして送ってください）',
+      replaceEn: 'Will display on screen only (copy manually to send)',
+      canReplace: true
+    });
+  }
+
+  // ⑧ 外部API連携（天気・地図など）
+  if (/天気.*(取得|表示|自動)|リアルタイム.*(株価|為替|ニュース)|外部.*(api|サービス).*連携|weather.*(api|auto)|real.*time.*(stock|news)/i.test(all)) {
+    warnings.push({
+      type: 'external_api',
+      cantDoJa: '天気・株価・ニュースなど外部サービスの自動取得',
+      cantDoEn: 'Auto-fetch weather, stocks, news from external services',
+      replaceJa: '情報は手動で入力する形にします',
+      replaceEn: 'Info will be entered manually',
+      canReplace: true
+    });
+  }
+
+  // ⑨ 課金・決済（完全NG、代替不可）
+  if (/課金|決済|クレジットカード|サブスク|定期購入|payment|subscribe|credit.*card/i.test(all)) {
+    warnings.push({
+      type: 'payment',
+      cantDoJa: 'アプリ内での課金や決済',
+      cantDoEn: 'In-app payment or subscription',
+      replaceJa: '',
+      replaceEn: '',
+      canReplace: false
+    });
+  }
+
+  // ⑩ PDF生成・Excel出力・印刷
+  if (/pdf.*(生成|出力|作成)|excel.*出力|印刷|プリント|pdf.*(export|generate)|excel.*export|print/i.test(all)) {
+    warnings.push({
+      type: 'file_export',
+      cantDoJa: 'PDFやExcelの生成、印刷',
+      cantDoEn: 'PDF/Excel generation, printing',
+      replaceJa: '画面に表示する形にします（スクリーンショットで保存できます）',
+      replaceEn: 'Will display on screen (save via screenshot)',
+      canReplace: true
+    });
+  }
+
+  // ⑪ バックグラウンド処理・自動実行
+  if (/(アプリを?閉じ(た|て).*(後|も)|バックグラウンド).*自動|毎日.*自動(実行|処理)|auto.*(run|execute).*background/i.test(all)) {
+    warnings.push({
+      type: 'background',
+      cantDoJa: 'アプリを閉じた後も自動で動き続ける',
+      cantDoEn: 'Keep running after the app is closed',
+      replaceJa: 'アプリを開いた時に日時から自動計算する形にします',
+      replaceEn: 'Auto-calculate based on time when you open the app',
+      canReplace: true
+    });
+  }
+
+  // ⑫ 生体認証・Face ID
+  if (/指紋|顔認証|face.*id|touch.*id|生体認証|biometric/i.test(all)) {
+    warnings.push({
+      type: 'biometric',
+      cantDoJa: '指紋認証や顔認証',
+      cantDoEn: 'Fingerprint or face authentication',
+      replaceJa: 'パスコード入力での保護にします（またはロックなし）',
+      replaceEn: 'Use passcode protection (or no lock)',
+      canReplace: true
+    });
+  }
+
+  // ⑬ 健康データ・歩数計連携
+  if (/歩数|心拍|睡眠.*(データ|記録)|健康.*(アプリ|データ).*連携|health.*data|step.*count/i.test(all)) {
+    warnings.push({
+      type: 'health_data',
+      cantDoJa: '歩数計や健康アプリのデータを自動取得',
+      cantDoEn: 'Auto-fetch health/step data from other apps',
+      replaceJa: '歩数や健康データは手動で記録する形にします',
+      replaceEn: 'Record health data manually',
+      canReplace: true
+    });
+  }
+
+  return warnings;
+}
+
+function continueRedirect() {
+  addMsg('ai', t().questions[qIndex].text, t().questions[qIndex].hint);
+  phase = 'interview'; render();
+}
+
+function startLoading() {
+  if (loadTimer) clearTimeout(loadTimer);
   tickLoader();
 }
 
-function tickLoader(){
-  var msgs=t().loadingMsgs;
-  if(loadStep>=msgs.length-1){
-    loadTimer=setTimeout(async function(){
-      try{
-        var spec=await callBackend(answers);
-        if(spec.status==='hold')   { holdMsg=spec.hold_reason||''; phase='hold';    render(); return; }
-        if(spec.status==='blocked'){ holdMsg=spec.blocked_reason||''; phase='blocked'; render(); return; }
-        genApp=spec;
-        saveProgress({stage:'result',answers:answers,app:spec});
-        checkedItems={};
-        phase='result'; render();
-      }catch(e){
-        if(e.message==='RATE_LIMIT'||e.message==='RATE_LIMIT_USER') phase='rateLimit';
-        else phase='error';
+function tickLoader() {
+  var msgs = t().loadingMsgs;
+  if (loadStep >= msgs.length - 1) {
+    loadTimer = setTimeout(async function() {
+      try {
+        var spec = await callBackend(answers);
+        if (spec.status === 'hold') { holdMsg = spec.hold_reason || ''; phase = 'hold'; render(); return; }
+        if (spec.status === 'blocked') { holdMsg = spec.blocked_reason || ''; phase = 'blocked'; render(); return; }
+        genApp = spec;
+        saveProgress({ stage:'result', answers:answers, app:spec });
+        checkedItems = {};
+        phase = 'result'; render();
+      } catch(e) {
+        if (e.message === 'RATE_LIMIT' || e.message === 'RATE_LIMIT_USER') phase = 'rateLimit';
+        else phase = 'error';
         render();
       }
-    },1800);
+    }, 1800);
     return;
   }
-  loadTimer=setTimeout(function(){ loadStep++; updateLoadingUI(); tickLoader(); },1500);
+  loadTimer = setTimeout(function() { loadStep++; updateLoadingUI(); tickLoader(); }, 1500);
 }
 
-function updateLoadingUI(){
-  var msgs=t().loadingMsgs;
-  var em=document.getElementById('loading-emoji');
-  var tx=document.getElementById('loading-text');
-  if(em) em.textContent=msgs[loadStep].icon;
-  if(tx) tx.textContent=msgs[loadStep].text;
-  document.querySelectorAll('.ldot').forEach(function(d,i){ d.classList.toggle('on',i<=loadStep); });
+function updateLoadingUI() {
+  var msgs = t().loadingMsgs;
+  var em = document.getElementById('loading-emoji');
+  var tx = document.getElementById('loading-text');
+  if (em) em.textContent = msgs[loadStep].icon;
+  if (tx) tx.textContent = msgs[loadStep].text;
+  var dots = document.querySelectorAll('.ldot');
+  for (var i = 0; i < dots.length; i++) { dots[i].classList.toggle('on', i <= loadStep); }
 }
 
-function renderLoading(){
-  var msgs=t().loadingMsgs;
-  var dots=msgs.map(function(_,i){ return '<div class="ldot'+(i<=loadStep?' on':'')+'"></div>'; }).join('');
-  return '<div id="loading"><div id="loading-inner">'
-    +'<div id="loading-emoji">'+msgs[loadStep].icon+'</div>'
-    +'<div id="loading-text">'+msgs[loadStep].text+'</div>'
-    +'<div id="loading-dots">'+dots+'</div>'
-    +'<div id="loading-sub">'+t().loadingSub+'</div>'
-    +'</div></div>';
+function renderLoading() {
+  var msgs = t().loadingMsgs;
+  var dots = msgs.map(function(_, i) { return '<div class="ldot' + (i <= loadStep ? ' on' : '') + '"></div>'; }).join('');
+  return '<div id="loading"><div id="loading-inner">' +
+    '<div id="loading-emoji">' + msgs[loadStep].icon + '</div>' +
+    '<div id="loading-text">' + msgs[loadStep].text + '</div>' +
+    '<div id="loading-dots">' + dots + '</div>' +
+    '<div id="loading-sub">' + t().loadingSub + '</div>' +
+    '</div></div>';
 }
 
-// -----------------------------------------------
-// 結果
-// -----------------------------------------------
-function renderResult(){
-  if(!genApp) return renderError();
-  var a=genApp, d=a.design||getDesign(a.feel);
-  var items=a.items||[];
-  var itemsHTML=items.map(function(item,i){
-    var done=checkedItems[i];
-    return '<div class="check-item'+(done?' done':'')+'" onclick="toggleCheck('+i+')">'
-      +'<span class="check-icon" style="color:'+(done?d.accent:'#555')+'">'+(done?'✅':'⬜')+'</span>'
-      +'<span class="check-label'+(done?' done':'')+'">'+item+'</span>'
-      +'</div>';
+// 作れない機能の確認画面
+function renderConfirm() {
+  var isJa = (lang === 'ja');
+  var hasBlocker = featureWarnings.some(function(w) { return !w.canReplace; });
+
+  var cantHTML = featureWarnings.map(function(w) {
+    return '<div class="confirm-item"><span class="confirm-x">❌</span><span>' + (isJa ? w.cantDoJa : w.cantDoEn) + '</span></div>';
   }).join('');
-  var allDone=items.every(function(_,i){ return checkedItems[i]; });
-  var doneMsgStyle=allDone?'display:block':'display:none';
-  var isJa=(lang==='ja');
-  return '<div id="result">'
-    +'<div class="result-head"><div class="result-emoji">🎉</div><div class="result-title">'+a.app_name+'</div><div class="result-desc">'+(a.one_liner||'')+'</div></div>'
-    +'<div class="phone-frame" style="border-color:'+d.accent+'33;box-shadow:0 10px 40px '+d.accent+'22">'
-    +'<div class="phone-hdr" style="color:'+d.accent+';border-bottom-color:'+d.accent+'22">'+a.app_name+'</div>'
-    +'<div class="phone-body">'+itemsHTML
-    +'<div class="alldone-msg" style="color:'+d.accent+';'+doneMsgStyle+'">'+a.done_message+'</div>'
-    +'</div></div>'
-    +'<div class="result-note">'+t().resultNote+'</div>'
-    +'<div class="dl-card" style="background:#0f0f0f;border:1px solid '+d.accent+'33">'
-    +'<div class="dl-card-title" style="color:'+d.accent+'">📥 '+(isJa?'無料版をダウンロード':'Download Free Version')+'</div>'
-    +'<div class="dl-card-desc">'+(isJa?'基本のチェックリストアプリ。サーバー不要でスマホ内で動きます。':'Basic checklist app. Works on your phone with no server.')+'</div>'
-    +'<button id="dl-btn" class="btn-p" style="background:'+d.accent+';padding:11px 0;font-size:13.5px" onclick="downloadHTML()">'+t().downloadBtn+'</button>'
-    +'</div>'
-    +'<div class="dl-card" style="background:linear-gradient(135deg,#1a0f00,#150a1a);border:1px solid #ff6b3555;position:relative">'
-    +'<span class="pro-tag">PRO</span>'
-    +'<div class="dl-card-title" style="color:#ff6b35">✨ '+(isJa?'もっと使いやすくしたい方へ':'Want more power?')+'</div>'
-    +'<div class="dl-card-desc">'+(isJa?'プロ版には以下の機能が全て入っています：':'Pro version includes all of the following:')+'</div>'
-    +['✏️ '+(isJa?'項目を自由に編集・追加・並び替え':'Edit, add & reorder items'),
-      '🔄 '+(isJa?'毎日・毎週の自動リセット':'Auto-reset daily or weekly'),
-      '📂 '+(isJa?'複数リストで場面を使い分け':'Multiple lists for different contexts'),
-      '📊 '+(isJa?'達成履歴・連続記録・完了率':'History, streaks & completion rate'),
-      '🎨 '+(isJa?'アイコン・カラーを自分好みに変更':'Custom icon & color theme'),
-      '📲 '+(isJa?'QRコードで家族・同僚に共有':'Share via QR code')
-     ].map(function(f){ return '<div class="pro-feature"><span class="pro-feature-icon">'+f.slice(0,2)+'</span>'+f.slice(2)+'</div>'; }).join('')
-    +'<button class="btn-p" style="background:linear-gradient(90deg,#ff6b35,#ff9055);padding:12px 0;font-size:14px;margin-top:4px" onclick="alert(\''+(isJa?'プロ版は近日実装予定です！お楽しみに💪':'Pro version coming soon! Stay tuned 💪')+'\')">'+t().proDownload+'</button>'
-    +'<div style="font-size:10.5px;color:#444;text-align:center;margin-top:8px">'+(isJa?'現在準備中':'Coming soon')+'</div>'
-    +'</div>'
-    +'<div class="dl-card" style="background:#0a0f1a;border:1px solid #5c9eff33">'
-    +'<div class="dl-card-title" style="color:#5c9eff">🌐 '+(isJa?'誰かに使わせたい場合':'Want to share with others?')+'</div>'
-    +'<div class="dl-card-desc">'+(isJa?'パパさんのサーバーに置いてURLを発行するサービスは近日実装予定です。':'A URL publishing service on karate papa\'s server is coming soon.')+'</div>'
-    +'<div style="font-size:11px;color:#444;background:#111;border-radius:8px;padding:10px 12px;line-height:1.7">'
-    +'💡 '+(isJa?'今すぐ試したい方は、HTMLファイルをLINEやメールで友人に送れます。':'For now, you can send the HTML file via LINE or email.')+'</div>'
-    +'</div>'
-    +'<div class="result-actions">'
-    +'<button class="btn-p" style="background:'+d.accent+'" onclick="resetAll()">'+t().retryBtn+'</button>'
-    +'<button class="btn-g" style="color:'+(bugPhase!=='idle'?d.accent:'#555')+'" onclick="handleBug()" '+(bugPhase!=='idle'?'disabled':'')+'>'+getBugText()+'</button>'
-    +'<button class="btn-g" style="font-size:12px;color:#3a3a3a" onclick="showArticle()">'+t().backToArticle+'</button>'
-    +'</div>'
-    +'</div>';
+
+  var replaceHTML = featureWarnings
+    .filter(function(w) { return w.canReplace; })
+    .map(function(w) {
+      return '<div class="confirm-item confirm-ok"><span class="confirm-check">✅</span><span>' + (isJa ? w.replaceJa : w.replaceEn) + '</span></div>';
+    }).join('');
+
+  var title, subtitle, cantLabel, replaceLabel, btnConfirm, btnRetry;
+  if (hasBlocker) {
+    title = isJa ? '申し訳ありません 🙏' : 'Sorry 🙏';
+    subtitle = isJa ? 'ご希望の機能の一部は、スマホだけで動くアプリでは実現できません。' : 'Some requested features cannot be built in a standalone phone app.';
+    cantLabel = isJa ? 'できないこと' : 'Cannot do';
+    btnConfirm = isJa ? 'それでもOK、作ってみる' : 'Build anyway';
+    btnRetry = isJa ? '質問をやり直す' : 'Redo questions';
+  } else {
+    title = isJa ? '🙋 ちょっと確認させてください' : '🙋 Quick check';
+    subtitle = isJa ? 'スマホだけで動くアプリの制約で、一部の機能は代わりのやり方になります。' : 'Due to standalone app constraints, some features will be adjusted.';
+    cantLabel = isJa ? 'できないこと' : 'Cannot do';
+    replaceLabel = isJa ? '代わりにこうします' : 'Instead, we will';
+    btnConfirm = isJa ? 'はい、これで作る ✨' : 'OK, build it ✨';
+    btnRetry = isJa ? '質問をやり直す' : 'Redo questions';
+  }
+
+  return '<div class="confirm-screen">' +
+    '<div class="confirm-card">' +
+    '<div class="confirm-emoji">' + (hasBlocker ? '🙏' : '🙋') + '</div>' +
+    '<div class="confirm-title">' + title + '</div>' +
+    '<div class="confirm-sub">' + subtitle + '</div>' +
+    '<div class="confirm-section">' +
+    '<div class="confirm-section-label">' + cantLabel + '</div>' +
+    cantHTML +
+    '</div>' +
+    (replaceHTML ? '<div class="confirm-section"><div class="confirm-section-label">' + replaceLabel + '</div>' + replaceHTML + '</div>' : '') +
+    (!hasBlocker ? '<button class="btn-p" onclick="confirmContinue()">' + btnConfirm + '</button>' : '<button class="btn-g" onclick="confirmRetry()">' + btnRetry + '</button>') +
+    (!hasBlocker ? '<button class="btn-g" style="margin-top:10px" onclick="confirmRetry()">' + btnRetry + '</button>' : '') +
+    '</div>' +
+    '</div>';
 }
 
-function toggleCheck(i){
-  checkedItems[i]=!checkedItems[i];
-  if(genApp) try{ localStorage.setItem(genApp.storage_key,JSON.stringify(checkedItems)); }catch(e){}
-  var c=document.getElementById('content');
-  c.innerHTML=renderResult();
+// 確認画面で「作る」を押したとき
+function confirmContinue() {
+  // 代替案を answers に記録しておく（AIに渡せる形で）
+  answers._feature_replacements = featureWarnings
+    .filter(function(w) { return w.canReplace; })
+    .map(function(w) { return { cant: w.cantDoJa, replaceWith: w.replaceJa }; });
+  addMsg('ai', t().doneMsg, null, false, true);
+  phase = 'interview'; render();
+  setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex }); render(); startLoading(); }, 1400);
 }
 
-function getBugText(){
-  if(bugPhase==='fixing') return t().bugFixing;
-  if(bugPhase==='fixed')  return t().bugFixed;
+// 確認画面で「やり直す」を押したとき
+function confirmRetry() {
+  // 最後の固定質問からやり直す
+  featureWarnings = [];
+  qIndex = t().questions.length - 1; // 最後の質問に戻る
+  messages = messages.slice(0, -2); // 最後の問答を1組戻す
+  addMsg('ai', (lang === 'ja' ? '✨ もう一度、最後の質問からやり直しましょう。' : '✨ Let\u0027s redo the last question.'), null);
+  addMsg('ai', t().questions[qIndex].text, t().questions[qIndex].hint);
+  phase = 'interview'; render();
+}
+
+function renderResult() {
+  if (!genApp) return renderError();
+  var a = genApp, d = a.design || getDesign(a.feel);
+  var items = a.items || [];
+  var itemsHTML = items.map(function(item, i) {
+    var done = checkedItems[i];
+    return '<div class="check-item" onclick="toggleCheck(' + i + ')">' +
+      '<span class="check-icon" style="color:' + (done ? d.accent : '#555') + '">' + (done ? '✅' : '⬜') + '</span>' +
+      '<span class="check-label' + (done ? ' done' : '') + '">' + item + '</span>' +
+      '</div>';
+  }).join('');
+  var allDone = items.length > 0 && items.every(function(_, i) { return checkedItems[i]; });
+  var isJa = (lang === 'ja');
+  return '<div id="result">' +
+    '<div class="result-head"><div class="result-emoji">🎉</div><div class="result-title">' + a.app_name + '</div><div class="result-desc">' + (a.one_liner || '') + '</div></div>' +
+    '<div class="phone-frame" style="border-color:' + d.accent + '55;box-shadow:0 10px 40px ' + d.accent + '33">' +
+    '<div class="phone-hdr" style="color:' + d.accent + '">' + a.app_name + '</div>' +
+    '<div class="phone-body">' + itemsHTML +
+    '<div class="alldone-msg" style="color:' + d.accent + ';' + (allDone ? 'display:block' : 'display:none') + '">' + a.done_message + '</div>' +
+    '</div></div>' +
+    '<div class="result-note">' + t().resultNote + '</div>' +
+    '<div class="dl-card" style="background:#0f0f0f;border:1px solid ' + d.accent + '44">' +
+    '<div class="dl-card-title" style="color:' + d.accent + '">📥 ' + (isJa ? '無料版をダウンロード' : 'Download Free Version') + '</div>' +
+    '<div class="dl-card-desc">' + (isJa ? '基本のチェックリストアプリ。サーバー不要でスマホ内で動きます。' : 'Basic checklist app. Works on your phone.') + '</div>' +
+    '<button id="dl-btn" class="btn-p" style="background:' + d.accent + ';padding:11px 0;font-size:13.5px" onclick="downloadHTML()">' + t().downloadBtn + '</button>' +
+    '</div>' +
+    '<div class="dl-card" style="background:linear-gradient(135deg,#1a0f00,#150a1a);border:1px solid rgba(201,168,76,0.4);position:relative">' +
+    '<span class="pro-tag">PRO</span>' +
+    '<div class="dl-card-title" style="color:var(--gold)">✨ ' + (isJa ? 'もっと使いやすくしたい方へ' : 'Want more power?') + '</div>' +
+    '<div class="dl-card-desc">' + (isJa ? 'プロ版には以下の機能が全て入っています：' : 'Pro version includes:') + '</div>' +
+    '<div class="pro-feature"><span class="pro-feature-icon">✏️</span>' + (isJa ? '項目を自由に編集・追加・並び替え' : 'Edit, add & reorder items') + '</div>' +
+    '<div class="pro-feature"><span class="pro-feature-icon">🔄</span>' + (isJa ? '毎日・毎週の自動リセット' : 'Auto-reset daily or weekly') + '</div>' +
+    '<div class="pro-feature"><span class="pro-feature-icon">📂</span>' + (isJa ? '複数リストで場面を使い分け' : 'Multiple lists') + '</div>' +
+    '<div class="pro-feature"><span class="pro-feature-icon">📊</span>' + (isJa ? '達成履歴・連続記録・完了率' : 'History & streaks') + '</div>' +
+    '<div class="pro-feature"><span class="pro-feature-icon">🎨</span>' + (isJa ? 'アイコン・カラーを自分好みに' : 'Custom icon & color') + '</div>' +
+    '<div class="pro-feature"><span class="pro-feature-icon">📲</span>' + (isJa ? 'QRコードで共有' : 'Share via QR') + '</div>' +
+    '<button class="btn-p" style="background:linear-gradient(90deg,var(--gold),#e8c96d);color:var(--ink);padding:12px 0;font-size:14px;margin-top:4px" onclick="alert(\'' + (isJa ? 'プロ版は近日実装予定です！お楽しみに💪' : 'Pro version coming soon!') + '\')">' + t().proDownload + '</button>' +
+    '<div style="font-size:10.5px;color:#444;text-align:center;margin-top:8px">' + (isJa ? '現在準備中' : 'Coming soon') + '</div>' +
+    '</div>' +
+    '<div class="dl-card" style="background:#0a0f1a;border:1px solid rgba(92,158,255,0.2)">' +
+    '<div class="dl-card-title" style="color:#5c9eff">🌐 ' + (isJa ? '誰かに使わせたい場合' : 'Want to share?') + '</div>' +
+    '<div class="dl-card-desc">' + (isJa ? 'パパさんのサーバーに置いてURLを発行するサービスは近日実装予定です。' : 'URL publishing service coming soon.') + '</div>' +
+    '<div style="font-size:11px;color:#444;background:#111;border-radius:8px;padding:10px 12px;line-height:1.7">' +
+    '💡 ' + (isJa ? '今すぐ試したい方は、HTMLファイルをLINEやメールで友人に送れます。' : 'For now, send the HTML via LINE or email.') + '</div>' +
+    '</div>' +
+    '<div class="result-actions">' +
+    '<button class="btn-p" style="background:' + d.accent + '" onclick="resetAll()">' + t().retryBtn + '</button>' +
+    '<button class="btn-g" onclick="handleBug()"' + (bugPhase !== 'idle' ? ' disabled' : '') + '>' + getBugText() + '</button>' +
+    '<button class="btn-g" style="font-size:12px" onclick="showArticle()">' + t().backToArticle + '</button>' +
+    '</div>' +
+    '</div>';
+}
+
+function toggleCheck(i) {
+  checkedItems[i] = !checkedItems[i];
+  if (genApp) { try { localStorage.setItem(genApp.storage_key, JSON.stringify(checkedItems)); } catch(e) {} }
+  var c = document.getElementById('content');
+  c.innerHTML = renderResult();
+}
+
+function getBugText() {
+  if (bugPhase === 'fixing') return t().bugFixing;
+  if (bugPhase === 'fixed') return t().bugFixed;
   return t().bugIdle;
 }
-var bugTimer=null;
-function handleBug(){
-  if(bugPhase!=='idle') return;
-  bugPhase='fixing';
-  var c=document.getElementById('content'); c.innerHTML=renderResult();
-  bugTimer=setTimeout(function(){ bugPhase='fixed'; var ct=document.getElementById('content'); ct.innerHTML=renderResult(); },2500);
-  bugTimer=setTimeout(function(){ bugPhase='idle';  var ct=document.getElementById('content'); ct.innerHTML=renderResult(); },5500);
+
+function handleBug() {
+  if (bugPhase !== 'idle') return;
+  bugPhase = 'fixing';
+  document.getElementById('content').innerHTML = renderResult();
+  if (bugTimer) clearTimeout(bugTimer);
+  bugTimer = setTimeout(function() {
+    bugPhase = 'fixed';
+    document.getElementById('content').innerHTML = renderResult();
+    bugTimer = setTimeout(function() {
+      bugPhase = 'idle';
+      document.getElementById('content').innerHTML = renderResult();
+    }, 3000);
+  }, 2500);
 }
 
-// -----------------------------------------------
-// エラー系
-// -----------------------------------------------
-function renderHold(){
-  var isEn=(lang==='en');
-  return '<div class="err-screen"><div class="err-card">'
-    +'<div class="err-emoji">🥋</div>'
-    +'<div style="font-size:11px;color:#ff6b35;font-weight:700;letter-spacing:1.5px;margin-bottom:12px">'+t().holdSenseiStop+'</div>'
-    +'<div class="err-title">'+t().holdTitle+'</div>'
-    +'<div class="hold-box">'+(holdMsg||t().holdDefault)+'</div>'
-    +'<button class="btn-p" onclick="holdRetry()">'+t().holdRetry+'</button>'
-    +'<button class="btn-g" style="margin-top:10px;color:#444" onclick="resetAll()">'+t().holdReset+'</button>'
-    +'</div></div>';
-}
-function holdRetry(){
-  addMsg('ai',t().holdRedoMsg,t().holdHint);
-  qIndex=2; phase='interview'; render();
+function renderHold() {
+  return '<div class="err-screen"><div class="err-card">' +
+    '<div class="err-emoji">🙋</div>' +
+    '<div style="font-size:11.5px;color:var(--shu);font-weight:700;letter-spacing:1px;margin-bottom:12px">' + t().holdSenseiStop + '</div>' +
+    '<div class="err-title">' + t().holdTitle + '</div>' +
+    '<div class="hold-box">' + (holdMsg || t().holdDefault) + '</div>' +
+    '<button class="btn-p" onclick="holdRetry()">' + t().holdRetry + '</button>' +
+    '<button class="btn-g" style="margin-top:10px" onclick="resetAll()">' + t().holdReset + '</button>' +
+    '</div></div>';
 }
 
-function renderBlocked(){
-  return '<div class="err-screen"><div class="err-card">'
-    +'<div class="err-emoji">🛑</div>'
-    +'<div class="err-title">'+t().blockedTitle+'</div>'
-    +'<div class="hold-box">'+(holdMsg||(lang==='ja'?'このリクエストは利用規約に違反しています。':'This request violates our terms of service.'))+'</div>'
-    +'<button class="btn-p" onclick="resetAll()">'+t().blockedReset+'</button>'
-    +'</div></div>';
+function holdRetry() {
+  addMsg('ai', t().holdRedoMsg, t().holdHint);
+  qIndex = 2; phase = 'interview'; render();
 }
 
-function renderRateLimit(){
-  return '<div class="err-screen"><div class="err-card">'
-    +'<div class="err-emoji">⏳</div>'
-    +'<div class="err-title">'+t().rateLimitTitle+'</div>'
-    +'<div class="err-desc">'+t().rateLimitDesc+'<br>'+t().rateLimitSub+'</div>'
-    +'<button class="btn-g" style="color:#555" onclick="showArticle()">'+t().backToArticle+'</button>'
-    +'</div></div>';
+function renderBlocked() {
+  return '<div class="err-screen"><div class="err-card">' +
+    '<div class="err-emoji">🛑</div>' +
+    '<div class="err-title">' + t().blockedTitle + '</div>' +
+    '<div class="hold-box">' + (holdMsg || (lang === 'ja' ? 'このリクエストは利用規約に違反しています。' : 'This request violates our terms.')) + '</div>' +
+    '<button class="btn-p" onclick="resetAll()">' + t().blockedReset + '</button>' +
+    '</div></div>';
 }
 
-function renderError(){
-  return '<div class="err-screen"><div class="err-card">'
-    +'<div class="err-emoji">😵</div>'
-    +'<div class="err-title">'+t().errorTitle+'</div>'
-    +'<div class="err-desc">'+t().errorDesc.replace('\n','<br>')+'</div>'
-    +'<button class="btn-p" onclick="startInterview()">'+t().retryFight+'</button>'
-    +'</div></div>';
+function renderRateLimit() {
+  return '<div class="err-screen"><div class="err-card">' +
+    '<div class="err-emoji">⏳</div>' +
+    '<div class="err-title">' + t().rateLimitTitle + '</div>' +
+    '<div class="err-desc">' + t().rateLimitDesc + '<br>' + t().rateLimitSub + '</div>' +
+    '<button class="btn-g" onclick="showArticle()">' + t().backToArticle + '</button>' +
+    '</div></div>';
 }
 
-// -----------------------------------------------
-// リセット
-// -----------------------------------------------
-function resetAll(){
-  clearProgress(); qIndex=0; answers={}; messages=[];
-  loadStep=0; genApp=null; holdMsg=''; checkedItems={};
-  if(loadTimer) clearTimeout(loadTimer);
-  if(bugTimer)  clearTimeout(bugTimer);
-  bugPhase='idle'; phase='welcome'; render();
+function renderError() {
+  return '<div class="err-screen"><div class="err-card">' +
+    '<div class="err-emoji">😵</div>' +
+    '<div class="err-title">' + t().errorTitle + '</div>' +
+    '<div class="err-desc">' + t().errorDesc.replace('\n', '<br>') + '</div>' +
+    '<button class="btn-p" onclick="startInterview()">' + t().retryFight + '</button>' +
+    '</div></div>';
 }
 
-// -----------------------------------------------
-// 起動
-// -----------------------------------------------
+function resetAll() {
+  clearProgress();
+  qIndex = 0; answers = {}; messages = [];
+  extraQuestions = [];
+  featureWarnings = [];
+  loadStep = 0; genApp = null; holdMsg = ''; checkedItems = {};
+  if (loadTimer) clearTimeout(loadTimer);
+  if (bugTimer) clearTimeout(bugTimer);
+  bugPhase = 'idle'; phase = 'welcome'; render();
+}
+
 render();
 </script>
-
 </body>
 </html>
