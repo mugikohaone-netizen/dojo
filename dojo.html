@@ -2,10 +2,26 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#fdfbf7">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#5b9bd5">
 <title>AIアプリ道場</title>
+
+<!-- PWA基本設定 -->
+<link rel="manifest" href="./manifest.json">
+
+<!-- iOS用：ホーム画面に追加された時の設定 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AI道場">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+
+<!-- Android用 -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="AIアプリ道場">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -41,9 +57,41 @@
 @keyframes stampIn { 0% { opacity:0; transform:scale(2) rotate(-15deg) } 60% { opacity:1; transform:scale(0.9) rotate(3deg) } 100% { opacity:1; transform:scale(1) rotate(0deg) } }
 
 * { box-sizing:border-box; margin:0; padding:0; }
-html,body { height:100%; background:var(--ink); color:var(--washi); font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif; }
+html,body {
+  height:100%;
+  background:var(--ink); color:var(--washi);
+  font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+  /* iOSのスタンドアロン時のセーフエリア対応 */
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+  padding-left:env(safe-area-inset-left);
+  padding-right:env(safe-area-inset-right);
+  /* スタンドアロン起動時の上部背景 */
+  background:linear-gradient(180deg, #5b9bd5 0%, #5b9bd5 env(safe-area-inset-top, 0), var(--ink) env(safe-area-inset-top, 0));
+}
 ::-webkit-scrollbar { width:3px; }
 ::-webkit-scrollbar-thumb { background:var(--ink5); border-radius:2px; }
+
+/* PWAインストール案内バナー */
+#install-banner {
+  position:fixed; bottom:env(safe-area-inset-bottom, 0); left:0; right:0;
+  z-index:1000; padding:12px;
+  animation:slideUp 0.4s ease;
+}
+.ib-inner {
+  max-width:480px; margin:0 auto;
+  background:#fff; border:1.5px solid var(--gold-lt); border-radius:16px;
+  padding:14px 16px; display:flex; gap:12px; align-items:center;
+  box-shadow:0 8px 24px rgba(91,155,213,0.25);
+}
+.ib-icon { font-size:30px; flex-shrink:0; }
+.ib-text { flex:1; min-width:0; }
+.ib-title { font-size:13.5px; font-weight:700; color:var(--washi); margin-bottom:2px; }
+.ib-desc { font-size:11.5px; color:var(--washi2); line-height:1.5; }
+.ib-close {
+  background:transparent; border:none; color:var(--washi3);
+  font-size:18px; cursor:pointer; padding:4px 8px; flex-shrink:0;
+}
 
 #app { display:flex; flex-direction:column; min-height:100vh; max-width:480px; margin:0 auto; }
 
@@ -65,7 +113,7 @@ html,body { height:100%; background:var(--ink); color:var(--washi); font-family:
 .btn-g { background:#fff; border:1.5px solid var(--ink4); border-radius:14px; padding:13px 0; font-size:13.5px; cursor:pointer; width:100%; font-family:inherit; color:var(--washi2); font-weight:500; transition:background 0.2s, border-color 0.2s; }
 .btn-g:hover { background:var(--ink3); border-color:var(--ink5); }
 .btn-s { background:var(--shu); color:#fff; border:none; border-radius:10px; padding:8px 14px; font-size:12.5px; cursor:pointer; font-weight:600; font-family:inherit; box-shadow:0 2px 8px rgba(255,126,103,0.25); }
-.btn-send { background:var(--shu); color:#fff; border:none; border-radius:8px; padding:10px 15px; font-weight:700; cursor:pointer; font-size:13.5px; white-space:nowrap; font-family:inherit; }
+.btn-send { background:linear-gradient(135deg, var(--shu) 0%, var(--shu-lt) 100%); color:#fff; border:none; border-radius:12px; padding:12px 18px; font-weight:700; cursor:pointer; font-size:14px; white-space:nowrap; font-family:inherit; flex-shrink:0; box-shadow:0 2px 8px rgba(255,126,103,0.25); }
 
 .center { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--ink); }
 .center-card { text-align:center; max-width:340px; animation:slideUp 0.5s ease; }
@@ -165,15 +213,19 @@ html,body { height:100%; background:var(--ink); color:var(--washi); font-family:
 #prog-bar { height:4px; background:var(--ink4); flex-shrink:0; }
 #prog-fill { height:100%; background:linear-gradient(90deg, var(--shu), var(--gold), var(--mint)); transition:width 0.5s; border-radius:0 2px 2px 0; }
 #step-lbl { font-size:11px; color:var(--washi3); text-align:right; padding:6px 16px; letter-spacing:0.5px; flex-shrink:0; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; font-weight:500; }
-#messages { flex:1; overflow-y:auto; padding:8px 16px; display:flex; flex-direction:column; gap:14px; }
+#interview-top { display:flex; align-items:center; justify-content:space-between; padding:0 4px; flex-shrink:0; }
+.back-q-btn { background:transparent; border:none; color:var(--gold); font-size:12px; font-weight:600; padding:8px 12px; cursor:pointer; font-family:inherit; border-radius:8px; transition:background 0.2s; }
+.back-q-btn:hover { background:rgba(91,155,213,0.1); }
+.back-q-btn:active { transform:translateY(1px); }
+#messages { flex:1; overflow-y:auto; padding:20px 16px 16px; display:flex; flex-direction:column; gap:14px; -webkit-overflow-scrolling:touch; }
 .msg-ai { display:flex; gap:9px; align-items:flex-start; animation:fadeUp 0.3s ease; }
 .msg-user { display:flex; justify-content:flex-end; animation:fadeUp 0.3s ease; }
 .msg-av { font-size:26px; flex-shrink:0; margin-top:3px; }
 .msg-bubble-ai { background:#fff; border:1px solid var(--ink4); border-radius:4px 18px 18px 18px; padding:12px 14px; max-width:272px; font-size:13.5px; line-height:1.65; color:var(--washi); box-shadow:0 1px 4px rgba(91,155,213,0.08); }
 .msg-bubble-user { background:linear-gradient(135deg, var(--shu) 0%, var(--shu-lt) 100%); border-radius:18px 4px 18px 18px; padding:12px 14px; max-width:272px; font-size:13.5px; line-height:1.65; color:#fff; box-shadow:0 2px 8px rgba(255,126,103,0.25); }
 .msg-hint { font-size:11px; color:var(--washi3); margin-top:5px; margin-left:4px; }
-#input-area { display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--ink4); background:#fff; flex-shrink:0; }
-#chat-inp { flex:1; background:#fff; border:1.5px solid var(--ink4); border-radius:12px; color:var(--washi); padding:12px 14px; font-size:14px; outline:none; font-family:inherit; transition:border-color 0.2s, box-shadow 0.2s; }
+#input-area { display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--ink4); background:#fff; flex-shrink:0; align-items:center; }
+#chat-inp { flex:1; min-width:0; background:#fff; border:1.5px solid var(--ink4); border-radius:12px; color:var(--washi); padding:12px 14px; font-size:14px; outline:none; font-family:inherit; transition:border-color 0.2s, box-shadow 0.2s; }
 #chat-inp:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(91,155,213,0.15); }
 
 #loading { flex:1; display:flex; align-items:center; justify-content:center; }
@@ -380,7 +432,7 @@ var T = {
     dojoTitle: 'あなたのアイデアを\n形にしましょう',
     dojoDesc: '4つの質問に答えるだけ。AIがアプリを作ります。',
     startBtn: '✨ はじめる',
-    send: '送信 →',
+    send: '送信',
     loadingSub: 'AIが本気で戦っています。少々お待ちを…',
     resultNote: '📱 バックエンド接続後にあなたの言葉で項目が生成されます',
     retryBtn: '🔄 別のアプリを作る',
@@ -458,7 +510,7 @@ var T = {
     dojoTitle: 'Let\u0027s turn your idea\ninto an app',
     dojoDesc: 'Just answer 4 questions. The AI handles the rest.',
     startBtn: 'Enter the Dojo! Osu!',
-    send: 'Send →',
+    send: 'Send',
     loadingSub: 'The AI is fighting hard. Please wait…',
     resultNote: '📱 After backend connection, items will match your words.',
     retryBtn: '🔄 Build another app',
@@ -744,10 +796,87 @@ function downloadHTML() {
 }
 
 function toggleLang() {
+  var oldLang = lang;
   lang = (lang === 'ja' ? 'en' : 'ja');
   document.getElementById('lang-btn').textContent = (lang === 'ja' ? 'EN' : '日本語');
   document.getElementById('hdr-name').textContent = t().appName;
+
+  // インタビュー中なら、AIメッセージ（質問）だけ新しい言語に翻訳する
+  if (view === 'dojo' && phase === 'interview' && messages && messages.length > 0) {
+    var oldT = T[oldLang], newT = T[lang];
+    var newMessages = [];
+    var qStep = 0; // 何問目のAI質問を表示中か
+    var fixedCount = oldT.questions.length;
+    for (var i = 0; i < messages.length; i++) {
+      var m = messages[i];
+      if (m.from === 'user') {
+        // ユーザー回答はそのまま
+        newMessages.push(m);
+        qStep++;
+      } else {
+        // AIメッセージを翻訳
+        var translated = translateAiMessage(m, oldLang, qStep);
+        newMessages.push(translated);
+      }
+    }
+    messages = newMessages;
+    // 動的追加質問も新言語に置き換え
+    regenerateExtraQuestionsIfNeeded();
+    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
+  }
+
   render();
+}
+
+// AIメッセージを旧言語→新言語に翻訳
+// 質問テキスト・ヒントは質問IDで照合、それ以外（おかえり、もう少し詳しく等）は固定文言で照合
+function translateAiMessage(m, oldLang, qStep) {
+  var oldT = T[oldLang], newT = T[lang];
+  var oldQs = oldT.questions, newQs = newT.questions;
+  // 固定質問の照合
+  for (var i = 0; i < oldQs.length; i++) {
+    if (m.text === oldQs[i].text) {
+      return { from:'ai', text:newQs[i].text, hint:newQs[i].hint };
+    }
+  }
+  // 動的追加質問の照合（id基準）
+  // ※extraQuestionsは現在の言語で生成されているので、idで言語切替時の対応文を引き当てる
+  // → 簡易対応：buildExtraQuestionsを再実行して新言語の追加質問を生成
+  var newExtras = buildExtraQuestions(answers);
+  for (var j = 0; j < extraQuestions.length; j++) {
+    if (m.text === extraQuestions[j].text) {
+      // 同じidの新言語版を探す
+      var matchedNew = newExtras.find(function(e) { return e.id === extraQuestions[j].id; });
+      if (matchedNew) {
+        return { from:'ai', text:matchedNew.text, hint:matchedNew.hint };
+      }
+    }
+  }
+  // 固定文言の照合
+  if (m.text === oldT.resumeMsg) return { from:'ai', text:newT.resumeMsg, hint:null };
+  if (m.text === oldT.doneMsg) return { from:'ai', text:newT.doneMsg, hint:null, isLast:m.isLast };
+  if (m.text === oldT.redirectMsg) return { from:'ai', text:newT.redirectMsg, hint:newT.redirectHint, isRedirect:true };
+  // 「もう少し詳しく」系の前置き
+  if (m.text === '✨ もう少し詳しく教えてください。' || m.text === '✨ One more detail.') {
+    return { from:'ai', text:(lang === 'ja' ? '✨ もう少し詳しく教えてください。' : '✨ One more detail.'), hint:null };
+  }
+  // 「もう一度、最後の質問からやり直しましょう」系
+  if (m.text === '✨ もう一度、最後の質問からやり直しましょう。' || m.text === '✨ Let\u0027s redo the last question.') {
+    return { from:'ai', text:(lang === 'ja' ? '✨ もう一度、最後の質問からやり直しましょう。' : '✨ Let\u0027s redo the last question.'), hint:null };
+  }
+  // 翻訳できないものはそのまま返す（フォールバック）
+  return m;
+}
+
+// 動的追加質問も言語に応じて再生成（extraQuestionsを更新）
+function regenerateExtraQuestionsIfNeeded() {
+  if (extraQuestions.length === 0) return;
+  var newExtras = buildExtraQuestions(answers);
+  // idベースで対応する新言語版に置き換え
+  extraQuestions = extraQuestions.map(function(eq) {
+    var found = newExtras.find(function(e) { return e.id === eq.id; });
+    return found || eq;
+  });
 }
 
 function showArticle() {
@@ -764,16 +893,35 @@ function showDojo() {
   if (saved && saved.stage === 'result' && saved.app) {
     genApp = saved.app; answers = saved.answers || {}; phase = 'result';
   } else if (saved && (saved.stage === 'interview' || saved.stage === 'loading') && saved.answers) {
-    answers = saved.answers; qIndex = saved.qIndex || 0;
-    messages = [
-      { from:'ai', text:t().resumeMsg, hint:null },
-      { from:'ai', text:t().questions[qIndex].text, hint:t().questions[qIndex].hint }
-    ];
+    // 古い保存形式（messages不在）の場合は破棄して最初から
+    if (!saved.messages || saved.messages.length === 0) {
+      clearProgress();
+      phase = 'welcome';
+      render();
+      return;
+    }
+    answers = saved.answers;
+    qIndex = saved.qIndex || 0;
+    extraQuestions = saved.extraQuestions || [];
+    messages = saved.messages.slice();
+    // 「おかえり！」を最後のAI質問の直前に挿入（重複防止）
+    var hasResumeMsg = messages.some(function(m) { return m.from === 'ai' && m.text === t().resumeMsg; });
+    if (!hasResumeMsg) {
+      var lastAiIdx = -1;
+      for (var i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].from === 'ai') { lastAiIdx = i; break; }
+      }
+      if (lastAiIdx >= 0) {
+        messages.splice(lastAiIdx, 0, { from:'ai', text:t().resumeMsg, hint:null });
+      } else {
+        messages.unshift({ from:'ai', text:t().resumeMsg, hint:null });
+      }
+    }
     if (saved.stage === 'loading') {
       setTimeout(function() {
         addMsg('ai', t().doneMsg, null, false, true);
         phase = 'interview'; render();
-        setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex }); render(); startLoading(); }, 1200);
+        setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1200);
       }, 600);
     }
     phase = 'interview';
@@ -1094,12 +1242,56 @@ function renderInterview() {
     stepLbl = (lang === 'ja' ? '質問 ' + (qIndex + 1) + ' / ' + t().questions.length : 'Q ' + (qIndex + 1) + ' / ' + t().questions.length);
   }
   var inputHTML = !inputOff ? '<div id="input-area"><input id="chat-inp" placeholder="' + ph + '" onkeydown="handleKey(event)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"><button class="btn-send" onclick="sendMsg()">' + t().send + '</button></div>' : '';
+
+  // 1問目以外なら「前の質問に戻る」ボタンを表示
+  var canGoBack = (qIndex > 0);
+  var backBtnHTML = canGoBack
+    ? '<button class="back-q-btn" onclick="goBackQuestion()">' + (lang === 'ja' ? '← 前の質問に戻る' : '← Previous') + '</button>'
+    : '<span></span>';
+
   return '<div id="interview">' +
     '<div id="prog-bar"><div id="prog-fill" style="width:' + pct + '%"></div></div>' +
-    '<div id="step-lbl">' + stepLbl + '</div>' +
+    '<div id="interview-top">' + backBtnHTML + '<div id="step-lbl">' + stepLbl + '</div></div>' +
     '<div id="messages">' + msgsHTML + '<div id="msg-btm"></div></div>' +
     inputHTML +
     '</div>';
+}
+
+// 1つ前の質問に戻る
+function goBackQuestion() {
+  if (qIndex <= 0) return;
+  // 後ろから探して、最後のユーザーメッセージの位置で切る（その後ろのAI質問も含めて削除）
+  var i = messages.length - 1;
+  while (i >= 0 && messages[i].from === 'ai') i--;
+  if (i >= 0) {
+    messages = messages.slice(0, i);
+  }
+  // 戻る先のqIndexと、その前のユーザー回答も削除
+  qIndex = qIndex - 1;
+  var activeQs = getActiveQuestions();
+  var prevQ = activeQs[qIndex];
+  if (prevQ && answers[prevQ.id]) {
+    delete answers[prevQ.id];
+  }
+  // 戻った先が固定質問になったら追加質問はリセット
+  if (qIndex < t().questions.length) {
+    extraQuestions = [];
+  }
+  // messagesから戻る先の質問より後のAI質問とユーザー回答を全部消したので、
+  // 戻る先の質問のメッセージも消えている可能性がある。
+  // → 戻る先の質問を改めて表示する
+  // messagesの最後がユーザー回答ならその後ろにAI質問が必要
+  // messagesが空ならAI質問をひとつ追加
+  // とりあえずmessagesが空、または最後がユーザー回答なら、戻る先の質問を追加
+  var lastMsg = messages[messages.length - 1];
+  if (!lastMsg || lastMsg.from === 'user') {
+    var curQ = activeQs[qIndex];
+    if (curQ) {
+      messages.push({ from:'ai', text:curQ.text, hint:curQ.hint });
+    }
+  }
+  saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
+  render();
 }
 
 function bindInterview() {
@@ -1109,9 +1301,19 @@ function bindInterview() {
 
 function scrollBottom() {
   setTimeout(function() {
-    var el = document.getElementById('msg-btm');
-    if (el) el.scrollIntoView({ behavior:'smooth' });
-  }, 50);
+    // 最後のAIメッセージ（質問）が画面に収まるようにスクロール
+    var msgs = document.getElementById('messages');
+    if (!msgs) return;
+    var aiMsgs = msgs.querySelectorAll('.msg-ai');
+    var lastAi = aiMsgs[aiMsgs.length - 1];
+    if (lastAi) {
+      // 最後のAIメッセージの上端を画面に表示
+      lastAi.scrollIntoView({ behavior:'smooth', block:'start' });
+    } else {
+      // フォールバック：一番下まで
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  }, 80);
 }
 
 function handleKey(e) {
@@ -1126,7 +1328,7 @@ function sendMsg() {
   if (/みんなで|複数人|他人と|グループで|リアルタイムで共有|multi.user|share with team/i.test(val)) {
     addMsg('user', val);
     addMsg('ai', t().redirectMsg, t().redirectHint, true);
-    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers });
+    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
     phase = 'interview'; render(); return;
   }
 
@@ -1153,15 +1355,15 @@ function sendMsg() {
     featureWarnings = detectUnsupportedFeatures(answers);
     if (featureWarnings.length > 0) {
       // 確認画面に遷移
-      saveProgress({ stage:'interview', qIndex:qIndex, answers:answers });
+      saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
       phase = 'interview'; render();
       setTimeout(function() { phase = 'confirm'; render(); }, 600);
       return;
     }
     addMsg('ai', t().doneMsg, null, false, true);
-    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers });
+    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
     phase = 'interview'; render();
-    setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex }); render(); startLoading(); }, 1400);
+    setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1400);
   } else {
     qIndex = next;
     var nextQ = getActiveQuestions()[next];
@@ -1171,7 +1373,7 @@ function sendMsg() {
       addMsg('ai', (lang === 'ja' ? '✨ もう少し詳しく教えてください。' : '✨ One more detail.'), null);
     }
     addMsg('ai', nextQ.text, nextQ.hint);
-    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers });
+    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
     phase = 'interview'; render();
   }
 }
@@ -1528,7 +1730,7 @@ function confirmContinue() {
     .map(function(w) { return { cant: w.cantDoJa, replaceWith: w.replaceJa }; });
   addMsg('ai', t().doneMsg, null, false, true);
   phase = 'interview'; render();
-  setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex }); render(); startLoading(); }, 1400);
+  setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1400);
 }
 
 // 確認画面で「やり直す」を押したとき
@@ -1678,6 +1880,56 @@ function resetAll() {
 }
 
 render();
-</script>
+
+// Service Worker 登録（PWA化）
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js').then(function(reg) {
+      console.log('SW registered:', reg.scope);
+    }).catch(function(err) {
+      console.log('SW registration failed:', err);
+    });
+  });
+}
+
+// PWA：iPhone Safariの「ホーム画面に追加」案内（初回のみ）
+function checkInstallPrompt() {
+  // すでにインストール済み or ジャンル外なら何もしない
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+  if (window.navigator.standalone === true) return;
+  // iOS Safari判定
+  var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (!isIOS) return;
+  // 1度案内したら出さない
+  try {
+    if (localStorage.getItem('dojo_install_shown') === '1') return;
+    localStorage.setItem('dojo_install_shown', '1');
+  } catch(e) {}
+  // 5秒後にバナー表示
+  setTimeout(showInstallBanner, 5000);
+}
+
+function showInstallBanner() {
+  var isJa = (lang === 'ja');
+  var banner = document.createElement('div');
+  banner.id = 'install-banner';
+  banner.innerHTML =
+    '<div class="ib-inner">' +
+    '<div class="ib-icon">📱</div>' +
+    '<div class="ib-text">' +
+    '<div class="ib-title">' + (isJa ? 'ホーム画面に追加できます' : 'Add to Home Screen') + '</div>' +
+    '<div class="ib-desc">' + (isJa ? '共有ボタン → 「ホーム画面に追加」をタップ' : 'Share button → "Add to Home Screen"') + '</div>' +
+    '</div>' +
+    '<button class="ib-close" onclick="closeInstallBanner()">✕</button>' +
+    '</div>';
+  document.body.appendChild(banner);
+}
+
+function closeInstallBanner() {
+  var b = document.getElementById('install-banner');
+  if (b) b.remove();
+}
+
+setTimeout(checkInstallPrompt, 1500);
 </body>
 </html>
