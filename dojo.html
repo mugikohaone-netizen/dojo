@@ -259,6 +259,31 @@ html,body {
 .pro-feature-icon { font-size:16px; width:22px; }
 .result-actions { display:flex; flex-direction:column; gap:9px; }
 
+/* 本物HTMLアプリのプレビュー用 */
+.preview-frame {
+  background:#fff; border:1.5px solid var(--ink4); border-radius:18px;
+  padding:12px; box-shadow:0 4px 16px rgba(91,155,213,0.12);
+  display:flex; flex-direction:column; gap:8px;
+}
+.preview-label {
+  font-size:11px; color:var(--washi3); text-align:center;
+  font-weight:600; letter-spacing:0.5px;
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+}
+#app-preview {
+  width:100%; height:540px; border:1px solid var(--ink3); border-radius:12px;
+  background:#fff; display:block;
+}
+.result-actions-v2 {
+  display:flex; gap:10px; flex-wrap:wrap;
+}
+.result-actions-v2 button { flex:1; min-width:130px; padding:13px 0; font-size:14px; }
+.result-note-v2 {
+  font-size:12px; color:var(--washi2); text-align:center; line-height:1.7;
+  background:#fff; border:1px solid var(--ink4); border-radius:12px;
+  padding:12px 14px;
+}
+
 .err-screen { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
 .err-card { text-align:center; max-width:320px; animation:fadeUp 0.4s ease; }
 .err-emoji { font-size:52px; margin-bottom:14px; }
@@ -891,7 +916,7 @@ function showDojo() {
   var saved = loadProgress();
   if (saved && saved.stage === 'result' && saved.app) {
     genApp = saved.app; answers = saved.answers || {}; phase = 'result';
-  } else if (saved && (saved.stage === 'interview' || saved.stage === 'loading') && saved.answers) {
+  } else if (saved && saved.stage === 'interview' && saved.answers) {
     // 古い保存形式（messages不在）の場合は破棄して最初から
     if (!saved.messages || saved.messages.length === 0) {
       clearProgress();
@@ -915,13 +940,6 @@ function showDojo() {
       } else {
         messages.unshift({ from:'ai', text:t().resumeMsg, hint:null });
       }
-    }
-    if (saved.stage === 'loading') {
-      setTimeout(function() {
-        addMsg('ai', t().doneMsg, null, false, true);
-        phase = 'interview'; render();
-        setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1200);
-      }, 600);
     }
     phase = 'interview';
   } else { phase = 'welcome'; }
@@ -1362,7 +1380,7 @@ function sendMsg() {
     addMsg('ai', t().doneMsg, null, false, true);
     saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
     phase = 'interview'; render();
-    setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1400);
+    setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'interview', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1400);
   } else {
     qIndex = next;
     var nextQ = getActiveQuestions()[next];
@@ -1746,7 +1764,7 @@ function confirmContinue() {
     .map(function(w) { return { cant: w.cantDoJa, replaceWith: w.replaceJa }; });
   addMsg('ai', t().doneMsg, null, false, true);
   phase = 'interview'; render();
-  setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'loading', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1400);
+  setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'interview', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1400);
 }
 
 // 確認画面で「やり直す」を押したとき
@@ -1762,55 +1780,114 @@ function confirmRetry() {
 
 function renderResult() {
   if (!genApp) return renderError();
-  var a = genApp, d = a.design || getDesign(a.feel);
-  var items = a.items || [];
-  var itemsHTML = items.map(function(item, i) {
-    var done = checkedItems[i];
-    return '<div class="check-item" onclick="toggleCheck(' + i + ')">' +
-      '<span class="check-icon" style="color:' + (done ? d.accent : '#555') + '">' + (done ? '✅' : '⬜') + '</span>' +
-      '<span class="check-label' + (done ? ' done' : '') + '">' + item + '</span>' +
-      '</div>';
-  }).join('');
-  var allDone = items.length > 0 && items.every(function(_, i) { return checkedItems[i]; });
+  var a = genApp;
   var isJa = (lang === 'ja');
+  var hasHtml = a.html && typeof a.html === 'string' && a.html.length > 100;
+
+  // 旧形式（itemsベース）の場合はフォールバック
+  if (!hasHtml) {
+    var d = a.design || getDesign(a.feel);
+    var items = a.items || [];
+    var itemsHTML = items.map(function(item, i) {
+      var done = checkedItems[i];
+      return '<div class="check-item" onclick="toggleCheck(' + i + ')">' +
+        '<span class="check-icon" style="color:' + (done ? d.accent : '#555') + '">' + (done ? '✅' : '⬜') + '</span>' +
+        '<span class="check-label' + (done ? ' done' : '') + '">' + item + '</span>' +
+        '</div>';
+    }).join('');
+    return '<div id="result"><div class="result-head"><div class="result-emoji">🎉</div>' +
+      '<div class="result-title">' + (a.app_name || 'My App') + '</div>' +
+      '<div class="result-desc">' + (a.one_liner || '') + '</div></div>' +
+      '<div class="phone-frame" style="border-color:' + d.accent + '55">' +
+      '<div class="phone-hdr" style="color:' + d.accent + '">' + (a.app_name || '') + '</div>' +
+      '<div class="phone-body">' + itemsHTML + '</div></div>' +
+      '<div class="result-actions">' +
+      '<button class="btn-p" onclick="downloadHTML()">' + t().downloadBtn + '</button>' +
+      '<button class="btn-g" onclick="resetAll()">' + t().retryBtn + '</button>' +
+      '</div></div>';
+  }
+
+  // 新形式：本物のHTMLアプリをiframeでプレビュー
   return '<div id="result">' +
-    '<div class="result-head"><div class="result-emoji">🎉</div><div class="result-title">' + a.app_name + '</div><div class="result-desc">' + (a.one_liner || '') + '</div></div>' +
-    '<div class="phone-frame" style="border-color:' + d.accent + '55;box-shadow:0 10px 40px ' + d.accent + '33">' +
-    '<div class="phone-hdr" style="color:' + d.accent + '">' + a.app_name + '</div>' +
-    '<div class="phone-body">' + itemsHTML +
-    '<div class="alldone-msg" style="color:' + d.accent + ';' + (allDone ? 'display:block' : 'display:none') + '">' + a.done_message + '</div>' +
-    '</div></div>' +
-    '<div class="result-note">' + t().resultNote + '</div>' +
-    '<div class="dl-card" style="background:#0f0f0f;border:1px solid ' + d.accent + '44">' +
-    '<div class="dl-card-title" style="color:' + d.accent + '">📥 ' + (isJa ? '無料版をダウンロード' : 'Download Free Version') + '</div>' +
-    '<div class="dl-card-desc">' + (isJa ? '基本のチェックリストアプリ。サーバー不要でスマホ内で動きます。' : 'Basic checklist app. Works on your phone.') + '</div>' +
-    '<button id="dl-btn" class="btn-p" style="background:' + d.accent + ';padding:11px 0;font-size:13.5px" onclick="downloadHTML()">' + t().downloadBtn + '</button>' +
+    '<div class="result-head">' +
+    '<div class="result-emoji">🎉</div>' +
+    '<div class="result-title">' + escapeHtml(a.app_name || 'My App') + '</div>' +
+    '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
     '</div>' +
-    '<div class="dl-card" style="background:linear-gradient(135deg,#1a0f00,#150a1a);border:1px solid rgba(201,168,76,0.4);position:relative">' +
-    '<span class="pro-tag">PRO</span>' +
-    '<div class="dl-card-title" style="color:var(--gold)">✨ ' + (isJa ? 'もっと使いやすくしたい方へ' : 'Want more power?') + '</div>' +
-    '<div class="dl-card-desc">' + (isJa ? 'プロ版には以下の機能が全て入っています：' : 'Pro version includes:') + '</div>' +
-    '<div class="pro-feature"><span class="pro-feature-icon">✏️</span>' + (isJa ? '項目を自由に編集・追加・並び替え' : 'Edit, add & reorder items') + '</div>' +
-    '<div class="pro-feature"><span class="pro-feature-icon">🔄</span>' + (isJa ? '毎日・毎週の自動リセット' : 'Auto-reset daily or weekly') + '</div>' +
-    '<div class="pro-feature"><span class="pro-feature-icon">📂</span>' + (isJa ? '複数リストで場面を使い分け' : 'Multiple lists') + '</div>' +
-    '<div class="pro-feature"><span class="pro-feature-icon">📊</span>' + (isJa ? '達成履歴・連続記録・完了率' : 'History & streaks') + '</div>' +
-    '<div class="pro-feature"><span class="pro-feature-icon">🎨</span>' + (isJa ? 'アイコン・カラーを自分好みに' : 'Custom icon & color') + '</div>' +
-    '<div class="pro-feature"><span class="pro-feature-icon">📲</span>' + (isJa ? 'QRコードで共有' : 'Share via QR') + '</div>' +
-    '<button class="btn-p" style="background:linear-gradient(90deg,var(--gold),#e8c96d);color:var(--ink);padding:12px 0;font-size:14px;margin-top:4px" onclick="alert(\'' + (isJa ? 'プロ版は近日実装予定です！お楽しみに💪' : 'Pro version coming soon!') + '\')">' + t().proDownload + '</button>' +
-    '<div style="font-size:10.5px;color:#444;text-align:center;margin-top:8px">' + (isJa ? '現在準備中' : 'Coming soon') + '</div>' +
+    '<div class="preview-frame">' +
+    '<div class="preview-label">📱 ' + (isJa ? 'プレビュー（実際に動きます！）' : 'Live Preview') + '</div>' +
+    '<iframe id="app-preview" sandbox="allow-scripts allow-same-origin allow-forms" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
     '</div>' +
-    '<div class="dl-card" style="background:#0a0f1a;border:1px solid rgba(92,158,255,0.2)">' +
-    '<div class="dl-card-title" style="color:#5c9eff">🌐 ' + (isJa ? '誰かに使わせたい場合' : 'Want to share?') + '</div>' +
-    '<div class="dl-card-desc">' + (isJa ? 'パパさんのサーバーに置いてURLを発行するサービスは近日実装予定です。' : 'URL publishing service coming soon.') + '</div>' +
-    '<div style="font-size:11px;color:#444;background:#111;border-radius:8px;padding:10px 12px;line-height:1.7">' +
-    '💡 ' + (isJa ? '今すぐ試したい方は、HTMLファイルをLINEやメールで友人に送れます。' : 'For now, send the HTML via LINE or email.') + '</div>' +
+    '<div class="result-actions-v2">' +
+    '<button class="btn-p" onclick="downloadGeneratedHtml()">📥 ' + (isJa ? 'ダウンロード' : 'Download') + '</button>' +
+    '<button class="btn-g" onclick="copyHtmlToClipboard()">📋 ' + (isJa ? 'コードをコピー' : 'Copy Code') + '</button>' +
+    '</div>' +
+    '<div class="result-note-v2">' +
+    '💡 ' + (isJa
+      ? 'ダウンロード後、「ファイル」アプリから開けます。お友達にLINEで送ることもできます。'
+      : 'Open from Files app after download. You can also share via LINE/Email.') +
     '</div>' +
     '<div class="result-actions">' +
-    '<button class="btn-p" style="background:' + d.accent + '" onclick="resetAll()">' + t().retryBtn + '</button>' +
-    '<button class="btn-g" onclick="handleBug()"' + (bugPhase !== 'idle' ? ' disabled' : '') + '>' + getBugText() + '</button>' +
-    '<button class="btn-g" style="font-size:12px" onclick="showArticle()">' + t().backToArticle + '</button>' +
+    '<button class="btn-g" onclick="resetAll()">🔄 ' + (isJa ? '別のアプリを作る' : 'Make another') + '</button>' +
+    '<button class="btn-g" style="font-size:12px" onclick="showArticle()">← ' + (isJa ? 'トップに戻る' : 'Back to top') + '</button>' +
     '</div>' +
     '</div>';
+}
+
+// HTMLエスケープ（iframe srcdocに入れるための変換）
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// 生成HTMLをダウンロード
+function downloadGeneratedHtml() {
+  if (!genApp || !genApp.html) return;
+  var blob = new Blob([genApp.html], { type: 'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (genApp.app_name || 'my-app') + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+}
+
+// HTMLをクリップボードにコピー
+function copyHtmlToClipboard() {
+  if (!genApp || !genApp.html) return;
+  var isJa = (lang === 'ja');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(genApp.html).then(function() {
+      alert(isJa ? '✅ コードをコピーしました！' : '✅ Code copied!');
+    }).catch(function() {
+      fallbackCopy(genApp.html);
+    });
+  } else {
+    fallbackCopy(genApp.html);
+  }
+}
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    alert(lang === 'ja' ? '✅ コードをコピーしました！' : '✅ Code copied!');
+  } catch (e) {
+    alert(lang === 'ja' ? 'コピーに失敗しました。手動でお試しください。' : 'Copy failed. Please try manually.');
+  }
+  document.body.removeChild(ta);
 }
 
 function toggleCheck(i) {
@@ -1889,9 +1966,11 @@ function renderError() {
 
 // エラーから即生成リトライ（回答そのまま使う）
 function retryGenerate() {
+  // ローディング画面を表示するが、保存上は interview ステージのまま
+  // （再開時に自動進行を防ぐため）
   phase = 'loading';
   loadStep = 0;
-  saveProgress({ stage:'loading', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions });
+  saveProgress({ stage:'interview', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions });
   render();
   startLoading();
 }
