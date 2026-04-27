@@ -160,13 +160,12 @@ html,body {
 .cta-desc { font-size:12.5px; color:var(--washi3); line-height:1.75; margin-bottom:18px; }
 .cta-zero { font-size:10.5px; color:var(--washi3); margin-top:10px; }
 
-.hold-btn-wrap { position:relative; overflow:hidden; border-radius:8px; }
-.hold-btn { position:relative; z-index:1; width:100%; padding:18px 0; font-size:16px; font-weight:700; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; letter-spacing:1px; cursor:pointer; border:2px solid var(--shu); background:#fff; color:var(--shu); border-radius:14px; overflow:hidden; transition:color 0.3s, box-shadow 0.3s; user-select:none; -webkit-user-select:none; box-shadow:0 4px 12px rgba(255,126,103,0.2); }
-.hold-btn:hover { box-shadow:0 6px 16px rgba(255,126,103,0.3); }
-.hold-btn.filling { color:var(--ink); }
-.hold-btn-fill { position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg, var(--shu-lt), var(--shu)); z-index:0; pointer-events:none; transition:none; }
+.hold-btn-wrap { position:relative; overflow:hidden; border-radius:14px; background:#fff; border:2px solid var(--shu); box-shadow:0 4px 12px rgba(255,126,103,0.2); transition:box-shadow 0.3s; }
+.hold-btn-wrap:hover { box-shadow:0 6px 16px rgba(255,126,103,0.3); }
+.hold-btn { position:relative; z-index:2; width:100%; padding:18px 0; font-size:16px; font-weight:700; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; letter-spacing:1px; cursor:pointer; border:none; background:transparent; color:var(--shu); border-radius:12px; overflow:visible; transition:color 0.2s; user-select:none; -webkit-user-select:none; display:block; }
 .hold-btn.filling { color:#fff !important; }
-.hold-btn-text { position:relative; z-index:1; }
+.hold-btn-fill { position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg, var(--shu-lt), var(--shu)); z-index:1; pointer-events:none; transition:none; }
+.hold-btn-text { position:relative; z-index:3; }
 .hold-hint { font-size:11px; color:var(--washi3); text-align:center; margin-top:8px; }
 
 .skip-link { text-align:center; margin-top:10px; }
@@ -989,10 +988,10 @@ function renderArticle() {
 
   // 長押し入門ボタン
   var holdBtnHtml = '<div class="hold-btn-wrap">' +
+    '<div class="hold-btn-fill" id="hold-fill"></div>' +
     '<button class="hold-btn" id="hold-btn" ' +
     'onmousedown="startHold()" ontouchstart="startHold()" ' +
     'onmouseup="cancelHold()" ontouchend="cancelHold()" onmouseleave="cancelHold()">' +
-    '<div class="hold-btn-fill" id="hold-fill"></div>' +
     '<span class="hold-btn-text">' + t().enterDojoPrompt + '</span>' +
     '</button>' +
     '</div>' +
@@ -1644,6 +1643,8 @@ function tickLoader() {
         checkedItems = {};
         phase = 'result'; render();
       } catch(e) {
+        // エラー時も回答を残すために interview ステージとして保存
+        saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
         if (e.message === 'RATE_LIMIT' || e.message === 'RATE_LIMIT_USER') phase = 'rateLimit';
         else phase = 'error';
         render();
@@ -1860,12 +1861,52 @@ function renderRateLimit() {
 }
 
 function renderError() {
+  var isJa = (lang === 'ja');
   return '<div class="err-screen"><div class="err-card">' +
     '<div class="err-emoji">😵</div>' +
     '<div class="err-title">' + t().errorTitle + '</div>' +
     '<div class="err-desc">' + t().errorDesc.replace('\n', '<br>') + '</div>' +
-    '<button class="btn-p" onclick="startInterview()">' + t().retryFight + '</button>' +
+    '<button class="btn-p" onclick="retryGenerate()">' + (isJa ? '🔄 もう一度生成する' : '🔄 Try generating again') + '</button>' +
+    '<button class="btn-g" style="margin-top:10px" onclick="backToInterview()">' + (isJa ? '← 回答を見直す' : '← Review answers') + '</button>' +
+    '<button class="btn-g" style="margin-top:10px;font-size:11.5px;color:var(--washi3)" onclick="resetAll()">' + (isJa ? '最初からやり直す' : 'Start over') + '</button>' +
     '</div></div>';
+}
+
+// エラーから即生成リトライ（回答そのまま使う）
+function retryGenerate() {
+  phase = 'loading';
+  loadStep = 0;
+  saveProgress({ stage:'loading', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions });
+  render();
+  startLoading();
+}
+
+// エラーから最後の質問に戻る（回答内容を変えたい時）
+function backToInterview() {
+  // 最後の質問を答えた直後の状態に戻す
+  // messagesから最後のAI完了メッセージ（doneMsg）が入っていれば消す
+  if (messages.length > 0) {
+    var last = messages[messages.length - 1];
+    if (last.from === 'ai' && last.isLast) {
+      messages = messages.slice(0, -1);
+    }
+  }
+  // qIndexは最後の質問のインデックスに合わせる
+  var totalQs = t().questions.length + extraQuestions.length;
+  qIndex = Math.max(0, totalQs - 1);
+  // 最後の質問の答えを削除
+  var activeQs = getActiveQuestions();
+  var lastQ = activeQs[qIndex];
+  if (lastQ && answers[lastQ.id]) {
+    delete answers[lastQ.id];
+  }
+  // 最後のユーザー回答メッセージも消す
+  if (messages.length > 0 && messages[messages.length - 1].from === 'user') {
+    messages = messages.slice(0, -1);
+  }
+  saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
+  phase = 'interview';
+  render();
 }
 
 function resetAll() {
