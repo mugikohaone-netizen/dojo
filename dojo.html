@@ -213,6 +213,10 @@ html,body {
 #prog-fill { height:100%; background:linear-gradient(90deg, var(--shu), var(--gold), var(--mint)); transition:width 0.5s; border-radius:0 2px 2px 0; }
 #step-lbl { font-size:11px; color:var(--washi3); text-align:right; padding:6px 16px; letter-spacing:0.5px; flex-shrink:0; font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif; font-weight:500; }
 #interview-top { display:flex; align-items:center; justify-content:space-between; padding:0 4px; flex-shrink:0; }
+#interview-top-right { display:flex; align-items:center; gap:4px; }
+.home-q-btn { background:transparent; border:none; color:var(--washi3); font-size:12px; font-weight:600; padding:8px 12px; cursor:pointer; font-family:inherit; border-radius:8px; transition:background 0.2s, color 0.2s; }
+.home-q-btn:hover { background:rgba(255,126,103,0.08); color:var(--shu); }
+.home-q-btn:active { transform:translateY(1px); }
 .back-q-btn { background:transparent; border:none; color:var(--gold); font-size:12px; font-weight:600; padding:8px 12px; cursor:pointer; font-family:inherit; border-radius:8px; transition:background 0.2s; }
 .back-q-btn:hover { background:rgba(91,155,213,0.1); }
 .back-q-btn:active { transform:translateY(1px); }
@@ -716,14 +720,26 @@ function getUserToken() {
   if (!tok) { tok = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); localStorage.setItem(TOKEN_KEY, tok); }
   return tok;
 }
+// テスト用：1日30回まで（公開時は1〜3に戻す）
+// パパさんの開発時は window.resetDojoRate() で即リセット可能
+var RATE_LIMIT_PER_DAY = 30;
+
 function checkRate() {
   var today = new Date().toISOString().slice(0, 10);
-  try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); return (d.date === today && d.count >= 1); } catch(e) { return false; }
+  try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); return (d.date === today && d.count >= RATE_LIMIT_PER_DAY); } catch(e) { return false; }
 }
 function incRate() {
   var today = new Date().toISOString().slice(0, 10);
   try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); var c = (d.date === today ? d.count : 0) + 1; localStorage.setItem(RATE_KEY, JSON.stringify({ date: today, count: c })); } catch(e) {}
 }
+// 開発用：レート制限と保存を全部リセット
+window.resetDojoRate = function() {
+  try {
+    localStorage.removeItem(RATE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
+    console.log('✅ Reset complete. Reload the page.');
+  } catch(e) { console.log('Reset failed:', e); }
+};
 
 var FEEL_MAP = {
   '達成': { accent:'#7ec9a8', bg:'#f5fcf8' }, '完了': { accent:'#7ec9a8', bg:'#f5fcf8' }, 'スッキリ': { accent:'#7ec9a8', bg:'#f5fcf8' },
@@ -1260,18 +1276,41 @@ function renderInterview() {
   }
   var inputHTML = !inputOff ? '<div id="input-area"><input id="chat-inp" placeholder="' + ph + '" onkeydown="handleKey(event)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"><button class="btn-send" onclick="sendMsg()">' + t().send + '</button></div>' : '';
 
-  // 1問目以外なら「前の質問に戻る」ボタンを表示
+  var isJa2 = (lang === 'ja');
+  // ホームに戻る（中断確認付き）
+  var homeBtnHTML = '<button class="home-q-btn" onclick="confirmGoHome()" title="' + (isJa2 ? 'ホームに戻る' : 'Back to home') + '">🏠 ' + (isJa2 ? 'ホーム' : 'Home') + '</button>';
+  // 前の質問に戻る（1問目以外）
   var canGoBack = (qIndex > 0);
   var backBtnHTML = canGoBack
-    ? '<button class="back-q-btn" onclick="goBackQuestion()">' + (lang === 'ja' ? '← 前の質問に戻る' : '← Previous') + '</button>'
+    ? '<button class="back-q-btn" onclick="goBackQuestion()">' + (isJa2 ? '← 前の質問' : '← Previous') + '</button>'
     : '<span></span>';
 
   return '<div id="interview">' +
     '<div id="prog-bar"><div id="prog-fill" style="width:' + pct + '%"></div></div>' +
-    '<div id="interview-top">' + backBtnHTML + '<div id="step-lbl">' + stepLbl + '</div></div>' +
+    '<div id="interview-top">' +
+    homeBtnHTML +
+    '<div id="interview-top-right">' + backBtnHTML + '<div id="step-lbl">' + stepLbl + '</div></div>' +
+    '</div>' +
     '<div id="messages">' + msgsHTML + '<div id="msg-btm"></div></div>' +
     inputHTML +
     '</div>';
+}
+
+// ホームに戻る前に中断確認
+function confirmGoHome() {
+  var isJa = (lang === 'ja');
+  var hasProgress = qIndex > 0 || (answers && Object.keys(answers).length > 0);
+  if (hasProgress) {
+    var ok = confirm(isJa
+      ? '途中の回答を保存してホームに戻りますか？\n（次回開いた時に続きから再開できます）'
+      : 'Save progress and go home?\n(You can resume next time)');
+    if (!ok) return;
+  }
+  // 進捗を保存（途中で中断する形）
+  if (hasProgress) {
+    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
+  }
+  showArticle();
 }
 
 // 1つ前の質問に戻る
