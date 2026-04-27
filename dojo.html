@@ -1392,7 +1392,22 @@ function buildExtraQuestions(ans) {
   var input = (ans.input || '').toLowerCase();
   var problem = (ans.problem || '').toLowerCase();
 
-  // 【追加質問1】日付・期限系のアプリで「開始日」が不明な場合
+  // 【最優先・追加質問1】「動き・出力」が不明な場合
+  // ジェミニさんの指摘：素人の回答だけだとAIは「処理・出力」が分からないので推測になる
+  // → タップした時に何が起きるか、どう表示されるかを聞く
+  var hasOutputAction = /タップ|押す|チェック|完了|消える|表示|並べ|リスト|カード|カレンダー|グラフ|tap|click|check|complete|display|list|card/i.test(want);
+  if (!hasOutputAction) {
+    extras.push({
+      id: 'output_action',
+      text: isJa
+        ? '👆 入力したものをどう見せたいですか？タップしたら何が起きると気持ちいい？'
+        : '👆 How should items appear, and what happens when you tap one?',
+      ph: isJa ? '例：カードで一覧、タップで完了マーク／リストで残り日数大きく表示' : 'e.g. Cards in a list, tap to mark done',
+      hint: isJa ? '見た目と動きをざっくりでOK 😊' : 'Rough idea of look & action is fine'
+    });
+  }
+
+  // 【追加質問2】日付・期限系のアプリで「開始日」が不明な場合
   var hasDateLike = /切れ|期限|残り|日数|日付|いつ|予定|締切|runs?\s*out|expire|deadline|days?\s*left/i.test(want + ' ' + problem);
   var hasStartDate = /開始|もらった|処方|今日|受け取|購入|買った|start|received|prescribed/i.test(input);
   if (hasDateLike && !hasStartDate) {
@@ -1406,7 +1421,7 @@ function buildExtraQuestions(ans) {
     });
   }
 
-  // 【追加質問2】複数管理が必要そうなのに「1つだけ」か不明な場合
+  // 【追加質問3】複数管理が必要そうなのに「1つだけ」か不明な場合
   var multiHint = /複数|いくつ|それぞれ|種類|一覧|リスト|multi|several|each|list/i.test(input + ' ' + want);
   var isSingleClear = /ひとつ|一つ|1つ|単体|single|one only/i.test(input + ' ' + want);
   if (multiHint && !isSingleClear) {
@@ -1420,7 +1435,7 @@ function buildExtraQuestions(ans) {
     });
   }
 
-  // 【追加質問3】警告・通知系の閾値が不明な場合
+  // 【追加質問4】警告・通知系の閾値が不明な場合
   var needsWarning = /少なく|警告|教え|通知|アラート|残り|注意|warn|alert|remind|low|running/i.test(want);
   var hasThreshold = /日前|日後|日に|%|パーセント|個|時間|days?\s*before|%|weeks?/i.test(want);
   if (needsWarning && !hasThreshold) {
@@ -1434,7 +1449,7 @@ function buildExtraQuestions(ans) {
     });
   }
 
-  // 【追加質問4】画面に表示したい情報の優先順位が不明
+  // 【追加質問5】画面に表示したい情報の優先順位が不明
   // （入力が3つ以上ある時のみ）
   var inputCount = (input.match(/[、,]/g) || []).length + 1;
   if (inputCount >= 3 && extras.length < 3) {
