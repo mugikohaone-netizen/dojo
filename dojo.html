@@ -6,14 +6,17 @@
 <meta name="theme-color" content="#5b9bd5">
 <title>AIアプリ道場</title>
 
+<!-- PWA基本設定 -->
 <link rel="manifest" href="./manifest.json">
 
+<!-- iOS用：ホーム画面に追加された時の設定 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="AI道場">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 
+<!-- Android用 -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="AIアプリ道場">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
@@ -23,21 +26,21 @@
 <style>
 :root {
   /* メインカラー：やさしい青 */
-  --gold:    #5b9bd5;
-  --gold-lt: #8ec5f0;
+  --gold:    #5b9bd5;        /* 旧：金 → やさしい青 */
+  --gold-lt: #8ec5f0;        /* 旧：淡金 → 明るい空色 */
   /* アクセント：コーラル（CTAなど強調用） */
-  --shu:     #ff7e67;
-  --shu-lt:  #ffa38d;
+  --shu:     #ff7e67;        /* 旧：朱色 → コーラル */
+  --shu-lt:  #ffa38d;        /* 旧：淡朱 → ピーチ */
   /* 背景：白〜薄いベージュ */
-  --ink:     #fdfbf7;
-  --ink2:    #ffffff;
-  --ink3:    #f5f1ea;
-  --ink4:    #e8e2d5;
-  --ink5:    #b8aea0;
+  --ink:     #fdfbf7;        /* 旧：墨 → クリームホワイト */
+  --ink2:    #ffffff;        /* カード背景：純白 */
+  --ink3:    #f5f1ea;        /* サブ背景：薄ベージュ */
+  --ink4:    #e8e2d5;        /* 境界線：ベージュ */
+  --ink5:    #b8aea0;        /* 薄めの線 */
   /* テキスト：濃い茶 */
-  --washi:   #3d3529;
-  --washi2:  #6b5d4c;
-  --washi3:  #9a8d7c;
+  --washi:   #3d3529;        /* 旧：白 → 濃茶（メインテキスト） */
+  --washi2:  #6b5d4c;        /* サブテキスト */
+  --washi3:  #9a8d7c;        /* ヒント・薄字 */
   /* 追加：グリーン（成功・ポジティブ） */
   --mint:    #7ec9a8;
   --mint-lt: #a9dcc2;
@@ -275,6 +278,10 @@ html,body {
 .result-actions-v2 {
   display:flex; gap:10px; flex-wrap:wrap;
 }
+.preview-tap-notice {
+  font-size:11px; color:var(--washi3); text-align:center;
+  padding:6px 8px; line-height:1.6;
+}
 .result-actions-v2 button { flex:1; min-width:130px; padding:13px 0; font-size:14px; }
 .result-note-v2 {
   font-size:12px; color:var(--washi2); text-align:center; line-height:1.7;
@@ -433,6 +440,7 @@ html,body {
   <div id="content"></div>
 </div>
 <div id="blackout"></div>
+
 <script>
 var BACKEND_URL = 'https://dojo-api.mugikoha-one.workers.dev/';
 var SAVE_KEY = 'dojo_v1';
@@ -454,7 +462,7 @@ var T = {
     dojoDesc: '4つの質問に答えるだけ。AIがアプリを作ります。',
     startBtn: '✨ はじめる',
     send: '送信',
-    loadingSub: 'AIが本気で戦っています。少々お待ちを…',
+    loadingSub: 'AIがあなただけのアプリを作っています ✨',
     resultNote: '📱 バックエンド接続後にあなたの言葉で項目が生成されます',
     retryBtn: '🔄 別のアプリを作る',
     bugIdle: '🐛 型が崩れている！直せ',
@@ -500,14 +508,17 @@ var T = {
       { id:'vibe',    text:'アプリの名前と、色のイメージは？', ph:'例：お薬カレンダー、優しい緑', hint:'ざっくりでOK。後から変えられます' }
     ],
     loadingMsgs: [
-      { icon:'⚔️', text:'AI同士が型を巡って白熱の議論中...' },
-      { icon:'🔍', text:'要件の穴を洗い出しています...' },
-      { icon:'✍️', text:'クロード大明神がコードを爆速執筆中...' },
-      { icon:'🏗️', text:'画面レイアウトを組み立てています...' },
-      { icon:'🎨', text:'UIに魂を吹き込んでいます...' },
-      { icon:'🛡️', text:'セキュリティの最終チェック中...' },
-      { icon:'💥', text:'あと少し！型の最終確認中...' },
-      { icon:'✨', text:'極まりました！！' }
+      { icon:'📝', text:'あなたの言葉を読み込んでいます...' },
+      { icon:'💭', text:'どんな機能が必要か考えています...' },
+      { icon:'🎨', text:'カラーとデザインを選んでいます...' },
+      { icon:'🏗️', text:'画面のレイアウトを組み立て中...' },
+      { icon:'⚙️', text:'動きの仕組みを書いています...' },
+      { icon:'🔘', text:'ボタンを配置しています...' },
+      { icon:'💾', text:'データの保存方法を準備中...' },
+      { icon:'🛡️', text:'安全性をチェックしています...' },
+      { icon:'🪄', text:'細かい部分を整えています...' },
+      { icon:'✨', text:'もうすぐ完成です...' },
+      { icon:'🎁', text:'仕上げの調整中...' }
     ],
     senseiQuotes: [
       '「型を知らずして、型を破れず。」',
@@ -526,12 +537,12 @@ var T = {
     tryDesc: 'Experience the process from the article with YOUR idea.',
     zeroProg: 'Zero coding knowledge needed',
     skipTrials: 'Skip remaining trials →',
-    stepSubtitle: 'Round 2 — Let\'s do this',
-    dojoTitle: 'Let\'s turn your idea\ninto an app',
+    stepSubtitle: 'Round 2 — Let\u0027s do this',
+    dojoTitle: 'Let\u0027s turn your idea\ninto an app',
     dojoDesc: 'Just answer 4 questions. The AI handles the rest.',
     startBtn: 'Enter the Dojo! Osu!',
     send: 'Send',
-    loadingSub: 'The AI is fighting hard. Please wait…',
+    loadingSub: 'AI is crafting your unique app ✨',
     resultNote: '📱 After backend connection, items will match your words.',
     retryBtn: '🔄 Build another app',
     bugIdle: '🐛 Broken form! Fix it',
@@ -541,20 +552,20 @@ var T = {
     downloaded: '✅ Downloaded!',
     holdTitle: 'Hold on!',
     holdSenseiStop: 'Sensei says stop',
-    holdDefault: 'Great idea! But let\'s start with a solo version first.',
+    holdDefault: 'Great idea! But let\u0027s start with a solo version first.',
     holdRetry: 'Got it! Redo it. Osu!',
     holdReset: 'Start over',
-    holdRedoMsg: 'Let\'s rethink the killer move 👇\nFocus on something that works solo on your phone 🥋',
+    holdRedoMsg: 'Let\u0027s rethink the killer move 👇\nFocus on something that works solo on your phone 🥋',
     holdHint: 'localStorage-only moves are the strongest',
     rateLimitTitle: 'The dojo is closed for today',
-    rateLimitDesc: 'You\'ve used today\'s generation limit.',
+    rateLimitDesc: 'You\u0027ve used today\u0027s generation limit.',
     rateLimitSub: 'Come back tomorrow. Osu! 🥋',
     errorTitle: 'Connection issue…',
-    errorDesc: 'Failed to reach the AI.\nLet\'s try again 💪',
+    errorDesc: 'Failed to reach the AI.\nLet\u0027s try again 💪',
     retryFight: 'Try again! Osu!',
     blockedTitle: 'Cannot create this app',
     blockedReset: 'Try a different idea',
-    resumeMsg: 'Welcome back! Let\'s pick up where you left off 💪',
+    resumeMsg: 'Welcome back! Let\u0027s pick up where you left off 💪',
     doneMsg: 'Perfect! ✊ The spec is complete.\nHanding it to Claude the Almighty now!',
     redirectMsg: 'Brilliant idea! ✨\nHowever, multi-user features need a solo foundation first 🥋',
     redirectHint: 'A solo app can still be incredibly powerful!',
@@ -565,26 +576,29 @@ var T = {
     articleTag: 'DOJO SCROLL',
     authorDate: 'April 14, 2026',
     authorDesc: 'Breaking down complex topics into plain language',
-    authorCTA: 'Drop a comment with \'I want to make X!\' — I\'ll help you figure out how. Osu!',
+    authorCTA: 'Drop a comment with \u0027I want to make X!\u0027 — I\u0027ll help you figure out how. Osu!',
     supportTitle: '💬 Got a question? Ask anytime',
-    supportDesc: 'Drop a comment and I\'ll reply as fast as I can.',
+    supportDesc: 'Drop a comment and I\u0027ll reply as fast as I can.',
     senseiName: 'SENSEI : karate papa',
     footerName: 'Sensei karate papa',
     questions: [
-      { id:'problem', text:'Osu! When do you get stuck? What\'s the frustration?', ph:'e.g. I forget when my medicine runs out', hint:'Your everyday pain is fine 💪' },
+      { id:'problem', text:'Osu! When do you get stuck? What\u0027s the frustration?', ph:'e.g. I forget when my medicine runs out', hint:'Your everyday pain is fine 💪' },
       { id:'want',    text:'What do you want the app to do in that moment?', ph:'e.g. Show days left at a glance, warn me when low', hint:'Just describe what would make you happy' },
       { id:'input',   text:'What will you type into the app?', ph:'e.g. Medicine name, days prescribed, clinic name', hint:'If you wrote it on paper, what would you write?' },
       { id:'vibe',    text:'What name and color fits this app?', ph:'e.g. Pill Calendar, gentle green', hint:'Rough ideas are fine. You can change it later' }
     ],
     loadingMsgs: [
-      { icon:'⚔️', text:'AIs debating the form...' },
-      { icon:'🔍', text:'Hunting for requirement gaps...' },
-      { icon:'✍️', text:'Claude coding at full speed...' },
-      { icon:'🏗️', text:'Building the screen layout...' },
-      { icon:'🎨', text:'Breathing soul into the UI...' },
-      { icon:'🛡️', text:'Final security check...' },
-      { icon:'💥', text:'Almost there! Final form check...' },
-      { icon:'✨', text:'Perfectly landed!!' }
+      { icon:'📝', text:'Reading your words...' },
+      { icon:'💭', text:'Thinking about what you need...' },
+      { icon:'🎨', text:'Picking colors and design...' },
+      { icon:'🏗️', text:'Assembling the layout...' },
+      { icon:'⚙️', text:'Writing the logic...' },
+      { icon:'🔘', text:'Placing buttons...' },
+      { icon:'💾', text:'Setting up data storage...' },
+      { icon:'🛡️', text:'Safety check in progress...' },
+      { icon:'🪄', text:'Polishing the details...' },
+      { icon:'✨', text:'Almost done...' },
+      { icon:'🎁', text:'Final touches...' }
     ],
     senseiQuotes: [
       '"You cannot break the form until you know it."',
@@ -683,7 +697,7 @@ var view = 'article';
 var phase = 'welcome';
 var qIndex = 0;
 var extraQuestions = [];
-var featureWarnings = [];
+var featureWarnings = []; // 確認画面で使う：作れない機能のリスト
 var answers = {};
 var messages = [];
 var loadStep = 0;
@@ -711,7 +725,8 @@ function getUserToken() {
   if (!tok) { tok = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); localStorage.setItem(TOKEN_KEY, tok); }
   return tok;
 }
-
+// テスト用：1日30回まで（公開時は1〜3に戻す）
+// パパさんの開発時は window.resetDojoRate() で即リセット可能
 var RATE_LIMIT_PER_DAY = 30;
 
 function checkRate() {
@@ -722,11 +737,11 @@ function incRate() {
   var today = new Date().toISOString().slice(0, 10);
   try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); var c = (d.date === today ? d.count : 0) + 1; localStorage.setItem(RATE_KEY, JSON.stringify({ date: today, count: c })); } catch(e) {}
 }
-
+// 開発用：レート制限と保存を全部リセット
 window.resetDojoRate = function() {
   try {
     localStorage.removeItem(RATE_KEY);
-    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
     console.log('✅ Reset complete. Reload the page.');
   } catch(e) { console.log('Reset failed:', e); }
 };
@@ -737,6 +752,7 @@ var FEEL_MAP = {
   'やる気': { accent:'#ffa94d', bg:'#fff8f0' }, '燃える': { accent:'#ff7e67', bg:'#fff5f0' },
   '楽しい': { accent:'#c084fc', bg:'#fbf5ff' }, 'ワクワク': { accent:'#c084fc', bg:'#fbf5ff' },
   '癒し': { accent:'#b8a591', bg:'#fdfaf5' },
+  // 色指定キーワード
   '緑': { accent:'#7ec9a8', bg:'#f5fcf8' }, '青': { accent:'#5b9bd5', bg:'#f5faff' },
   '赤': { accent:'#ff7e67', bg:'#fff5f0' }, 'ピンク': { accent:'#f093a7', bg:'#fef5f8' },
   '紫': { accent:'#c084fc', bg:'#fbf5ff' }, 'オレンジ': { accent:'#ffa94d', bg:'#fff8f0' },
@@ -792,15 +808,17 @@ function downloadHTML() {
   parts.push('.hdr{background:#fff;padding:18px;text-align:center;border-bottom:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.04)}.hdr h1{font-size:19px;color:' + d.accent + '}');
   parts.push('.item{display:flex;gap:12px;padding:16px 18px;border-bottom:1px solid #f0ece4;cursor:pointer;background:#fff;transition:background 0.2s}.item:hover{background:#faf8f3}.item.done{background:' + d.accent + '15}.item.done .lbl{text-decoration:line-through;opacity:.5}');
   parts.push('.chk{font-size:20px}.lbl{font-size:15px;color:#3d3529}.complete{text-align:center;padding:22px;color:' + d.accent + ';font-weight:700;display:none;background:' + d.accent + '15;margin:16px;border-radius:14px;font-size:15px}.complete.show{display:block}');
-  // プロへの誘導（.upgradeクラス）を削除し、フッターのみ残す
-  parts.push('.ftr{text-align:center;padding:18px;font-size:11px;color:#9a8d7c}</style></head><body>');
+  parts.push('.ftr{text-align:center;padding:18px;font-size:11px;color:#9a8d7c}.upgrade{background:#fff;border:1.5px solid #e8e2d5;border-radius:16px;margin:18px;padding:16px;text-align:center;box-shadow:0 2px 10px rgba(91,155,213,0.08)}');
+  parts.push('.upgrade a{display:inline-block;background:#ff7e67;color:#fff;border-radius:12px;padding:10px 22px;text-decoration:none;margin-top:8px;font-weight:600;box-shadow:0 2px 8px rgba(255,126,103,0.25)}</style></head><body>');
   parts.push('<div class="hdr"><h1>' + a.app_name + '</h1></div><div id="list">');
   items.forEach(function(item, i) {
     parts.push('<div class="item" id="i' + i + '" onclick="tog(' + i + ')"><span class="chk" id="c' + i + '">⬜</span><span class="lbl">' + item + '</span></div>');
   });
   parts.push('</div><div class="complete" id="done">' + (a.done_message || '🎊 極まった！') + '</div>');
+  parts.push('<div class="upgrade"><div style="color:#5b9bd5;font-weight:700;font-size:14px">✨ ' + (isJa ? 'もっと便利に使いたい方へ' : 'Want more features?') + '</div>');
+  parts.push('<div style="font-size:12px;color:#6b5d4c;margin:8px 0;line-height:1.6">' + (isJa ? '項目編集・自動リセット・複数リスト・履歴など' : 'Edit, reset, multi-lists, history') + '</div>');
+  parts.push('<a href="https://mugikohaone-netizen.github.io/dojo/dojo.html" target="_blank">' + (isJa ? '公式サイトへ ✨' : 'Visit site ✨') + '</a></div>');
   parts.push('<div class="ftr">Made with AI App Dojo ✨</div>');
-  
   var scriptOpen = '<' + 'script>';
   var scriptClose = '<' + '/' + 'script>';
   parts.push(scriptOpen);
@@ -811,7 +829,6 @@ function downloadHTML() {
   parts.push('try{var s=JSON.parse(localStorage.getItem("' + skey + '")||"{}");Object.keys(s).forEach(function(i){if(s[i])tog(parseInt(i));});}catch(e){}');
   parts.push(scriptClose);
   parts.push('</body></html>');
-  
   var html = parts.join('\n');
   var blob = new Blob([html], { type:'text/html;charset=utf-8' });
   var url = URL.createObjectURL(blob);
@@ -829,22 +846,26 @@ function toggleLang() {
   document.getElementById('lang-btn').textContent = (lang === 'ja' ? 'EN' : '日本語');
   document.getElementById('hdr-name').textContent = t().appName;
 
+  // インタビュー中なら、AIメッセージ（質問）だけ新しい言語に翻訳する
   if (view === 'dojo' && phase === 'interview' && messages && messages.length > 0) {
     var oldT = T[oldLang], newT = T[lang];
     var newMessages = [];
-    var qStep = 0;
+    var qStep = 0; // 何問目のAI質問を表示中か
     var fixedCount = oldT.questions.length;
     for (var i = 0; i < messages.length; i++) {
       var m = messages[i];
       if (m.from === 'user') {
+        // ユーザー回答はそのまま
         newMessages.push(m);
         qStep++;
       } else {
+        // AIメッセージを翻訳
         var translated = translateAiMessage(m, oldLang, qStep);
         newMessages.push(translated);
       }
     }
     messages = newMessages;
+    // 動的追加質問も新言語に置き換え
     regenerateExtraQuestionsIfNeeded();
     saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
   }
@@ -852,38 +873,51 @@ function toggleLang() {
   render();
 }
 
+// AIメッセージを旧言語→新言語に翻訳
+// 質問テキスト・ヒントは質問IDで照合、それ以外（おかえり、もう少し詳しく等）は固定文言で照合
 function translateAiMessage(m, oldLang, qStep) {
   var oldT = T[oldLang], newT = T[lang];
   var oldQs = oldT.questions, newQs = newT.questions;
+  // 固定質問の照合
   for (var i = 0; i < oldQs.length; i++) {
     if (m.text === oldQs[i].text) {
       return { from:'ai', text:newQs[i].text, hint:newQs[i].hint };
     }
   }
+  // 動的追加質問の照合（id基準）
+  // ※extraQuestionsは現在の言語で生成されているので、idで言語切替時の対応文を引き当てる
+  // → 簡易対応：buildExtraQuestionsを再実行して新言語の追加質問を生成
   var newExtras = buildExtraQuestions(answers);
   for (var j = 0; j < extraQuestions.length; j++) {
     if (m.text === extraQuestions[j].text) {
+      // 同じidの新言語版を探す
       var matchedNew = newExtras.find(function(e) { return e.id === extraQuestions[j].id; });
       if (matchedNew) {
         return { from:'ai', text:matchedNew.text, hint:matchedNew.hint };
       }
     }
   }
+  // 固定文言の照合
   if (m.text === oldT.resumeMsg) return { from:'ai', text:newT.resumeMsg, hint:null };
   if (m.text === oldT.doneMsg) return { from:'ai', text:newT.doneMsg, hint:null, isLast:m.isLast };
   if (m.text === oldT.redirectMsg) return { from:'ai', text:newT.redirectMsg, hint:newT.redirectHint, isRedirect:true };
+  // 「もう少し詳しく」系の前置き
   if (m.text === '✨ もう少し詳しく教えてください。' || m.text === '✨ One more detail.') {
     return { from:'ai', text:(lang === 'ja' ? '✨ もう少し詳しく教えてください。' : '✨ One more detail.'), hint:null };
   }
-  if (m.text === '✨ もう一度、最後の質問からやり直しましょう。' || m.text === '✨ Let\'s redo the last question.') {
-    return { from:'ai', text:(lang === 'ja' ? '✨ もう一度、最後の質問からやり直しましょう。' : '✨ Let\'s redo the last question.'), hint:null };
+  // 「もう一度、最後の質問からやり直しましょう」系
+  if (m.text === '✨ もう一度、最後の質問からやり直しましょう。' || m.text === '✨ Let\u0027s redo the last question.') {
+    return { from:'ai', text:(lang === 'ja' ? '✨ もう一度、最後の質問からやり直しましょう。' : '✨ Let\u0027s redo the last question.'), hint:null };
   }
+  // 翻訳できないものはそのまま返す（フォールバック）
   return m;
 }
 
+// 動的追加質問も言語に応じて再生成（extraQuestionsを更新）
 function regenerateExtraQuestionsIfNeeded() {
   if (extraQuestions.length === 0) return;
   var newExtras = buildExtraQuestions(answers);
+  // idベースで対応する新言語版に置き換え
   extraQuestions = extraQuestions.map(function(eq) {
     var found = newExtras.find(function(e) { return e.id === eq.id; });
     return found || eq;
@@ -904,6 +938,7 @@ function showDojo() {
   if (saved && saved.stage === 'result' && saved.app) {
     genApp = saved.app; answers = saved.answers || {}; phase = 'result';
   } else if (saved && saved.stage === 'interview' && saved.answers) {
+    // 古い保存形式（messages不在）の場合は破棄して最初から
     if (!saved.messages || saved.messages.length === 0) {
       clearProgress();
       phase = 'welcome';
@@ -914,6 +949,7 @@ function showDojo() {
     qIndex = saved.qIndex || 0;
     extraQuestions = saved.extraQuestions || [];
     messages = saved.messages.slice();
+    // 「おかえり！」を最後のAI質問の直前に挿入（重複防止）
     var hasResumeMsg = messages.some(function(m) { return m.from === 'ai' && m.text === t().resumeMsg; });
     if (!hasResumeMsg) {
       var lastAiIdx = -1;
@@ -947,6 +983,8 @@ function render() {
 
 function renderArticle() {
   var isEn = (lang === 'en');
+
+  // ランディングのヒーロー＋強み訴求
   var strengths = isEn ? [
     { icon:'📱', title:'Phone only',        desc:'No PC needed. All on your smartphone.' },
     { icon:'⚡', title:'Just 4 questions',   desc:'No prompt writing. Just answer, get an app.' },
@@ -971,6 +1009,7 @@ function renderArticle() {
       '</div>';
   }).join('');
 
+  // 例示（どんなアプリが作れるか）
   var examples = isEn ? [
     '💊 Medication refill reminder',
     '✅ Pre-visit sales checklist',
@@ -986,6 +1025,7 @@ function renderArticle() {
     return '<div class="example-chip">' + e + '</div>';
   }).join('');
 
+  // 長押し入門ボタン（divベースに変更してiOSのclickイベント競合回避）
   var holdBtnHtml = '<div class="hold-btn-wrap" id="hold-btn-wrap" ' +
     'onmousedown="startHold(event)" ontouchstart="startHold(event)" ' +
     'onmouseup="cancelHold()" ontouchend="cancelHold()" ' +
@@ -1043,20 +1083,25 @@ function renderArticle() {
     '</div>';
 }
 
-function bindArticle() {}
+function bindArticle() {
+  // ランディングには特別なバインドは不要
+}
 
 var holdActive = false;
 
 function startHold(e) {
   if (e && e.preventDefault) e.preventDefault();
+  // 多重発火防止：すでにアクティブなら無視
   if (holdActive) return;
   holdActive = true;
   var wrap = document.getElementById('hold-btn-wrap');
   var btn = document.getElementById('hold-btn');
   var fill = document.getElementById('hold-fill');
   if (!wrap || !btn || !fill) { holdActive = false; return; }
+  // 古いトランジションを削除（width:0%即時反映）
   fill.style.transition = 'none';
   fill.style.width = '0%';
+  // 強制reflowしてからアニメーション開始
   void fill.offsetWidth;
   var start = Date.now();
   var duration = 1500;
@@ -1241,6 +1286,7 @@ function renderInterview() {
     }
   }).join('');
   var ph = activeQs[Math.min(qIndex, activeQs.length - 1)].ph;
+  // 固定質問中 / 追加質問中 で表示変える
   var isExtra = qIndex >= t().questions.length;
   var stepLbl;
   if (isExtra) {
@@ -1251,7 +1297,9 @@ function renderInterview() {
   var inputHTML = !inputOff ? '<div id="input-area"><input id="chat-inp" placeholder="' + ph + '" onkeydown="handleKey(event)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"><button class="btn-send" onclick="sendMsg()">' + t().send + '</button></div>' : '';
 
   var isJa2 = (lang === 'ja');
+  // ホームに戻る（中断確認付き）
   var homeBtnHTML = '<button class="home-q-btn" onclick="confirmGoHome()" title="' + (isJa2 ? 'ホームに戻る' : 'Back to home') + '">🏠 ' + (isJa2 ? 'ホーム' : 'Home') + '</button>';
+  // 前の質問に戻る（1問目以外）
   var canGoBack = (qIndex > 0);
   var backBtnHTML = canGoBack
     ? '<button class="back-q-btn" onclick="goBackQuestion()">' + (isJa2 ? '← 前の質問' : '← Previous') + '</button>'
@@ -1268,6 +1316,7 @@ function renderInterview() {
     '</div>';
 }
 
+// ホームに戻る前に中断確認
 function confirmGoHome() {
   var isJa = (lang === 'ja');
   var hasProgress = qIndex > 0 || (answers && Object.keys(answers).length > 0);
@@ -1277,28 +1326,39 @@ function confirmGoHome() {
       : 'Save progress and go home?\n(You can resume next time)');
     if (!ok) return;
   }
+  // 進捗を保存（途中で中断する形）
   if (hasProgress) {
     saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
   }
   showArticle();
 }
 
+// 1つ前の質問に戻る
 function goBackQuestion() {
   if (qIndex <= 0) return;
+  // 後ろから探して、最後のユーザーメッセージの位置で切る（その後ろのAI質問も含めて削除）
   var i = messages.length - 1;
   while (i >= 0 && messages[i].from === 'ai') i--;
   if (i >= 0) {
     messages = messages.slice(0, i);
   }
+  // 戻る先のqIndexと、その前のユーザー回答も削除
   qIndex = qIndex - 1;
   var activeQs = getActiveQuestions();
   var prevQ = activeQs[qIndex];
   if (prevQ && answers[prevQ.id]) {
     delete answers[prevQ.id];
   }
+  // 戻った先が固定質問になったら追加質問はリセット
   if (qIndex < t().questions.length) {
     extraQuestions = [];
   }
+  // messagesから戻る先の質問より後のAI質問とユーザー回答を全部消したので、
+  // 戻る先の質問のメッセージも消えている可能性がある。
+  // → 戻る先の質問を改めて表示する
+  // messagesの最後がユーザー回答ならその後ろにAI質問が必要
+  // messagesが空ならAI質問をひとつ追加
+  // とりあえずmessagesが空、または最後がユーザー回答なら、戻る先の質問を追加
   var lastMsg = messages[messages.length - 1];
   if (!lastMsg || lastMsg.from === 'user') {
     var curQ = activeQs[qIndex];
@@ -1317,13 +1377,16 @@ function bindInterview() {
 
 function scrollBottom() {
   setTimeout(function() {
+    // 最後のAIメッセージ（質問）が画面に収まるようにスクロール
     var msgs = document.getElementById('messages');
     if (!msgs) return;
     var aiMsgs = msgs.querySelectorAll('.msg-ai');
     var lastAi = aiMsgs[aiMsgs.length - 1];
     if (lastAi) {
+      // 最後のAIメッセージの上端を画面に表示
       lastAi.scrollIntoView({ behavior:'smooth', block:'start' });
     } else {
+      // フォールバック：一番下まで
       msgs.scrollTop = msgs.scrollHeight;
     }
   }, 80);
@@ -1345,24 +1408,29 @@ function sendMsg() {
     phase = 'interview'; render(); return;
   }
 
+  // 固定質問 or 動的追加質問に回答を保存
   var activeQs = getActiveQuestions();
   var q = activeQs[qIndex];
   answers[q.id] = val;
   addMsg('user', val);
   var next = qIndex + 1;
 
+  // 固定4問が全部終わったら追加質問の判定
   if (next === t().questions.length && extraQuestions.length === 0) {
     extraQuestions = buildExtraQuestions(answers);
   }
 
+  // 全質問（固定＋追加）完了チェック
   var totalQs = t().questions.length + extraQuestions.length;
   if (next >= totalQs) {
     if (checkRate()) {
       addMsg('ai', lang === 'ja' ? '本日のご利用回数に達しました。また明日試してみてください 😊' : 'Daily limit reached. Come back tomorrow 😊');
       phase = 'interview'; render(); return;
     }
+    // 作れない機能をチェック
     featureWarnings = detectUnsupportedFeatures(answers);
     if (featureWarnings.length > 0) {
+      // 確認画面に遷移
       saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
       phase = 'interview'; render();
       setTimeout(function() { phase = 'confirm'; render(); }, 600);
@@ -1375,6 +1443,7 @@ function sendMsg() {
   } else {
     qIndex = next;
     var nextQ = getActiveQuestions()[next];
+    // 追加質問なら師範風の前置きを添える
     var isExtra = next >= t().questions.length;
     if (isExtra) {
       addMsg('ai', (lang === 'ja' ? '✨ もう少し詳しく教えてください。' : '✨ One more detail.'), null);
@@ -1385,10 +1454,14 @@ function sendMsg() {
   }
 }
 
+// 現在有効な質問リスト（固定＋動的追加）
 function getActiveQuestions() {
   return t().questions.concat(extraQuestions);
 }
 
+// 回答内容から動的追加質問を生成
+// ※ 本物AIが来るまでのモック実装
+// ※ バックエンド実装後はClaude APIに判定を移譲
 function buildExtraQuestions(ans) {
   var isJa = (lang === 'ja');
   var extras = [];
@@ -1396,6 +1469,9 @@ function buildExtraQuestions(ans) {
   var input = (ans.input || '').toLowerCase();
   var problem = (ans.problem || '').toLowerCase();
 
+  // 【最優先・追加質問1】「動き・出力」が不明な場合
+  // ジェミニさんの指摘：素人の回答だけだとAIは「処理・出力」が分からないので推測になる
+  // → タップした時に何が起きるか、どう表示されるかを聞く
   var hasOutputAction = /タップ|押す|チェック|完了|消える|表示|並べ|リスト|カード|カレンダー|グラフ|tap|click|check|complete|display|list|card/i.test(want);
   if (!hasOutputAction) {
     extras.push({
@@ -1408,6 +1484,7 @@ function buildExtraQuestions(ans) {
     });
   }
 
+  // 【追加質問2】日付・期限系のアプリで「開始日」が不明な場合
   var hasDateLike = /切れ|期限|残り|日数|日付|いつ|予定|締切|runs?\s*out|expire|deadline|days?\s*left/i.test(want + ' ' + problem);
   var hasStartDate = /開始|もらった|処方|今日|受け取|購入|買った|start|received|prescribed/i.test(input);
   if (hasDateLike && !hasStartDate) {
@@ -1421,6 +1498,7 @@ function buildExtraQuestions(ans) {
     });
   }
 
+  // 【追加質問3】複数管理が必要そうなのに「1つだけ」か不明な場合
   var multiHint = /複数|いくつ|それぞれ|種類|一覧|リスト|multi|several|each|list/i.test(input + ' ' + want);
   var isSingleClear = /ひとつ|一つ|1つ|単体|single|one only/i.test(input + ' ' + want);
   if (multiHint && !isSingleClear) {
@@ -1434,6 +1512,7 @@ function buildExtraQuestions(ans) {
     });
   }
 
+  // 【追加質問4】警告・通知系の閾値が不明な場合
   var needsWarning = /少なく|警告|教え|通知|アラート|残り|注意|warn|alert|remind|low|running/i.test(want);
   var hasThreshold = /日前|日後|日に|%|パーセント|個|時間|days?\s*before|%|weeks?/i.test(want);
   if (needsWarning && !hasThreshold) {
@@ -1447,6 +1526,8 @@ function buildExtraQuestions(ans) {
     });
   }
 
+  // 【追加質問5】画面に表示したい情報の優先順位が不明
+  // （入力が3つ以上ある時のみ）
   var inputCount = (input.match(/[、,]/g) || []).length + 1;
   if (inputCount >= 3 && extras.length < 3) {
     extras.push({
@@ -1459,14 +1540,18 @@ function buildExtraQuestions(ans) {
     });
   }
 
+  // 最大4問まで
   return extras.slice(0, 4);
 }
 
+// 作れない機能を検出して警告リストを返す
+// 各項目：{ type, detected, canReplace, replaceWith }
 function detectUnsupportedFeatures(ans) {
   var all = Object.values(ans).join(' ').toLowerCase();
   var isJa = (lang === 'ja');
   var warnings = [];
 
+  // ① プッシュ通知（アプリ閉じてても通知）
   if (/プッシュ通知|閉じ(て|ていて).*(通知|アラート|お知らせ)|バックグラウンド.*通知|push notification|background notif/i.test(all) ||
       (/(通知|アラーム|リマインド|お知らせ|アラート|rem(ind|inder)|alarm|notify)/i.test(all) &&
        /毎朝|毎日|定時|毎週|every\s*(day|morning|week)|at\s*\d/i.test(all))) {
@@ -1480,6 +1565,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ② 複数人共有・チーム機能
   if (/みんなで|複数人|他人と|グループで|チーム|共有|シェア|家族と|友達と|multi.user|share.*(with|between)|team|group/i.test(all)) {
     warnings.push({
       type: 'multi_user',
@@ -1491,6 +1577,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ③ 位置情報・GPS
   if (/位置情報|gps|現在地|地図で|マップで|どこに.*いる|location|map.*track/i.test(all)) {
     warnings.push({
       type: 'gps',
@@ -1502,6 +1589,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ④ カメラ・OCR・画像認識
   if (/カメラで.*読み取|写真.*認識|ocr|バーコード|qrコード.*読|画像.*分析|image.*recogn|scan.*(photo|image|code)/i.test(all)) {
     warnings.push({
       type: 'camera_ocr',
@@ -1513,6 +1601,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ⑤ 音声認識・音声入力
   if (/音声.*(入力|認識|読み上げ|録音)|声で|しゃべ(って|る)|voice.*(input|recog)|speech.*to.*text|record.*audio/i.test(all)) {
     warnings.push({
       type: 'voice',
@@ -1524,6 +1613,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ⑥ クラウド保存・他端末同期
   if (/クラウド|他の.*(端末|スマホ|機器).*同期|複数.*端末.*共有|cloud.*save|sync.*(device|phone)/i.test(all)) {
     warnings.push({
       type: 'cloud',
@@ -1535,6 +1625,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ⑦ メール/SMS/LINE 送信
   if (/(メール|sms|line|ライン).*(送信|送る|飛ばす)|send.*(mail|sms|message)/i.test(all)) {
     warnings.push({
       type: 'messaging',
@@ -1546,6 +1637,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ⑧ 外部API連携（天気・地図など）
   if (/天気.*(取得|表示|自動)|リアルタイム.*(株価|為替|ニュース)|外部.*(api|サービス).*連携|weather.*(api|auto)|real.*time.*(stock|news)/i.test(all)) {
     warnings.push({
       type: 'external_api',
@@ -1557,6 +1649,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ⑨ 課金・決済（完全NG、代替不可）
   if (/課金|決済|クレジットカード|サブスク|定期購入|payment|subscribe|credit.*card/i.test(all)) {
     warnings.push({
       type: 'payment',
@@ -1568,6 +1661,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ⑩ PDF生成・Excel出力・印刷
   if (/pdf.*(生成|出力|作成)|excel.*出力|印刷|プリント|pdf.*(export|generate)|excel.*export|print/i.test(all)) {
     warnings.push({
       type: 'file_export',
@@ -1579,6 +1673,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ⑪ バックグラウンド処理・自動実行
   if (/(アプリを?閉じ(た|て).*(後|も)|バックグラウンド).*自動|毎日.*自動(実行|処理)|auto.*(run|execute).*background/i.test(all)) {
     warnings.push({
       type: 'background',
@@ -1590,6 +1685,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ⑫ 生体認証・Face ID
   if (/指紋|顔認証|face.*id|touch.*id|生体認証|biometric/i.test(all)) {
     warnings.push({
       type: 'biometric',
@@ -1601,6 +1697,7 @@ function detectUnsupportedFeatures(ans) {
     });
   }
 
+  // ⑬ 健康データ・歩数計連携
   if (/歩数|心拍|睡眠.*(データ|記録)|健康.*(アプリ|データ).*連携|health.*data|step.*count/i.test(all)) {
     warnings.push({
       type: 'health_data',
@@ -1620,33 +1717,72 @@ function continueRedirect() {
   phase = 'interview'; render();
 }
 
+// API呼び出しの結果を保持するグローバル変数
+var pendingApiPromise = null;
+var pendingApiResult = null;
+var pendingApiError = null;
+
 function startLoading() {
   if (loadTimer) clearTimeout(loadTimer);
+  // ① ロード演出開始の瞬間にAPIを並行して走らせる
+  pendingApiResult = null;
+  pendingApiError = null;
+  pendingApiPromise = callBackend(answers).then(function(spec) {
+    pendingApiResult = spec;
+  }).catch(function(e) {
+    pendingApiError = e;
+  });
+  // ② 段階的アニメーション開始
   tickLoader();
 }
 
 function tickLoader() {
   var msgs = t().loadingMsgs;
+  // 最後のステップに到達したら、API結果を待ってから結果画面へ
   if (loadStep >= msgs.length - 1) {
-    loadTimer = setTimeout(async function() {
-      try {
-        var spec = await callBackend(answers);
-        if (spec.status === 'hold') { holdMsg = spec.hold_reason || ''; phase = 'hold'; render(); return; }
-        if (spec.status === 'blocked') { holdMsg = spec.blocked_reason || ''; phase = 'blocked'; render(); return; }
-        genApp = spec;
-        saveProgress({ stage:'result', answers:answers, app:spec });
-        checkedItems = {};
-        phase = 'result'; render();
-      } catch(e) {
-        saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
-        if (e.message === 'RATE_LIMIT' || e.message === 'RATE_LIMIT_USER') phase = 'rateLimit';
-        else phase = 'error';
-        render();
-      }
-    }, 1800);
+    waitApiAndShowResult();
     return;
   }
-  loadTimer = setTimeout(function() { loadStep++; updateLoadingUI(); tickLoader(); }, 1500);
+  // 1ステップ約3秒で進む（11ステップ × 3秒 = 約33秒）
+  loadTimer = setTimeout(function() {
+    loadStep++;
+    updateLoadingUI();
+    tickLoader();
+  }, 3000);
+}
+
+// 最終ステップ：APIが終わってたら即結果へ、まだならポーリング
+function waitApiAndShowResult() {
+  // 既にエラーで失敗してたら即遷移
+  if (pendingApiError) {
+    handleApiError(pendingApiError);
+    return;
+  }
+  // 結果が既に来てたら即遷移
+  if (pendingApiResult) {
+    handleApiSuccess(pendingApiResult);
+    return;
+  }
+  // まだ来てないなら最終メッセージを少しずつ点滅させながら待つ
+  loadTimer = setTimeout(waitApiAndShowResult, 500);
+}
+
+function handleApiSuccess(spec) {
+  if (spec.status === 'hold') { holdMsg = spec.hold_reason || ''; phase = 'hold'; render(); return; }
+  if (spec.status === 'blocked') { holdMsg = spec.blocked_reason || ''; phase = 'blocked'; render(); return; }
+  genApp = spec;
+  saveProgress({ stage:'result', answers:answers, app:spec });
+  checkedItems = {};
+  phase = 'result';
+  render();
+}
+
+function handleApiError(e) {
+  // エラー時も回答を残すために interview ステージとして保存
+  saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
+  if (e.message === 'RATE_LIMIT' || e.message === 'RATE_LIMIT_USER') phase = 'rateLimit';
+  else phase = 'error';
+  render();
 }
 
 function updateLoadingUI() {
@@ -1670,6 +1806,7 @@ function renderLoading() {
     '</div></div>';
 }
 
+// 作れない機能の確認画面
 function renderConfirm() {
   var isJa = (lang === 'ja');
   var hasBlocker = featureWarnings.some(function(w) { return !w.canReplace; });
@@ -1716,7 +1853,9 @@ function renderConfirm() {
     '</div>';
 }
 
+// 確認画面で「作る」を押したとき
 function confirmContinue() {
+  // 代替案を answers に記録しておく（AIに渡せる形で）
   answers._feature_replacements = featureWarnings
     .filter(function(w) { return w.canReplace; })
     .map(function(w) { return { cant: w.cantDoJa, replaceWith: w.replaceJa }; });
@@ -1725,11 +1864,13 @@ function confirmContinue() {
   setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'interview', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1400);
 }
 
+// 確認画面で「やり直す」を押したとき
 function confirmRetry() {
+  // 最後の固定質問からやり直す
   featureWarnings = [];
-  qIndex = t().questions.length - 1;
-  messages = messages.slice(0, -2);
-  addMsg('ai', (lang === 'ja' ? '✨ もう一度、最後の質問からやり直しましょう。' : '✨ Let\'s redo the last question.'), null);
+  qIndex = t().questions.length - 1; // 最後の質問に戻る
+  messages = messages.slice(0, -2); // 最後の問答を1組戻す
+  addMsg('ai', (lang === 'ja' ? '✨ もう一度、最後の質問からやり直しましょう。' : '✨ Let\u0027s redo the last question.'), null);
   addMsg('ai', t().questions[qIndex].text, t().questions[qIndex].hint);
   phase = 'interview'; render();
 }
@@ -1740,6 +1881,7 @@ function renderResult() {
   var isJa = (lang === 'ja');
   var hasHtml = a.html && typeof a.html === 'string' && a.html.length > 100;
 
+  // 旧形式（itemsベース）の場合はフォールバック
   if (!hasHtml) {
     var d = a.design || getDesign(a.feel);
     var items = a.items || [];
@@ -1762,6 +1904,7 @@ function renderResult() {
       '</div></div>';
   }
 
+  // 新形式：本物のHTMLアプリをiframeでプレビュー
   return '<div id="result">' +
     '<div class="result-head">' +
     '<div class="result-emoji">🎉</div>' +
@@ -1770,7 +1913,8 @@ function renderResult() {
     '</div>' +
     '<div class="preview-frame">' +
     '<div class="preview-label">📱 ' + (isJa ? 'プレビュー（実際に動きます！）' : 'Live Preview') + '</div>' +
-    '<iframe id="app-preview" sandbox="allow-scripts allow-same-origin allow-forms" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
+    '<iframe id="app-preview" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
+    '<div class="preview-tap-notice">💡 ' + (isJa ? 'プレビューはチラ見せ用です。完全動作はダウンロードしてご確認ください。' : 'Preview is for a quick look. Download for full functionality.') + '</div>' +
     '</div>' +
     '<div class="result-actions-v2">' +
     '<button class="btn-p" onclick="downloadGeneratedHtml()">📥 ' + (isJa ? 'ダウンロード' : 'Download') + '</button>' +
@@ -1788,6 +1932,7 @@ function renderResult() {
     '</div>';
 }
 
+// HTMLエスケープ（iframe srcdocに入れるための変換）
 function escapeHtml(str) {
   if (!str) return '';
   return String(str)
@@ -1798,6 +1943,7 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;');
 }
 
+// 生成HTMLをダウンロード
 function downloadGeneratedHtml() {
   if (!genApp || !genApp.html) return;
   var blob = new Blob([genApp.html], { type: 'text/html;charset=utf-8' });
@@ -1811,6 +1957,7 @@ function downloadGeneratedHtml() {
   setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
 }
 
+// HTMLをクリップボードにコピー
 function copyHtmlToClipboard() {
   if (!genApp || !genApp.html) return;
   var isJa = (lang === 'ja');
@@ -1915,7 +2062,10 @@ function renderError() {
     '</div></div>';
 }
 
+// エラーから即生成リトライ（回答そのまま使う）
 function retryGenerate() {
+  // ローディング画面を表示するが、保存上は interview ステージのまま
+  // （再開時に自動進行を防ぐため）
   phase = 'loading';
   loadStep = 0;
   saveProgress({ stage:'interview', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions });
@@ -1923,20 +2073,26 @@ function retryGenerate() {
   startLoading();
 }
 
+// エラーから最後の質問に戻る（回答内容を変えたい時）
 function backToInterview() {
+  // 最後の質問を答えた直後の状態に戻す
+  // messagesから最後のAI完了メッセージ（doneMsg）が入っていれば消す
   if (messages.length > 0) {
     var last = messages[messages.length - 1];
     if (last.from === 'ai' && last.isLast) {
       messages = messages.slice(0, -1);
     }
   }
+  // qIndexは最後の質問のインデックスに合わせる
   var totalQs = t().questions.length + extraQuestions.length;
   qIndex = Math.max(0, totalQs - 1);
+  // 最後の質問の答えを削除
   var activeQs = getActiveQuestions();
   var lastQ = activeQs[qIndex];
   if (lastQ && answers[lastQ.id]) {
     delete answers[lastQ.id];
   }
+  // 最後のユーザー回答メッセージも消す
   if (messages.length > 0 && messages[messages.length - 1].from === 'user') {
     messages = messages.slice(0, -1);
   }
@@ -1958,6 +2114,7 @@ function resetAll() {
 
 render();
 
+// Service Worker 登録（PWA化）
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js').then(function(reg) {
@@ -1968,15 +2125,20 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// PWA：iPhone Safariの「ホーム画面に追加」案内（初回のみ）
 function checkInstallPrompt() {
+  // すでにインストール済み or ジャンル外なら何もしない
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (window.navigator.standalone === true) return;
+  // iOS Safari判定
   var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
   if (!isIOS) return;
+  // 1度案内したら出さない
   try {
     if (localStorage.getItem('dojo_install_shown') === '1') return;
     localStorage.setItem('dojo_install_shown', '1');
   } catch(e) {}
+  // 5秒後にバナー表示
   setTimeout(showInstallBanner, 5000);
 }
 
