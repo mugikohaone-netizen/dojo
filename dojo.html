@@ -282,6 +282,49 @@ html,body {
   font-size:11px; color:var(--washi3); text-align:center;
   padding:6px 8px; line-height:1.6;
 }
+
+/* ホーム画面追加用URLカード（最重要・目立たせる） */
+.home-url-card {
+  background:linear-gradient(135deg, #fffaf3 0%, #fff5f0 100%);
+  border:2px solid var(--shu-lt);
+  border-radius:18px;
+  padding:18px 16px 16px;
+  box-shadow:0 6px 20px rgba(255,126,103,0.18);
+  display:flex; flex-direction:column; gap:10px;
+  animation:bounceIn 0.6s ease;
+}
+@keyframes bounceIn {
+  0% { transform:scale(0.9); opacity:0; }
+  60% { transform:scale(1.02); opacity:1; }
+  100% { transform:scale(1); }
+}
+.home-url-title {
+  font-size:15px; font-weight:700; color:var(--shu);
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+}
+.home-url-desc {
+  font-size:12px; color:var(--washi2); line-height:1.7;
+}
+.home-url-box {
+  background:#fff; border:1.5px solid var(--ink4); border-radius:10px;
+  padding:10px 12px; display:flex; align-items:center; gap:8px;
+  cursor:pointer; transition:border-color 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color:rgba(255,126,103,0.1);
+}
+.home-url-box:hover { border-color:var(--shu-lt); box-shadow:0 2px 8px rgba(255,126,103,0.1); }
+.home-url-box:active { transform:translateY(1px); }
+.home-url-text {
+  flex:1; min-width:0; font-size:11.5px; color:var(--washi);
+  font-family:'SF Mono', monospace, sans-serif;
+  word-break:break-all; line-height:1.5;
+}
+.home-url-copy-icon { font-size:16px; flex-shrink:0; }
+.home-url-actions { display:flex; gap:8px; }
+.home-url-actions button { flex:1; padding:11px 0; font-size:13px; }
+.home-url-note {
+  font-size:11px; color:var(--washi3); line-height:1.7;
+  background:rgba(255,255,255,0.6); border-radius:8px; padding:8px 10px;
+}
 .result-actions-v2 button { flex:1; min-width:130px; padding:13px 0; font-size:14px; }
 .result-note-v2 {
   font-size:12px; color:var(--washi2); text-align:center; line-height:1.7;
@@ -1905,31 +1948,76 @@ function renderResult() {
   }
 
   // 新形式：本物のHTMLアプリをiframeでプレビュー
+  // ホーム画面追加用URL（KV保存成功時のみ）
+  var homeUrlCard = '';
+  if (a.app_url) {
+    homeUrlCard =
+      '<div class="home-url-card">' +
+      '<div class="home-url-title">📱 ' + (isJa ? 'ホーム画面に追加できます！' : 'Add to Home Screen!') + '</div>' +
+      '<div class="home-url-desc">' +
+        (isJa
+          ? '下のURLをSafariで開いて「共有 → ホーム画面に追加」'
+          : 'Open URL in Safari → Share → Add to Home Screen') +
+      '</div>' +
+      '<div class="home-url-box" onclick="copyAppUrl()">' +
+      '<span class="home-url-text">' + escapeHtml(a.app_url) + '</span>' +
+      '<span class="home-url-copy-icon">📋</span>' +
+      '</div>' +
+      '<div class="home-url-actions">' +
+      '<button class="btn-p" onclick="openAppUrl()">🚀 ' + (isJa ? 'Safariで開く' : 'Open in Safari') + '</button>' +
+      '<button class="btn-g" onclick="copyAppUrl()">📋 ' + (isJa ? 'URLをコピー' : 'Copy URL') + '</button>' +
+      '</div>' +
+      '<div class="home-url-note">⏰ ' +
+      (isJa
+        ? 'このURLは30日間有効。ホーム画面追加後はあなたのスマホ内で永久に動きます'
+        : 'URL valid for 30 days. After adding, works permanently on your phone.') +
+      '</div>' +
+      '</div>';
+  }
+
   return '<div id="result">' +
     '<div class="result-head">' +
     '<div class="result-emoji">🎉</div>' +
     '<div class="result-title">' + escapeHtml(a.app_name || 'My App') + '</div>' +
     '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
     '</div>' +
+    homeUrlCard +
     '<div class="preview-frame">' +
-    '<div class="preview-label">📱 ' + (isJa ? 'プレビュー（実際に動きます！）' : 'Live Preview') + '</div>' +
-    '<iframe id="app-preview" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
-    '<div class="preview-tap-notice">💡 ' + (isJa ? 'プレビューはチラ見せ用です。完全動作はダウンロードしてご確認ください。' : 'Preview is for a quick look. Download for full functionality.') + '</div>' +
+    '<div class="preview-label">📱 ' + (isJa ? 'プレビュー' : 'Preview') + '</div>' +
+    '<iframe id="app-preview" sandbox="allow-scripts allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
+    '<div class="preview-tap-notice">💡 ' + (isJa ? 'プレビューは見本です。完全動作は上のSafariで開く' : 'Preview only. Open in Safari above for full functionality') + '</div>' +
     '</div>' +
     '<div class="result-actions-v2">' +
-    '<button class="btn-p" onclick="downloadGeneratedHtml()">📥 ' + (isJa ? 'ダウンロード' : 'Download') + '</button>' +
+    '<button class="btn-g" onclick="downloadGeneratedHtml()">📥 ' + (isJa ? 'ダウンロード' : 'Download') + '</button>' +
     '<button class="btn-g" onclick="copyHtmlToClipboard()">📋 ' + (isJa ? 'コードをコピー' : 'Copy Code') + '</button>' +
-    '</div>' +
-    '<div class="result-note-v2">' +
-    '💡 ' + (isJa
-      ? 'ダウンロード後、「ファイル」アプリから開けます。お友達にLINEで送ることもできます。'
-      : 'Open from Files app after download. You can also share via LINE/Email.') +
     '</div>' +
     '<div class="result-actions">' +
     '<button class="btn-g" onclick="resetAll()">🔄 ' + (isJa ? '別のアプリを作る' : 'Make another') + '</button>' +
     '<button class="btn-g" style="font-size:12px" onclick="showArticle()">← ' + (isJa ? 'トップに戻る' : 'Back to top') + '</button>' +
     '</div>' +
     '</div>';
+}
+
+// アプリURLをSafariで開く
+function openAppUrl() {
+  if (!genApp || !genApp.app_url) return;
+  window.open(genApp.app_url, '_blank');
+}
+
+// アプリURLをクリップボードにコピー
+function copyAppUrl() {
+  if (!genApp || !genApp.app_url) return;
+  var url = genApp.app_url;
+  var isJa = (lang === 'ja');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function() {
+      alert(isJa ? '✅ URLをコピーしました！\nSafariのアドレスバーに貼り付けて開いてください。' : '✅ URL copied!');
+    }).catch(function() {
+      fallbackCopy(url);
+    });
+  } else {
+    fallbackCopy(url);
+  }
 }
 
 // HTMLエスケープ（iframe srcdocに入れるための変換）
