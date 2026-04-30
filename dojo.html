@@ -1975,19 +1975,18 @@ function renderResult() {
       '</div>';
   }
 
-// ✅ 修正後の完全な型（ここから）
   return '<div id="result">' +
     '<div class="result-head">' +
     '<div class="result-emoji">🎉</div>' +
     '<div class="result-title">' + escapeHtml(a.app_name || 'My App') + '</div>' +
     '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
     '</div>' +
-    '<div class="preview-frame">' +  // ← プレビュー枠の開始
+    homeUrlCard +
+    '<div class="preview-frame">' +
     '<div class="preview-label">📱 ' + (isJa ? 'プレビュー' : 'Preview') + '</div>' +
     '<iframe id="app-preview" sandbox="allow-scripts allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
-    '<div class="preview-tap-notice">💡 ' + (isJa ? 'プレビューは見本です。完全動作は下のSafariで開く' : 'Preview only. Open in Safari below for full functionality') + '</div>' +
-    '</div>' +  // ← プレビュー枠の終了
-    homeUrlCard + // ← プレビューの下にURLカードを配置！
+    '<div class="preview-tap-notice">💡 ' + (isJa ? 'プレビューは見本です。完全動作は上のSafariで開く' : 'Preview only. Open in Safari above for full functionality') + '</div>' +
+    '</div>' +
     '<div class="result-actions-v2">' +
     '<button class="btn-g" onclick="downloadGeneratedHtml()">📥 ' + (isJa ? 'ダウンロード' : 'Download') + '</button>' +
     '<button class="btn-g" onclick="copyHtmlToClipboard()">📋 ' + (isJa ? 'コードをコピー' : 'Copy Code') + '</button>' +
@@ -1997,7 +1996,7 @@ function renderResult() {
     '<button class="btn-g" style="font-size:12px" onclick="showArticle()">← ' + (isJa ? 'トップに戻る' : 'Back to top') + '</button>' +
     '</div>' +
     '</div>';
-// ✅ （ここまで）  
+}
 
 // アプリURLをSafariで開く
 function openAppUrl() {
