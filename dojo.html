@@ -846,6 +846,42 @@ async function fetchAdvice(ans) {
   }
 }
 
+// OS/ブラウザ判定
+function detectPlatform() {
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+  var isAndroid = /Android/.test(ua);
+  return { isIOS: isIOS, isAndroid: isAndroid, isMobile: isIOS || isAndroid };
+}
+
+// プラットフォーム別のホーム画面追加ガイダンス
+function getInstallGuide() {
+  var p = detectPlatform();
+  var isJa = (lang === 'ja');
+  if (p.isIOS) {
+    return {
+      browserName: isJa ? 'Safari' : 'Safari',
+      openLabel: isJa ? 'Safariで開く' : 'Open in Safari',
+      addStepsShort: isJa ? '下のURLをSafariで開いて「共有 → ホーム画面に追加」' : 'Open URL in Safari → Share → Add to Home Screen',
+      addStepsLong: isJa ? '共有ボタン → 「ホーム画面に追加」をタップ' : 'Share button → "Add to Home Screen"'
+    };
+  } else if (p.isAndroid) {
+    return {
+      browserName: isJa ? 'Chrome' : 'Chrome',
+      openLabel: isJa ? 'Chromeで開く' : 'Open in Chrome',
+      addStepsShort: isJa ? '下のURLをChromeで開いて「︙メニュー → ホーム画面に追加」' : 'Open URL in Chrome → ︙ Menu → Add to Home Screen',
+      addStepsLong: isJa ? '右上の「︙」 → 「ホーム画面に追加」をタップ' : '︙ menu → "Add to Home Screen"'
+    };
+  } else {
+    return {
+      browserName: isJa ? 'ブラウザ' : 'Browser',
+      openLabel: isJa ? 'ブラウザで開く' : 'Open in Browser',
+      addStepsShort: isJa ? 'スマホでURLを開いて「ホーム画面に追加」' : 'Open URL on phone → Add to Home Screen',
+      addStepsLong: isJa ? 'スマホでこのURLを開いてください' : 'Open this URL on your phone'
+    };
+  }
+}
+
 function saveProgress(data) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e) {} }
 function loadProgress() { try { var r = localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
 function clearProgress() { try { localStorage.removeItem(SAVE_KEY); } catch(e) {} }
@@ -2119,20 +2155,17 @@ function renderResult() {
   // ホーム画面追加用URL（KV保存成功時のみ）
   var homeUrlCard = '';
   if (a.app_url) {
+    var guide = getInstallGuide();
     homeUrlCard =
       '<div class="home-url-card">' +
       '<div class="home-url-title">📱 ' + (isJa ? 'ホーム画面に追加できます！' : 'Add to Home Screen!') + '</div>' +
-      '<div class="home-url-desc">' +
-        (isJa
-          ? '下のURLをSafariで開いて「共有 → ホーム画面に追加」'
-          : 'Open URL in Safari → Share → Add to Home Screen') +
-      '</div>' +
+      '<div class="home-url-desc">' + guide.addStepsShort + '</div>' +
       '<div class="home-url-box" onclick="copyAppUrl()">' +
       '<span class="home-url-text">' + escapeHtml(a.app_url) + '</span>' +
       '<span class="home-url-copy-icon">📋</span>' +
       '</div>' +
       '<div class="home-url-actions">' +
-      '<button class="btn-p" onclick="openAppUrl()">🚀 ' + (isJa ? 'Safariで開く' : 'Open in Safari') + '</button>' +
+      '<button class="btn-p" onclick="openAppUrl()">🚀 ' + guide.openLabel + '</button>' +
       '<button class="btn-g" onclick="copyAppUrl()">📋 ' + (isJa ? 'URLをコピー' : 'Copy URL') + '</button>' +
       '</div>' +
       '<div class="home-url-note">⏰ ' +
@@ -2153,7 +2186,7 @@ function renderResult() {
     '<div class="preview-frame">' +
     '<div class="preview-label">📱 ' + (isJa ? 'プレビュー' : 'Preview') + '</div>' +
     '<iframe id="app-preview" sandbox="allow-scripts allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
-    '<div class="preview-tap-notice">💡 ' + (isJa ? 'プレビューは見本です。完全動作は上のSafariで開く' : 'Preview only. Open in Safari above for full functionality') + '</div>' +
+    '<div class="preview-tap-notice">💡 ' + (isJa ? 'プレビューは見本です。完全動作は上の「' + getInstallGuide().openLabel + '」から' : 'Preview only. Use "' + getInstallGuide().openLabel + '" above for full functionality') + '</div>' +
     '</div>' +
     '<div class="result-actions-v2">' +
     '<button class="btn-g" onclick="downloadGeneratedHtml()">📥 ' + (isJa ? 'ダウンロード' : 'Download') + '</button>' +
@@ -2177,9 +2210,13 @@ function copyAppUrl() {
   if (!genApp || !genApp.app_url) return;
   var url = genApp.app_url;
   var isJa = (lang === 'ja');
+  var guide = getInstallGuide();
+  var msg = isJa
+    ? '✅ URLをコピーしました！\n' + guide.browserName + 'のアドレスバーに貼り付けて開いてください。'
+    : '✅ URL copied!\nPaste it in ' + guide.browserName + ' address bar.';
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(function() {
-      alert(isJa ? '✅ URLをコピーしました！\nSafariのアドレスバーに貼り付けて開いてください。' : '✅ URL copied!');
+      alert(msg);
     }).catch(function() {
       fallbackCopy(url);
     });
@@ -2383,14 +2420,14 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// PWA：iPhone Safariの「ホーム画面に追加」案内（初回のみ）
+// PWA：iPhone Safari / Android Chrome の「ホーム画面に追加」案内（初回のみ）
 function checkInstallPrompt() {
-  // すでにインストール済み or ジャンル外なら何もしない
+  // すでにインストール済みなら何もしない
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (window.navigator.standalone === true) return;
-  // iOS Safari判定
-  var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
-  if (!isIOS) return;
+  // iOS Safari または Android のみ
+  var p = detectPlatform();
+  if (!p.isMobile) return;
   // 1度案内したら出さない
   try {
     if (localStorage.getItem('dojo_install_shown') === '1') return;
@@ -2402,6 +2439,7 @@ function checkInstallPrompt() {
 
 function showInstallBanner() {
   var isJa = (lang === 'ja');
+  var guide = getInstallGuide();
   var banner = document.createElement('div');
   banner.id = 'install-banner';
   banner.innerHTML =
@@ -2409,7 +2447,7 @@ function showInstallBanner() {
     '<div class="ib-icon">📱</div>' +
     '<div class="ib-text">' +
     '<div class="ib-title">' + (isJa ? 'ホーム画面に追加できます' : 'Add to Home Screen') + '</div>' +
-    '<div class="ib-desc">' + (isJa ? '共有ボタン → 「ホーム画面に追加」をタップ' : 'Share button → "Add to Home Screen"') + '</div>' +
+    '<div class="ib-desc">' + guide.addStepsLong + '</div>' +
     '</div>' +
     '<button class="ib-close" onclick="closeInstallBanner()">✕</button>' +
     '</div>';
