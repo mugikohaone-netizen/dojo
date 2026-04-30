@@ -770,7 +770,7 @@ function getUserToken() {
 }
 // テスト用：1日30回まで（公開時は1〜3に戻す）
 // パパさんの開発時は window.resetDojoRate() で即リセット可能
-var RATE_LIMIT_PER_DAY = 30;
+var RATE_LIMIT_PER_DAY = 3;
 
 function checkRate() {
   var today = new Date().toISOString().slice(0, 10);
@@ -1918,7 +1918,6 @@ function confirmRetry() {
   phase = 'interview'; render();
 }
 
-// ✅ ここから：関数全体を丸ごと上書きペーストしてください！
 function renderResult() {
   if (!genApp) return renderError();
   var a = genApp;
@@ -1975,30 +1974,6 @@ function renderResult() {
       '</div>' +
       '</div>';
   }
-
-  return '<div id="result">' +
-    '<div class="result-head">' +
-    '<div class="result-emoji">🎉</div>' +
-    '<div class="result-title">' + escapeHtml(a.app_name || 'My App') + '</div>' +
-    '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
-    '</div>' +
-    '<div class="preview-frame">' +
-    '<div class="preview-label">📱 ' + (isJa ? 'プレビュー' : 'Preview') + '</div>' +
-    '<iframe id="app-preview" sandbox="allow-scripts allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
-    '<div class="preview-tap-notice">💡 ' + (isJa ? 'プレビューは見本です。完全動作は下のSafariで開く' : 'Preview only. Open in Safari below for full functionality') + '</div>' +
-    '</div>' +
-    homeUrlCard + // 🌟 ここでちゃんと案内が出ます！
-    '<div class="result-actions-v2">' +
-    '<button class="btn-g" onclick="downloadGeneratedHtml()">📥 ' + (isJa ? 'ダウンロード' : 'Download') + '</button>' +
-    '<button class="btn-g" onclick="copyHtmlToClipboard()">📋 ' + (isJa ? 'コードをコピー' : 'Copy Code') + '</button>' +
-    '</div>' +
-    '<div class="result-actions">' +
-    '<button class="btn-g" onclick="resetAll()">🔄 ' + (isJa ? '別のアプリを作る' : 'Make another') + '</button>' +
-    '<button class="btn-g" style="font-size:12px" onclick="showArticle()">← ' + (isJa ? 'トップに戻る' : 'Back to top') + '</button>' +
-    '</div>' +
-    '</div>';
-}
-// ✅ ここまで
 
   return '<div id="result">' +
     '<div class="result-head">' +
