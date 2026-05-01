@@ -113,7 +113,7 @@ html,body {
 .btn-g { background:#fff; border:1.5px solid var(--ink4); border-radius:14px; padding:13px 0; font-size:13.5px; cursor:pointer; width:100%; font-family:inherit; color:var(--washi2); font-weight:500; transition:background 0.2s, border-color 0.2s; }
 .btn-g:hover { background:var(--ink3); border-color:var(--ink5); }
 .btn-s { background:var(--shu); color:#fff; border:none; border-radius:10px; padding:8px 14px; font-size:12.5px; cursor:pointer; font-weight:600; font-family:inherit; box-shadow:0 2px 8px rgba(255,126,103,0.25); }
-.btn-send { background:linear-gradient(135deg, var(--shu) 0%, var(--shu-lt) 100%); color:#fff; border:none; border-radius:12px; padding:12px 18px; font-weight:700; cursor:pointer; font-size:14px; white-space:nowrap; font-family:inherit; flex-shrink:0; box-shadow:0 2px 8px rgba(255,126,103,0.25); }
+.btn-send { background:linear-gradient(135deg, var(--shu) 0%, var(--shu-lt) 100%); color:#fff; border:none; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer; font-size:13px; white-space:nowrap; font-family:inherit; flex-shrink:0; box-shadow:0 2px 8px rgba(255,126,103,0.25); line-height:1.4; text-align:center; min-width:52px; align-self:flex-end; }
 
 .center { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--ink); }
 .center-card { text-align:center; max-width:340px; animation:slideUp 0.5s ease; }
@@ -228,7 +228,7 @@ html,body {
 .msg-bubble-user { background:linear-gradient(135deg, var(--shu) 0%, var(--shu-lt) 100%); border-radius:18px 4px 18px 18px; padding:12px 14px; max-width:272px; font-size:13.5px; line-height:1.65; color:#fff; box-shadow:0 2px 8px rgba(255,126,103,0.25); }
 .msg-hint { font-size:11px; color:var(--washi3); margin-top:5px; margin-left:4px; }
 #input-area { display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--ink4); background:#fff; flex-shrink:0; align-items:flex-end; }
-#chat-inp { flex:1; min-width:0; background:#fff; border:1.5px solid var(--ink4); border-radius:12px; color:var(--washi); padding:12px 14px; font-size:14px; outline:none; font-family:inherit; transition:border-color 0.2s, box-shadow 0.2s; resize:none; line-height:1.6; min-height:48px; max-height:160px; overflow-y:auto; }
+#chat-inp { flex:1; min-width:0; background:#fff; border:1.5px solid var(--ink4); border-radius:12px; color:var(--washi); padding:12px 14px; font-size:14px; outline:none; font-family:inherit; transition:border-color 0.2s, box-shadow 0.2s; resize:none; line-height:1.6; min-height:88px; max-height:240px; overflow-y:auto; }
 #chat-inp:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(91,155,213,0.15); }
 
 #loading { flex:1; display:flex; align-items:center; justify-content:center; }
@@ -1317,7 +1317,7 @@ function renderArticle() {
     '<div class="art-footer-desc">' + t().authorDesc + '</div></div></div>' +
     '<div class="art-footer-cta">' + t().authorCTA + '</div>' +
     '<div class="support-box"><div class="support-box-title">' + t().supportTitle + '</div><div class="support-box-desc">' + t().supportDesc + '</div></div>' +
-    '<div class="terms-link"><a href="./terms.html">📜 ' + (isEn ? 'Terms of Service' : '利用規約') + '</a></div>' +
+    '<div class="terms-link"><a href="https://mugikohaone-netizen.github.io/dojo/terms.html" target="_blank" rel="noopener">📜 ' + (isEn ? 'Terms of Service' : '利用規約') + '</a></div>' +
     '</div>' +
     '</div>';
 }
@@ -1533,7 +1533,7 @@ function renderInterview() {
   } else {
     stepLbl = (lang === 'ja' ? '質問 ' + (qIndex + 1) + ' / ' + t().questions.length : 'Q ' + (qIndex + 1) + ' / ' + t().questions.length);
   }
-  var inputHTML = !inputOff ? '<div id="input-area"><textarea id="chat-inp" placeholder="' + ph + '" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"></textarea><button class="btn-send" onclick="sendMsg()">' + t().send + '</button></div>' : '';
+  var inputHTML = !inputOff ? '<div id="input-area"><textarea id="chat-inp" placeholder="' + ph + '" rows="3" onkeydown="handleKey(event)" oninput="autoResize(this)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"></textarea><button class="btn-send" onclick="sendMsg()">↑<br>' + t().send + '</button></div>' : '';
 
   var isJa2 = (lang === 'ja');
   // ホームに戻る（中断確認付き）
@@ -1642,15 +1642,15 @@ function handleKey(e) {
 // textareaを内容に合わせて自動リサイズ
 function autoResize(el) {
   el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  el.style.height = Math.min(el.scrollHeight, 240) + 'px';
 }
 
 function sendMsg() {
   var inp = document.getElementById('chat-inp');
   if (!inp || !inp.value.trim()) return;
   var val = inp.value.trim();
-  // リサイズリセット
-  inp.style.height = 'auto';
+  // リサイズリセット（3行分の高さに戻す）
+  inp.style.height = '88px';
 
   if (/みんなで|複数人|他人と|グループで|リアルタイムで共有|multi.user|share with team/i.test(val)) {
     addMsg('user', val);
