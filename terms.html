@@ -2101,7 +2101,21 @@ function renderConfirm() {
       '</div>' +
       '</div>';
   } else if (hasAdvice) {
-    var tipsHTML = adviceData.tips.map(function(tip) {
+    var safeTips = [];
+    if (typeof adviceData.tips === 'string') {
+      // 文字列で来てしまった場合は、要素1つの配列で包み直す
+      safeTips = [adviceData.tips];
+    } else if (Array.isArray(adviceData.tips)) {
+      // 全ての要素が「1文字」だった場合、バラバラ事件と判定して再結合する
+      var isAllSingleChar = adviceData.tips.length > 0 && adviceData.tips.every(function(t) { return typeof t === 'string' && t.length === 1; });
+      if (isAllSingleChar) {
+        safeTips = [adviceData.tips.join('')];
+      } else {
+        safeTips = adviceData.tips; // 正常な配列ならそのまま
+      }
+    }
+
+    var tipsHTML = safeTips.map(function(tip) {
       return '<div class="confirm-item advice-item"><span class="advice-bullet">💡</span><span>' + escapeHtml(tip) + '</span></div>';
     }).join('');
     var altHTML = adviceData.alternative
