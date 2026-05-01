@@ -227,8 +227,8 @@ html,body {
 .msg-bubble-ai { background:#fff; border:1px solid var(--ink4); border-radius:4px 18px 18px 18px; padding:12px 14px; max-width:272px; font-size:13.5px; line-height:1.65; color:var(--washi); box-shadow:0 1px 4px rgba(91,155,213,0.08); }
 .msg-bubble-user { background:linear-gradient(135deg, var(--shu) 0%, var(--shu-lt) 100%); border-radius:18px 4px 18px 18px; padding:12px 14px; max-width:272px; font-size:13.5px; line-height:1.65; color:#fff; box-shadow:0 2px 8px rgba(255,126,103,0.25); }
 .msg-hint { font-size:11px; color:var(--washi3); margin-top:5px; margin-left:4px; }
-#input-area { display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--ink4); background:#fff; flex-shrink:0; align-items:center; }
-#chat-inp { flex:1; min-width:0; background:#fff; border:1.5px solid var(--ink4); border-radius:12px; color:var(--washi); padding:12px 14px; font-size:14px; outline:none; font-family:inherit; transition:border-color 0.2s, box-shadow 0.2s; }
+#input-area { display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--ink4); background:#fff; flex-shrink:0; align-items:flex-end; }
+#chat-inp { flex:1; min-width:0; background:#fff; border:1.5px solid var(--ink4); border-radius:12px; color:var(--washi); padding:12px 14px; font-size:14px; outline:none; font-family:inherit; transition:border-color 0.2s, box-shadow 0.2s; resize:none; line-height:1.6; min-height:48px; max-height:160px; overflow-y:auto; }
 #chat-inp:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(91,155,213,0.15); }
 
 #loading { flex:1; display:flex; align-items:center; justify-content:center; }
@@ -324,6 +324,71 @@ html,body {
 .home-url-note {
   font-size:11px; color:var(--washi3); line-height:1.7;
   background:rgba(255,255,255,0.6); border-radius:8px; padding:8px 10px;
+}
+
+/* 🌟 クロード大明神 降臨演出 🌟 */
+.premium-banner {
+  background:linear-gradient(135deg, #fff8dc 0%, #ffd700 50%, #fff4b3 100%);
+  background-size:200% 200%;
+  animation:premiumShimmer 3s ease infinite;
+  border:2px solid #d4af37;
+  border-radius:18px;
+  padding:18px 16px;
+  text-align:center;
+  box-shadow:0 0 30px rgba(212,175,55,0.4), 0 4px 14px rgba(0,0,0,0.08);
+  position:relative;
+  overflow:hidden;
+}
+@keyframes premiumShimmer {
+  0%,100% { background-position:0% 50%; }
+  50% { background-position:100% 50%; }
+}
+.premium-sparkle {
+  font-size:24px; letter-spacing:8px;
+  animation:sparkleFloat 2s ease-in-out infinite;
+}
+@keyframes sparkleFloat {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(-4px); }
+}
+.premium-title {
+  font-size:18px; font-weight:900; color:#5d4e1b;
+  margin:6px 0 4px;
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+  letter-spacing:1px;
+  text-shadow:0 1px 2px rgba(255,255,255,0.5);
+}
+.premium-sub {
+  font-size:12px; color:#7a6831; line-height:1.7; margin-bottom:8px;
+}
+.premium-badge {
+  display:inline-block;
+  background:linear-gradient(135deg, #d4af37, #f4d77a);
+  color:#fff; font-size:11px; font-weight:900;
+  padding:4px 14px; border-radius:12px;
+  letter-spacing:2px;
+  box-shadow:0 2px 6px rgba(212,175,55,0.4);
+}
+.home-url-premium {
+  background:linear-gradient(135deg, #fffbea 0%, #fff8d6 100%) !important;
+  border-color:#d4af37 !important;
+  box-shadow:0 6px 20px rgba(212,175,55,0.25) !important;
+}
+.result-premium .result-emoji {
+  animation:pulse 1.5s ease-in-out infinite;
+}
+#loading.loading-premium {
+  background:linear-gradient(135deg, #fffaf0 0%, #fff3c4 50%, #fffaf0 100%);
+  background-size:200% 200%;
+  animation:premiumShimmer 4s ease infinite;
+}
+.loading-premium-overlay {
+  background:linear-gradient(135deg, #d4af37, #f4d77a);
+  color:#fff; padding:8px 14px; border-radius:20px;
+  font-size:11px; font-weight:700; letter-spacing:1px;
+  display:inline-block; margin-bottom:14px;
+  box-shadow:0 4px 12px rgba(212,175,55,0.4);
+  animation:zunIn 0.6s ease;
 }
 .result-actions-v2 button { flex:1; min-width:130px; padding:13px 0; font-size:14px; }
 .result-note-v2 {
@@ -946,12 +1011,21 @@ function mockGen(ans) {
   };
 }
 
+var isPremiumPending = false; // 大明神当選フラグ（ロード中も保持）
+
 async function callBackend(ans) {
   if (!BACKEND_URL) return mockGen(ans);
+  // 大明神モード抽選（3%）
+  isPremiumPending = (Math.random() * 100) < 3;
+  // ローディング表示も切り替えるため即re-render
+  if (phase === 'loading') {
+    var em = document.getElementById('loading-emoji');
+    if (em) updateLoadingUI();
+  }
   var res = await fetch(BACKEND_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ answers: ans, userToken: getUserToken() })
+    body: JSON.stringify({ answers: ans, userToken: getUserToken(), isPremium: isPremiumPending })
   });
   if (res.status === 429) { var d = await res.json().catch(function() { return {}; }); throw new Error(d.error === 'RATE_LIMIT_USER' ? 'RATE_LIMIT_USER' : 'RATE_LIMIT'); }
   if (res.status === 403) throw new Error('CAPTCHA_FAILED');
@@ -1459,7 +1533,7 @@ function renderInterview() {
   } else {
     stepLbl = (lang === 'ja' ? '質問 ' + (qIndex + 1) + ' / ' + t().questions.length : 'Q ' + (qIndex + 1) + ' / ' + t().questions.length);
   }
-  var inputHTML = !inputOff ? '<div id="input-area"><input id="chat-inp" placeholder="' + ph + '" onkeydown="handleKey(event)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"><button class="btn-send" onclick="sendMsg()">' + t().send + '</button></div>' : '';
+  var inputHTML = !inputOff ? '<div id="input-area"><textarea id="chat-inp" placeholder="' + ph + '" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)" oncompositionstart="isComposing=true" oncompositionend="isComposing=false"></textarea><button class="btn-send" onclick="sendMsg()">' + t().send + '</button></div>' : '';
 
   var isJa2 = (lang === 'ja');
   // ホームに戻る（中断確認付き）
@@ -1558,13 +1632,25 @@ function scrollBottom() {
 }
 
 function handleKey(e) {
-  if (e.key === 'Enter' && !isComposing) sendMsg();
+  // Shift+Enter → 改行、Enter単体 → 送信
+  if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
+    e.preventDefault();
+    sendMsg();
+  }
+}
+
+// textareaを内容に合わせて自動リサイズ
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 160) + 'px';
 }
 
 function sendMsg() {
   var inp = document.getElementById('chat-inp');
   if (!inp || !inp.value.trim()) return;
   var val = inp.value.trim();
+  // リサイズリセット
+  inp.style.height = 'auto';
 
   if (/みんなで|複数人|他人と|グループで|リアルタイムで共有|multi.user|share with team/i.test(val)) {
     addMsg('user', val);
@@ -1980,11 +2066,18 @@ function updateLoadingUI() {
 function renderLoading() {
   var msgs = t().loadingMsgs;
   var dots = msgs.map(function(_, i) { return '<div class="ldot' + (i <= loadStep ? ' on' : '') + '"></div>'; }).join('');
-  return '<div id="loading"><div id="loading-inner">' +
+  var premiumClass = isPremiumPending ? ' loading-premium' : '';
+  var premiumOverlay = isPremiumPending
+    ? '<div class="loading-premium-overlay">' +
+      '<div class="loading-premium-text">🥋 ' + (lang === 'ja' ? 'クロード大明神 本気モード' : 'Claude Daimyojin: Serious Mode') + ' 🥋</div>' +
+      '</div>'
+    : '';
+  return '<div id="loading" class="' + premiumClass.trim() + '"><div id="loading-inner">' +
+    premiumOverlay +
     '<div id="loading-emoji">' + msgs[loadStep].icon + '</div>' +
     '<div id="loading-text">' + msgs[loadStep].text + '</div>' +
     '<div id="loading-dots">' + dots + '</div>' +
-    '<div id="loading-sub">' + t().loadingSub + '</div>' +
+    '<div id="loading-sub">' + (isPremiumPending ? (lang === 'ja' ? '✨ 本日のあなたは特別。最高品質で作っています ✨' : '✨ Today is special. Crafting at top quality ✨') : t().loadingSub) + '</div>' +
     '</div></div>';
 }
 
@@ -2152,12 +2245,26 @@ function renderResult() {
   }
 
   // 新形式：本物のHTMLアプリをiframeでプレビュー
+  var isPremium = a.is_premium === true;
+
+  // 大明神降臨バナー（当選時のみ）
+  var premiumBanner = '';
+  if (isPremium) {
+    premiumBanner =
+      '<div class="premium-banner">' +
+      '<div class="premium-sparkle">✨🌟✨</div>' +
+      '<div class="premium-title">' + (isJa ? '🥋 クロード大明神 降臨 🥋' : '🥋 Claude Daimyojin Descended 🥋') + '</div>' +
+      '<div class="premium-sub">' + (isJa ? '本日のあなたは特別。最上位AIが本気で作りました。' : 'Today is special. Top-tier AI gave its all.') + '</div>' +
+      '<div class="premium-badge">SR / 大明神特製</div>' +
+      '</div>';
+  }
+
   // ホーム画面追加用URL（KV保存成功時のみ）
   var homeUrlCard = '';
   if (a.app_url) {
     var guide = getInstallGuide();
     homeUrlCard =
-      '<div class="home-url-card">' +
+      '<div class="home-url-card' + (isPremium ? ' home-url-premium' : '') + '">' +
       '<div class="home-url-title">📱 ' + (isJa ? 'ホーム画面に追加できます！' : 'Add to Home Screen!') + '</div>' +
       '<div class="home-url-desc">' + guide.addStepsShort + '</div>' +
       '<div class="home-url-box" onclick="copyAppUrl()">' +
@@ -2176,9 +2283,10 @@ function renderResult() {
       '</div>';
   }
 
-  return '<div id="result">' +
+  return '<div id="result"' + (isPremium ? ' class="result-premium"' : '') + '>' +
+    premiumBanner +
     '<div class="result-head">' +
-    '<div class="result-emoji">🎉</div>' +
+    '<div class="result-emoji">' + (isPremium ? '🌟' : '🎉') + '</div>' +
     '<div class="result-title">' + escapeHtml(a.app_name || 'My App') + '</div>' +
     '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
     '</div>' +
@@ -2193,7 +2301,7 @@ function renderResult() {
     '<button class="btn-g" onclick="copyHtmlToClipboard()">📋 ' + (isJa ? 'コードをコピー' : 'Copy Code') + '</button>' +
     '</div>' +
     '<div class="result-actions">' +
-    '<button class="btn-g" onclick="resetAll()">🔄 ' + (isJa ? '別のアプリを作る' : 'Make another') + '</button>' +
+    '<button class="btn-g" onclick="resetAll()">🎲 ' + (isJa ? 'もう一回振る' : 'Roll again') + '</button>' +
     '<button class="btn-g" style="font-size:12px" onclick="showArticle()">← ' + (isJa ? 'トップに戻る' : 'Back to top') + '</button>' +
     '</div>' +
     '</div>';
@@ -2401,6 +2509,7 @@ function resetAll() {
   featureWarnings = [];
   adviceData = null;
   adviceLoading = false;
+  isPremiumPending = false;
   loadStep = 0; genApp = null; holdMsg = ''; checkedItems = {};
   if (loadTimer) clearTimeout(loadTimer);
   if (bugTimer) clearTimeout(bugTimer);
