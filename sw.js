@@ -1,6 +1,6 @@
 // AI App Dojo - Service Worker
 // バージョンを変えるとキャッシュが更新される
-const CACHE_VERSION = 'dojo-v1';
+const CACHE_VERSION = 'dojo-v3'; // ← 更新するたびにここを変える
 const ASSETS_TO_CACHE = [
   './',
   './dojo.html',
@@ -14,7 +14,6 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION).then((cache) => {
-      // 個別にキャッシュ追加（一つ失敗しても他は続ける）
       return Promise.allSettled(
         ASSETS_TO_CACHE.map((url) => cache.add(url).catch((err) => {
           console.log('Cache failed for:', url, err);
@@ -25,7 +24,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// アクティブ化時：古いキャッシュを削除
+// アクティブ化時：古いキャッシュを全削除
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -37,22 +36,25 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// フェッチ時：キャッシュ優先・なければネットワーク
+// フェッチ時：ネットワーク優先 → 失敗時だけキャッシュ（オフライン対応）
 self.addEventListener('fetch', (event) => {
-  // GETリクエストのみ対応
   if (event.request.method !== 'GET') return;
 
-  // バックエンドAPIへのリクエストはキャッシュしない（常にネットワーク）
+  // APIリクエストは絶対にキャッシュしない
   const url = new URL(event.request.url);
-  if (url.pathname.includes('/api/') || url.hostname.includes('anthropic') || url.hostname.includes('workers.dev')) {
+  if (
+    url.pathname.includes('/api/') ||
+    url.hostname.includes('anthropic') ||
+    url.hostname.includes('workers.dev')
+  ) {
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        // 成功したレスポンスのみキャッシュ
+    // ネットワーク優先：まず最新を取りに行く
+    fetch(event.request)
+      .then((response) => {
+        // 取得成功 → キャッシュを最新に更新してから返す
         if (response && response.status === 200 && response.type === 'basic') {
           const responseClone = response.clone();
           caches.open(CACHE_VERSION).then((cache) => {
@@ -60,12 +62,16 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return response;
-      }).catch(() => {
-        // オフライン時、HTMLリクエストならdojo.htmlを返す
-        if (event.request.headers.get('accept')?.includes('text/html')) {
-          return caches.match('./dojo.html');
-        }
-      });
-    })
+      })
+      .catch(() => {
+        // ネットワーク失敗（オフライン）→ キャッシュから返す
+        return caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          // HTMLリクエストならdojo.htmlをフォールバック
+          if (event.request.headers.get('accept')?.includes('text/html')) {
+            return caches.match('./dojo.html');
+          }
+        });
+      })
   );
 });
