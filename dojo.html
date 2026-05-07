@@ -904,7 +904,26 @@ async function fetchAdvice(ans) {
     if (!res.ok) return null;
     var data = await res.json();
     if (data.status !== 'ok' || !data.advice) return null;
-    return data.advice; // { tips: [...], alternative: '...' }
+    var advice = data.advice; // { tips: [...], alternative: '...' }
+
+    // 怪文書フィルター：10文字未満・記号だけ・意味不明な短文を除外
+    if (advice.tips && Array.isArray(advice.tips)) {
+      advice.tips = advice.tips.filter(function(tip) {
+        if (!tip || typeof tip !== 'string') return false;
+        var t = tip.trim();
+        if (t.length < 10) return false; // 10文字未満は除外
+        if (/^[^\u3000-\u9fff\u30a0-\u30ffa-zA-Z]+$/.test(t)) return false; // 記号だけは除外
+        if (/^(編集機|変換機|計算機|検索機|作成機|管理機)$/.test(t)) return false; // 怪文書パターン除外
+        return true;
+      });
+    }
+    // alternativeも同様にフィルター
+    if (advice.alternative && advice.alternative.trim().length < 10) {
+      advice.alternative = '';
+    }
+    // tips が全部消えたらnullを返す
+    if (!advice.tips || advice.tips.length === 0) return null;
+    return advice;
   } catch (e) {
     console.log('Advice fetch failed:', e);
     return null;
@@ -1659,6 +1678,31 @@ function sendMsg() {
     phase = 'interview'; render(); return;
   }
 
+  // 修正モード：回答をwantに追記して確認画面へ戻る
+  if (answers._modify_mode) {
+    answers._modify_mode = false;
+    answers.want = (answers.want || '') + '。追加修正：' + val;
+    addMsg('user', val);
+    addMsg('ai', lang === 'ja' ? '✨ 了解！内容を更新して確認します。' : '✨ Got it! Updating and reviewing.', null);
+    extraQuestions = []; // 追加質問リセット
+    featureWarnings = detectUnsupportedFeatures(answers);
+    var complexity = calcComplexity(answers);
+    saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
+    if (complexity >= 3 || featureWarnings.length > 0) {
+      adviceLoading = true;
+      adviceData = null;
+      setTimeout(function() { phase = 'confirm'; render(); }, 800);
+      fetchAdvice(answers).then(function(adv) {
+        adviceData = adv;
+        adviceLoading = false;
+        if (phase === 'confirm') render();
+      });
+    } else {
+      setTimeout(function() { phase = 'confirm'; render(); }, 800);
+    }
+    phase = 'interview'; render(); return;
+  }
+
   // 固定質問 or 動的追加質問に回答を保存
   var activeQs = getActiveQuestions();
   var q = activeQs[qIndex];
@@ -1781,9 +1825,11 @@ function buildExtraQuestions(ans) {
   }
 
   // 【追加質問4】警告・通知系の閾値が不明な場合
-  var needsWarning = /少なく|警告|教え|通知|アラート|残り|注意|warn|alert|remind|low|running/i.test(want);
-  var hasThreshold = /日前|日後|日に|%|パーセント|個|時間|days?\s*before|%|weeks?/i.test(want);
-  if (needsWarning && !hasThreshold) {
+  // 「残量が減っていくもの」管理アプリのみ対象（チェックリスト・タイマー・記録帳には不要）
+  var isStockApp = /薬|在庫|残量|食料|食品|消耗|補充|賞味|期限|切れ|ストック|stock|inventory|expir|supply|medicine|medication/i.test(problem + want + input);
+  var needsWarning = /警告|教え|通知|アラート|残り.*少|warn|alert|remind|low|running.?out/i.test(want);
+  var hasThreshold = /日前|日後|\d+日|\d+個|\d+%|パーセント|個以下|時間前|days?\s*before|weeks?/i.test(want + input);
+  if (isStockApp && needsWarning && !hasThreshold) {
     extras.push({
       id: 'warning_threshold',
       text: isJa
@@ -2179,7 +2225,7 @@ function renderConfirm() {
     '<div class="confirm-sub">' + subtitle + '</div>' +
     sections +
     (!hasBlocker ? '<button class="btn-p" onclick="confirmContinue()">' + btnConfirm + '</button>' : '<button class="btn-g" onclick="confirmRetry()">' + btnRetry + '</button>') +
-    (!hasBlocker ? '<button class="btn-g" style="margin-top:10px" onclick="confirmRetry()">' + btnRetry + '</button>' : '') +
+    (!hasBlocker ? '<button class="btn-g" style="margin-top:10px" onclick="openModifyMode()">' + (isJa ? '✏️ 内容を修正したい' : '✏️ Modify my request') + '</button>' : '') +
     '</div>' +
     '</div>';
 }
@@ -2200,6 +2246,47 @@ function confirmContinue() {
   addMsg('ai', t().doneMsg, null, false, true);
   phase = 'interview'; render();
   setTimeout(function() { phase = 'loading'; loadStep = 0; saveProgress({ stage:'interview', answers:answers, qIndex:qIndex, messages:messages, extraQuestions:extraQuestions }); render(); startLoading(); }, 1400);
+}
+
+// 確認画面で「内容を修正したい」を押したとき
+function openModifyMode() {
+  var isJa = (lang === 'ja');
+  featureWarnings = [];
+  adviceLoading = false;
+
+  // AI提案のテキストをクリップボード用にまとめる
+  var suggestionText = '';
+  if (adviceData && adviceData.tips && adviceData.tips.length > 0) {
+    suggestionText = adviceData.tips.join('、');
+    if (adviceData.alternative) suggestionText += '。' + adviceData.alternative;
+  }
+  adviceData = null;
+
+  // 修正モード専用の質問を追加
+  var modifyQ = isJa
+    ? '✏️ 追加・修正したいことを教えてください。'
+    : '✏️ What would you like to add or change?';
+  var modifyHint = isJa
+    ? 'AIからの提案をそのままコピーして貼っても大丈夫です 👍'
+    : 'You can paste the AI suggestions directly 👍';
+
+  // 提案があればメッセージに表示（コピペ用）
+  if (suggestionText) {
+    addMsg('ai',
+      (isJa ? '💡 さっきのAI提案はこちら（コピーして貼り付けてもOK）：\n\n「' + suggestionText + '」' : '💡 Here were the AI suggestions (feel free to paste):\n\n"' + suggestionText + '"'),
+      null
+    );
+  }
+  addMsg('ai', modifyQ, modifyHint);
+
+  // 修正モードフラグを立てる（次の回答をwantに追記する）
+  answers._modify_mode = true;
+  phase = 'interview';
+  render();
+  setTimeout(function() {
+    var inp = document.getElementById('chat-inp');
+    if (inp) inp.focus();
+  }, 300);
 }
 
 // 確認画面で「やり直す」を押したとき
