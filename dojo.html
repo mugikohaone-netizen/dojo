@@ -189,8 +189,9 @@ html,body {
 .support-box { margin-top:16px; background:#fff5f0; border:1.5px solid var(--shu-lt); border-radius:14px; padding:14px 16px; box-shadow:0 2px 8px rgba(255,126,103,0.1); }
 .support-box-title { font-size:13px; color:var(--shu); font-weight:700; margin-bottom:4px; }
 .support-box-desc { font-size:12px; color:var(--washi2); line-height:1.7; }
-.terms-link { margin-top:12px; font-size:11px; }
-.terms-link a { color:var(--ink5); text-decoration:none; }
+.terms-link { margin-top:12px; font-size:11px; line-height:2; text-align:center; }
+.terms-link a { color:var(--ink5); text-decoration:none; white-space:nowrap; }
+.terms-link a:hover { color:var(--washi3); }
 
 .demo-chat { display:flex; flex-direction:column; gap:10px; }
 .bubble-row { display:flex; gap:8px; align-items:flex-start; animation:slideIn 0.3s ease; }
@@ -369,10 +370,39 @@ html,body {
   letter-spacing:2px;
   box-shadow:0 2px 6px rgba(212,175,55,0.4);
 }
-.home-url-premium {
-  background:linear-gradient(135deg, #fffbea 0%, #fff8d6 100%) !important;
-  border-color:#d4af37 !important;
-  box-shadow:0 6px 20px rgba(212,175,55,0.25) !important;
+.home-url-sensei {
+  background:linear-gradient(135deg, #f0f8ff 0%, #dbeeff 100%) !important;
+  border-color:var(--gold) !important;
+  box-shadow:0 6px 20px rgba(91,155,213,0.2) !important;
+}
+.sensei-banner {
+  background:linear-gradient(135deg, #e8f4ff 0%, var(--gold-lt) 50%, #e8f4ff 100%);
+  background-size:200% 200%;
+  animation:premiumShimmer 4s ease infinite;
+  border:2px solid var(--gold);
+  border-radius:18px;
+  padding:16px 16px;
+  text-align:center;
+  box-shadow:0 0 20px rgba(91,155,213,0.25);
+  margin-bottom:4px;
+}
+.sensei-banner-title {
+  font-size:16px; font-weight:900; color:var(--gold);
+  margin:4px 0;
+  font-family:'Zen Maru Gothic','Zen Kaku Gothic New',sans-serif;
+}
+.sensei-banner-sub {
+  font-size:12px; color:var(--washi2); margin-bottom:8px;
+}
+.sensei-banner-badge {
+  display:inline-block;
+  background:linear-gradient(135deg, var(--gold), var(--gold-lt));
+  color:#fff; font-size:11px; font-weight:900;
+  padding:4px 14px; border-radius:12px;
+  letter-spacing:1px;
+}
+.result-sensei .result-emoji {
+  animation:pulse 1.5s ease-in-out infinite;
 }
 .result-premium .result-emoji {
   animation:pulse 1.5s ease-in-out infinite;
@@ -382,12 +412,25 @@ html,body {
   background-size:200% 200%;
   animation:premiumShimmer 4s ease infinite;
 }
+#loading.loading-sensei {
+  background:linear-gradient(135deg, #f0f8ff 0%, #dbeeff 50%, #f0f8ff 100%);
+  background-size:200% 200%;
+  animation:premiumShimmer 4s ease infinite;
+}
 .loading-premium-overlay {
   background:linear-gradient(135deg, #d4af37, #f4d77a);
   color:#fff; padding:8px 14px; border-radius:20px;
   font-size:11px; font-weight:700; letter-spacing:1px;
   display:inline-block; margin-bottom:14px;
   box-shadow:0 4px 12px rgba(212,175,55,0.4);
+  animation:zunIn 0.6s ease;
+}
+.loading-sensei-overlay {
+  background:linear-gradient(135deg, var(--gold), var(--gold-lt));
+  color:#fff; padding:8px 14px; border-radius:20px;
+  font-size:11px; font-weight:700; letter-spacing:1px;
+  display:inline-block; margin-bottom:14px;
+  box-shadow:0 4px 12px rgba(91,155,213,0.4);
   animation:zunIn 0.6s ease;
 }
 .result-actions-v2 button { flex:1; min-width:130px; padding:13px 0; font-size:14px; }
@@ -585,6 +628,12 @@ html,body {
 
 <script>
 var BACKEND_URL = 'https://dojo-api.mugikoha-one.workers.dev/';
+
+// 外部リンク
+var LINKS = {
+  privacyPolicy: 'https://note.com/gentle_curlew322/n/nf654c2991d29',
+  gallery:       'https://note.com/gentle_curlew322/m/md014c7d44963',
+};
 var SAVE_KEY = 'dojo_v1';
 var RATE_KEY = 'dojo_rate';
 var TOKEN_KEY = 'dojo_token';
@@ -1030,21 +1079,34 @@ function mockGen(ans) {
   };
 }
 
-var isPremiumPending = false; // 大明神当選フラグ（ロード中も保持）
+// ===== レア度定数（無料版）=====
+var RARITY = {
+  NORMAL:    'normal',
+  SENSEI:    'sensei',
+  DAIMYOJIN: 'daimyojin',
+};
+
+// ガチャ抽選（無料版）
+// 大明神3% / 師範直伝13% / 通常84%
+function rollGacha() {
+  var r = Math.random() * 100;
+  if (r < 3)        return RARITY.DAIMYOJIN; // 3%
+  if (r < 3 + 13)   return RARITY.SENSEI;    // 13%
+  return RARITY.NORMAL;                        // 84%
+}
+
+var pendingRarity = RARITY.NORMAL; // 抽選結果を保持
 
 async function callBackend(ans) {
   if (!BACKEND_URL) return mockGen(ans);
-  // 大明神モード抽選（3%）
-  isPremiumPending = (Math.random() * 100) < 3;
-  // ローディング表示も切り替えるため即re-render
-  if (phase === 'loading') {
-    var em = document.getElementById('loading-emoji');
-    if (em) updateLoadingUI();
-  }
+  // ガチャ抽選
+  pendingRarity = rollGacha();
+  // ローディング表示に反映
+  if (phase === 'loading') updateLoadingUI && updateLoadingUI();
   var res = await fetch(BACKEND_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ answers: ans, userToken: getUserToken(), isPremium: isPremiumPending })
+    body: JSON.stringify({ answers: ans, userToken: getUserToken(), rarity: pendingRarity })
   });
   if (res.status === 429) { var d = await res.json().catch(function() { return {}; }); throw new Error(d.error === 'RATE_LIMIT_USER' ? 'RATE_LIMIT_USER' : 'RATE_LIMIT'); }
   if (res.status === 403) throw new Error('CAPTCHA_FAILED');
@@ -1336,7 +1398,13 @@ function renderArticle() {
     '<div class="art-footer-desc">' + t().authorDesc + '</div></div></div>' +
     '<div class="art-footer-cta">' + t().authorCTA + '</div>' +
     '<div class="support-box"><div class="support-box-title">' + t().supportTitle + '</div><div class="support-box-desc">' + t().supportDesc + '</div></div>' +
-    '<div class="terms-link"><a href="https://mugikohaone-netizen.github.io/dojo/terms.html" target="_blank" rel="noopener">📜 ' + (isEn ? 'Terms of Service' : '利用規約') + '</a></div>' +
+    '<div class="terms-link">' +
+    '<a href="https://mugikohaone-netizen.github.io/dojo/terms.html" target="_blank" rel="noopener">📜 ' + (isEn ? 'Terms of Service' : '利用規約') + '</a>' +
+    ' &nbsp;｜&nbsp; ' +
+    '<a href="' + LINKS.privacyPolicy + '" target="_blank" rel="noopener">🔒 ' + (isEn ? 'Privacy Policy' : 'プライバシーポリシー') + '</a>' +
+    ' &nbsp;｜&nbsp; ' +
+    '<a href="' + LINKS.gallery + '" target="_blank" rel="noopener">🏆 ' + (isEn ? 'Gallery' : 'みんなの作品') + '</a>' +
+    '</div>' +
     '</div>' +
     '</div>';
 }
@@ -2112,18 +2180,28 @@ function updateLoadingUI() {
 function renderLoading() {
   var msgs = t().loadingMsgs;
   var dots = msgs.map(function(_, i) { return '<div class="ldot' + (i <= loadStep ? ' on' : '') + '"></div>'; }).join('');
-  var premiumClass = isPremiumPending ? ' loading-premium' : '';
-  var premiumOverlay = isPremiumPending
-    ? '<div class="loading-premium-overlay">' +
-      '<div class="loading-premium-text">🥋 ' + (lang === 'ja' ? 'クロード大明神 本気モード' : 'Claude Daimyojin: Serious Mode') + ' 🥋</div>' +
-      '</div>'
-    : '';
+  var isDaimyojin = pendingRarity === RARITY.DAIMYOJIN;
+  var isSensei    = pendingRarity === RARITY.SENSEI;
+  var isJa = (lang === 'ja');
+
+  var premiumClass = isDaimyojin ? ' loading-premium' : (isSensei ? ' loading-sensei' : '');
+  var overlay = '';
+  var subText = t().loadingSub;
+
+  if (isDaimyojin) {
+    overlay = '<div class="loading-premium-overlay">🥋 ' + (isJa ? 'クロード大明神 本気モード' : 'Claude Daimyojin: Serious Mode') + ' 🥋</div>';
+    subText = isJa ? '✨ 本日のあなたは特別。最高品質で作っています ✨' : '✨ Today is special. Crafting at top quality ✨';
+  } else if (isSensei) {
+    overlay = '<div class="loading-sensei-overlay">⚡ ' + (isJa ? '師範直伝モード' : 'Sensei Mode') + ' ⚡</div>';
+    subText = isJa ? '⚡ 師範が腕を振るっています...' : '⚡ Sensei is crafting with care...';
+  }
+
   return '<div id="loading" class="' + premiumClass.trim() + '"><div id="loading-inner">' +
-    premiumOverlay +
+    overlay +
     '<div id="loading-emoji">' + msgs[loadStep].icon + '</div>' +
     '<div id="loading-text">' + msgs[loadStep].text + '</div>' +
     '<div id="loading-dots">' + dots + '</div>' +
-    '<div id="loading-sub">' + (isPremiumPending ? (lang === 'ja' ? '✨ 本日のあなたは特別。最高品質で作っています ✨' : '✨ Today is special. Crafting at top quality ✨') : t().loadingSub) + '</div>' +
+    '<div id="loading-sub">' + subText + '</div>' +
     '</div></div>';
 }
 
@@ -2332,27 +2410,43 @@ function renderResult() {
   }
 
   // 新形式：本物のHTMLアプリをiframeでプレビュー
-  var isPremium = a.is_premium === true;
+  var rarity = a.rarity || 'normal';
+  var isDaimyojin = rarity === 'daimyojin';
+  var isSensei    = rarity === 'sensei';
+  var storageDays = a.storage_days || 30;
+  var isJa2 = (lang === 'ja');
 
-  // 大明神降臨バナー（当選時のみ）
-  var premiumBanner = '';
-  if (isPremium) {
-    premiumBanner =
+  // レア度別バナー
+  var rarityBanner = '';
+  if (isDaimyojin) {
+    rarityBanner =
       '<div class="premium-banner">' +
       '<div class="premium-sparkle">✨🌟✨</div>' +
-      '<div class="premium-title">' + (isJa ? '🥋 クロード大明神 降臨 🥋' : '🥋 Claude Daimyojin Descended 🥋') + '</div>' +
-      '<div class="premium-sub">' + (isJa ? '本日のあなたは特別。最上位AIが本気で作りました。' : 'Today is special. Top-tier AI gave its all.') + '</div>' +
-      '<div class="premium-badge">SR / 大明神特製</div>' +
+      '<div class="premium-title">' + (isJa2 ? '🥋 クロード大明神 降臨 🥋' : '🥋 Claude Daimyojin Descended 🥋') + '</div>' +
+      '<div class="premium-sub">' + (isJa2 ? '本日のあなたは特別。最上位AIが本気で作りました。' : 'Today is special. Top-tier AI gave its all.') + '</div>' +
+      '<div class="premium-badge">🌟 大明神特製 / ' + storageDays + (isJa2 ? '日間保存' : '-day save') + '</div>' +
+      '</div>';
+  } else if (isSensei) {
+    rarityBanner =
+      '<div class="sensei-banner">' +
+      '<div class="sensei-banner-title">' + (isJa2 ? '⚡ 師範直伝 ⚡' : '⚡ Sensei Special ⚡') + '</div>' +
+      '<div class="sensei-banner-sub">' + (isJa2 ? '師範が腕を振るった一品です。' : 'Crafted with extra care by the sensei.') + '</div>' +
+      '<div class="sensei-banner-badge">⚡ 師範直伝 / ' + storageDays + (isJa2 ? '日間保存' : '-day save') + '</div>' +
       '</div>';
   }
 
-  // ホーム画面追加用URL（KV保存成功時のみ）
+
+  // ホーム画面追加用URL
   var homeUrlCard = '';
   if (a.app_url) {
     var guide = getInstallGuide();
+    var urlCardClass = 'home-url-card' + (isDaimyojin ? ' home-url-premium' : isSensei ? ' home-url-sensei' : '');
+    var urlNote = isJa2
+      ? 'このURLは' + storageDays + '日間有効。ホーム画面追加後はあなたのスマホ内で永久に動きます'
+      : 'URL valid for ' + storageDays + ' days. After adding, works permanently on your phone.';
     homeUrlCard =
-      '<div class="home-url-card' + (isPremium ? ' home-url-premium' : '') + '">' +
-      '<div class="home-url-title">📱 ' + (isJa ? 'ホーム画面に追加できます！' : 'Add to Home Screen!') + '</div>' +
+      '<div class="' + urlCardClass + '">' +
+      '<div class="home-url-title">📱 ' + (isJa2 ? 'ホーム画面に追加できます！' : 'Add to Home Screen!') + '</div>' +
       '<div class="home-url-desc">' + guide.addStepsShort + '</div>' +
       '<div class="home-url-box" onclick="copyAppUrl()">' +
       '<span class="home-url-text">' + escapeHtml(a.app_url) + '</span>' +
@@ -2360,36 +2454,35 @@ function renderResult() {
       '</div>' +
       '<div class="home-url-actions">' +
       '<button class="btn-p" onclick="openAppUrl()">🚀 ' + guide.openLabel + '</button>' +
-      '<button class="btn-g" onclick="copyAppUrl()">📋 ' + (isJa ? 'URLをコピー' : 'Copy URL') + '</button>' +
+      '<button class="btn-g" onclick="copyAppUrl()">📋 ' + (isJa2 ? 'URLをコピー' : 'Copy URL') + '</button>' +
       '</div>' +
-      '<div class="home-url-note">⏰ ' +
-      (isJa
-        ? 'このURLは30日間有効。ホーム画面追加後はあなたのスマホ内で永久に動きます'
-        : 'URL valid for 30 days. After adding, works permanently on your phone.') +
-      '</div>' +
+      '<div class="home-url-note">⏰ ' + urlNote + '</div>' +
       '</div>';
   }
 
-  return '<div id="result"' + (isPremium ? ' class="result-premium"' : '') + '>' +
-    premiumBanner +
+  var resultClass = isDaimyojin ? ' class="result-premium"' : isSensei ? ' class="result-sensei"' : '';
+  var resultEmoji = isDaimyojin ? '🌟' : isSensei ? '⚡' : '🎉';
+
+  return '<div id="result"' + resultClass + '>' +
+    rarityBanner +
     '<div class="result-head">' +
-    '<div class="result-emoji">' + (isPremium ? '🌟' : '🎉') + '</div>' +
+    '<div class="result-emoji">' + resultEmoji + '</div>' +
     '<div class="result-title">' + escapeHtml(a.app_name || 'My App') + '</div>' +
     '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
     '</div>' +
     homeUrlCard +
     '<div class="preview-frame">' +
-    '<div class="preview-label">📱 ' + (isJa ? 'プレビュー' : 'Preview') + '</div>' +
+    '<div class="preview-label">📱 ' + (isJa2 ? 'プレビュー' : 'Preview') + '</div>' +
     '<iframe id="app-preview" sandbox="allow-scripts allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
-    '<div class="preview-tap-notice">💡 ' + (isJa ? 'プレビューは見本です。完全動作は上の「' + getInstallGuide().openLabel + '」から' : 'Preview only. Use "' + getInstallGuide().openLabel + '" above for full functionality') + '</div>' +
+    '<div class="preview-tap-notice">💡 ' + (isJa2 ? 'プレビューは見本です。完全動作は上の「' + getInstallGuide().openLabel + '」から' : 'Preview only. Use "' + getInstallGuide().openLabel + '" above for full functionality') + '</div>' +
     '</div>' +
     '<div class="result-actions-v2">' +
-    '<button class="btn-g" onclick="downloadGeneratedHtml()">📥 ' + (isJa ? 'ダウンロード' : 'Download') + '</button>' +
-    '<button class="btn-g" onclick="copyHtmlToClipboard()">📋 ' + (isJa ? 'コードをコピー' : 'Copy Code') + '</button>' +
+    '<button class="btn-g" onclick="downloadGeneratedHtml()">📥 ' + (isJa2 ? 'ダウンロード' : 'Download') + '</button>' +
+    '<button class="btn-g" onclick="copyHtmlToClipboard()">📋 ' + (isJa2 ? 'コードをコピー' : 'Copy Code') + '</button>' +
     '</div>' +
     '<div class="result-actions">' +
-    '<button class="btn-g" onclick="resetAll()">🎲 ' + (isJa ? 'もう一回振る' : 'Roll again') + '</button>' +
-    '<button class="btn-g" style="font-size:12px" onclick="showArticle()">← ' + (isJa ? 'トップに戻る' : 'Back to top') + '</button>' +
+    '<button class="btn-g" onclick="resetAll()">🎲 ' + (isJa2 ? 'もう一回振る' : 'Roll again') + '</button>' +
+    '<button class="btn-g" style="font-size:12px" onclick="showArticle()">← ' + (isJa2 ? 'トップに戻る' : 'Back to top') + '</button>' +
     '</div>' +
     '</div>';
 }
@@ -2596,7 +2689,7 @@ function resetAll() {
   featureWarnings = [];
   adviceData = null;
   adviceLoading = false;
-  isPremiumPending = false;
+  pendingRarity = RARITY.NORMAL;
   loadStep = 0; genApp = null; holdMsg = ''; checkedItems = {};
   if (loadTimer) clearTimeout(loadTimer);
   if (bugTimer) clearTimeout(bugTimer);
