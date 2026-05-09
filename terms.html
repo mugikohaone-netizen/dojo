@@ -92,15 +92,30 @@ body{background:#0a0a0a;color:#f0f0f0;font-family:'Hiragino Kaku Gothic ProN','N
           <strong>⚠️ 重要：ユーザーの自己責任</strong><br><br>
           本サービスで生成されたコード・アプリの利用によって生じたいかなる損害・トラブル・法的問題についても、運営者は一切の責任を負いません。生成物の利用責任は、すべてユーザー本人に帰属します。
         </div>
+
         <p>具体的に運営者が責任を負わない事例：</p>
         <ul>
-          <li>生成されたアプリのバグ・不具合による損害</li>
+          <li>生成されたアプリのバグ・不具合・脆弱性による損害</li>
           <li>生成アプリを第三者に配布・販売した場合のトラブル</li>
-          <li>AIが生成したコードに含まれる誤り・脆弱性</li>
-          <li>サービス停止・データ消失による損害</li>
+          <li>AIが生成したコードの誤り・品質・完成度・適法性</li>
+          <li>サービス停止・データ消失・URL期限切れによる損害</li>
           <li>AIの回答内容の正確性・完全性</li>
+          <li>ユーザーが本サービスを利用して行った違法行為の結果</li>
+          <li>第三者が生成したアプリを悪用した場合の損害</li>
+          <li>生成AIの判断・出力に起因するいかなる問題</li>
         </ul>
+
+        <div class="info-box">
+          <strong>📌 運営者の対応権限</strong><br><br>
+          運営者は以下を予告なく実施できる権限を有します：<br>
+          ・問題のある生成アプリのURLをサーバーから削除すること<br>
+          ・サービスの全部または一部を停止・変更・終了すること<br>
+          ・禁止事項に違反したユーザーのアクセスを遮断すること<br>
+          ・利用規約を予告なく変更すること
+        </div>
+
         <p>本サービスはlocalStorage（ブラウザの内部ストレージ）のみを使用します。ユーザーのデータはユーザー自身のデバイス内にのみ保存されます。</p>
+        <p style="font-size:12px;color:#9a8d7c;">本サービスは個人が運営するベータ版サービスです。「現状のまま（as-is）」で提供されており、いかなる品質・可用性・適法性も保証しません。問題のあるコンテンツを発見した場合は、コメント欄またはSNSよりご報告ください。</p>
       </div>
     </div>
 
@@ -108,36 +123,65 @@ body{background:#0a0a0a;color:#f0f0f0;font-family:'Hiragino Kaku Gothic ProN','N
       <div class="section-title">💰 第4条 料金・課金</div>
       <div class="section-body">
         <div class="info-box">
-          <strong>✅ 無料で使えること</strong><br>
+          <strong>✅ 無料で使えること（ずっと無料）</strong><br>
           ・1日3回までのアプリ生成<br>
           ・生成したアプリのHTMLダウンロード<br>
-          ・専用URL（レア度に応じて30〜90日間有効）でホーム画面に追加
+          ・専用URL（レア度に応じて30〜90日間有効）でホーム画面に追加<br>
+          ・師範直伝・大明神当選時の機能追加（レート制限なし）
         </div>
-        <p>将来的に「<strong>チケット制</strong>」による追加生成・上位AIアクセス等のサービス導入を予定しています（<strong>現在開発中</strong>）。チケットの内容・価格・利用条件は確定次第、本規約および別途案内ページにてお知らせします。</p>
-        <p>チケット制の導入に伴い、本規約は予告なく改定される場合があります。改定後の規約は本ページに掲載した時点から効力を生じます。</p>
+
+        <div class="info-box" style="margin-top:12px;">
+          <strong>⚡ Sonnetチケット（有料・任意）</strong><br>
+          ・1枚購入ごとにSonnetモデルで確実に生成<br>
+          ・ガチャなし、Sonnet確定<br>
+          ・生成URLは90日間有効<br>
+          ・1日3回のレート制限にカウントしない<br>
+          ・価格・購入方法は別途案内ページをご確認ください
+        </div>
+
+        <div class="info-box" style="margin-top:12px;">
+          <strong>💾 買い切り永続保存（有料・任意）</strong><br>
+          ・生成済みアプリのURLを永続化（サービス存続の限り）<br>
+          ・無料版・チケット版どちらの生成アプリにも適用可能<br>
+          ・価格・購入方法は別途案内ページをご確認ください
+        </div>
+
+        <p style="margin-top:12px;">有料サービスの購入はすべて任意です。無料版でも全機能をご利用いただけます。</p>
+        <p>チケット・買い切り保存は購入後の払い戻しには対応しておりません。ご了承ください。</p>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">🎰 第5条 生成AIモードと確率について</div>
+      <div class="section-title">🌡️ 第5条 AIの本気度について</div>
       <div class="section-body">
-        <p>本サービスでは、アプリ生成時に以下3種類のAIモードをランダムに選択して使用します（無料版）。</p>
+        <p>本サービスでは、アプリ生成時にAIの「本気度（使用モデル）」がランダムに変わります。</p>
+        <p style="font-size:12px;color:#9a8d7c;margin-bottom:12px;">正直に言うと：全員毎回Sonnetで生成するとAPIコストが続きません。だからランダムにしています。コスト制約を楽しい体験に変えた設計です。</p>
 
         <div class="info-box">
-          <strong>🥋 通常モード（約84%）</strong><br>
-          Claude Haiku モデルを使用。シンプルで実用的なアプリを生成します。<br>
-          生成したアプリのURLは<strong>30日間</strong>有効です。<br><br>
+          <strong>🥋 通常（約84%）</strong><br>
+          Claude Haiku モデルを使用。手早く実用的なアプリを生成します。<br>
+          生成URLは<strong>30日間</strong>有効です。<br><br>
 
-          <strong>⚡ 師範直伝モード（約13%）</strong><br>
+          <strong>⚡ 師範直伝（約13%）</strong><br>
           Claude Haiku モデル（強化プロンプト）を使用。UIや細部の品質を一段階引き上げます。<br>
-          ローディング画面が水色に変化します。URLは<strong>60日間</strong>有効です。<br><br>
+          ローディング画面が水色に変化します。URLは<strong>60日間</strong>有効です。<br>
+          <strong>機能追加ボタン</strong>が表示され、後から機能を足して育てられます。<br><br>
 
-          <strong>🌟 大明神モード（約3%）</strong><br>
-          Claude Sonnet モデル（上位モデル）を使用。デザイン・機能ともに最高品質で生成します。<br>
-          ローディング画面が金色に変化します。URLは<strong>90日間</strong>有効です。
+          <strong>🌟 Sonnet本気（約3%）</strong><br>
+          Claude Sonnet モデルを使用。デザイン・機能ともに丁寧な仕上がりで生成します。<br>
+          ローディング画面が金色に変化します。URLは<strong>90日間</strong>有効です。<br>
+          <strong>機能追加ボタン</strong>が表示され、後から機能を足して育てられます。
         </div>
 
         <p>すべてのモードはユーザーに追加課金を求めることなく、ランダムに自動選択されます。</p>
+
+        <div class="info-box" style="margin-top:12px;">
+          <strong>✨ 機能追加について（師範直伝・Sonnet本気限定）</strong><br>
+          師範直伝またはSonnet本気モードで生成されたアプリには、生成後に機能を追加できます。<br>
+          ・コード充填率80%未満の間、何回でも追加可能<br>
+          ・1日3回のレート制限にカウントしません<br>
+          ・追加生成のコストは運営者が負担します（無料）
+        </div>
 
         <div class="warn-box">
           <strong>📝 ご理解いただきたい点</strong><br><br>
@@ -151,32 +195,30 @@ body{background:#0a0a0a;color:#f0f0f0;font-family:'Hiragino Kaku Gothic ProN','N
     </div>
 
     <div class="section">
-      <div class="section-title">🧠 第6条 知的財産権・商用利用について</div>
+      <div class="section-title">🧠 第6条 知的財産権・利用について</div>
       <div class="section-body">
         <p>本サービスのUI・デザイン・コード・文章・ロゴの著作権は運営者に帰属します。</p>
         <p>ユーザーが入力したアイデア・回答内容の権利はユーザーに帰属します。</p>
-        <p>本サービスで生成されたHTMLコードは、<strong>個人的・非商用目的に限り</strong>自由に利用できます。</p>
-
-        <div class="warn-box">
-          <strong>⚠️ 以下の行為は禁止です（商用ライセンスなしの場合）</strong><br><br>
-          ・生成したアプリ・コードをApp Store / Google Playで販売すること<br>
-          ・生成したアプリ・コードを第三者に有償で提供・納品すること<br>
-          ・生成したアプリをクライアントワーク・業務委託の成果物として使用すること<br>
-          ・生成したアプリをSNS・マーケットプレイスで販売・配布すること<br>
-          ・生成したコードをベースに別サービスを構築して収益化すること
-        </div>
 
         <div class="info-box">
-          <strong>✅ 以下は自由に行えます（無料・プロプラン共通）</strong><br><br>
-          ・自分自身が日常的に使用すること<br>
-          ・家族・友人・同僚に無償で共有すること<br>
-          ・使い方をSNSで紹介すること（作成ツールの明記をお願いします）<br>
-          ・個人のブログ・noteで活用事例として紹介すること
+          <strong>✅ 生成されたアプリの利用は完全自由</strong><br><br>
+          本サービスで生成されたHTMLコード・アプリは、<strong>商用・非商用を問わず自由に利用できます。</strong><br><br>
+          ・自分自身で使う<br>
+          ・家族・友人・職場に配布する<br>
+          ・SNS・noteで紹介する<br>
+          ・商用サービスや業務に組み込む<br>
+          ・改造・再配布する<br><br>
+          すべてOKです。作ったものはあなたのものです。
         </div>
 
-        <p>商用利用（App Store販売・クライアントへの納品・業務利用等）を希望する場合は、<strong>商用ライセンス（別途有料）</strong>が必要です。ご希望の方はコメント欄またはSNSよりお問い合わせください。</p>
-        <p>生成されたHTMLに含まれる「Made with AI App Dojo 🥋」の表示は削除しないでください。</p>
-        <p style="font-size:12px;color:#555;margin-top:8px">※ 本条に違反した場合、利用停止・損害賠償請求の対象となる場合があります。</p>
+        <p style="margin-top:12px;">ただし、以下についてはご遠慮ください：</p>
+        <div class="warn-box">
+          ・本サービス自体（dojo.htmlのコード・UI・ブランド）を無断で複製・再配布すること<br>
+          ・「AIアプリ道場」の名称・ロゴを無断で使用すること<br>
+          ・生成AIが作成したコンテンツであることを意図的に隠して販売・配布すること
+        </div>
+
+        <p style="margin-top:12px; font-size:12px; color:#9a8d7c;">※ 生成されたHTMLに「Made with AI App Dojo 🥋」の表示がある場合、残していただけると嬉しいですが、削除しても構いません。</p>
       </div>
     </div>
 
@@ -229,14 +271,18 @@ body{background:#0a0a0a;color:#f0f0f0;font-family:'Hiragino Kaku Gothic ProN','N
           · Creating apps that infringe intellectual property rights<br>
           · Creating or distributing malware, viruses, or spyware<br>
           · Creating content that promotes discrimination or hate speech<br>
-          · Any use that violates applicable laws<br>
-          · Reselling generated code for commercial purposes without permission
+          · Supporting or assisting anti-social organizations or terrorist activities<br>
+          · Prompt injection or unauthorized manipulation of AI systems<br>
+          · Any use that violates applicable laws or public order
         </div>
         <ul>
           <li>Automated bot access to bypass rate limits</li>
           <li>Creating multiple accounts to circumvent restrictions</li>
           <li>Using the Service as a general-purpose AI chatbot replacement</li>
+          <li>Defaming or harassing the operator or other users</li>
         </ul>
+        <p>Violations may result in immediate access termination and deletion of generated app URLs from the server without notice.</p>
+        <p style="font-size:12px;color:#9a8d7c;">※ Due to the nature of AI generation, it is technically impossible to prevent all harmful content. If you discover problematic content, please report it via the comment section or social media.</p>
       </div>
     </div>
 
@@ -247,7 +293,30 @@ body{background:#0a0a0a;color:#f0f0f0;font-family:'Hiragino Kaku Gothic ProN','N
           <strong>⚠️ Important: User Responsibility</strong><br><br>
           The operator accepts no responsibility for any damages, disputes, or legal issues arising from the use of code or apps generated by this Service. All responsibility for generated content lies with the user.
         </div>
-        <p>The operator is not responsible for: bugs in generated apps, disputes from distributing generated apps, errors or vulnerabilities in AI-generated code, service downtime or data loss, or the accuracy of AI responses.</p>
+
+        <p>The operator is not responsible for:</p>
+        <ul>
+          <li>Bugs, defects, or security vulnerabilities in generated apps</li>
+          <li>Disputes arising from distributing or selling generated apps</li>
+          <li>Errors, quality, or legality of AI-generated code</li>
+          <li>Service downtime, data loss, or URL expiration</li>
+          <li>The accuracy or completeness of AI responses</li>
+          <li>Consequences of illegal activities conducted using this Service</li>
+          <li>Damages caused by third parties misusing generated apps</li>
+          <li>Any issues arising from AI judgment or output</li>
+        </ul>
+
+        <div class="info-box">
+          <strong>📌 Operator's Rights</strong><br><br>
+          The operator reserves the right to, without prior notice:<br>
+          · Delete problematic generated app URLs from the server<br>
+          · Suspend, modify, or terminate the Service in whole or in part<br>
+          · Block access for users who violate these Terms<br>
+          · Modify these Terms at any time
+        </div>
+
+        <p>This Service uses only localStorage (browser internal storage). User data is stored only on the user's own device.</p>
+        <p style="font-size:12px;color:#9a8d7c;">This Service is operated by an individual and is in beta. It is provided "as-is" with no guarantees of quality, availability, or legality. If you find problematic content, please report it via the comment section or social media.</p>
       </div>
     </div>
 
@@ -255,41 +324,69 @@ body{background:#0a0a0a;color:#f0f0f0;font-family:'Hiragino Kaku Gothic ProN','N
       <div class="section-title">💰 Article 4 - Pricing</div>
       <div class="section-body">
         <div class="info-box">
-          <strong>✅ Always Free</strong><br>
+          <strong>✅ Always Free (forever)</strong><br>
           · Up to 3 app generations per day<br>
           · HTML download of generated apps<br>
-          · Dedicated URL (valid for 30–90 days depending on rarity) for home screen install
+          · Dedicated URL (valid for 30–90 days depending on rarity) for home screen install<br>
+          · Feature additions for Sensei Special & Daimyojin apps (no rate limit)
         </div>
-        <p>A "<strong>Ticket System</strong>" providing additional generations and access to higher-tier AI models is planned (<strong>currently in development</strong>). Details such as pricing, contents, and conditions will be announced on this page once finalized.</p>
-        <p>These Terms may be revised without prior notice in connection with the introduction of the Ticket System. Revised Terms take effect upon publication on this page.</p>
+
+        <div class="info-box" style="margin-top:12px;">
+          <strong>⚡ Sonnet Ticket (paid, optional)</strong><br>
+          · Each ticket guarantees generation with Sonnet model (no gacha)<br>
+          · Generated URL valid for 90 days<br>
+          · Does not count toward the daily 3-generation limit<br>
+          · See the pricing page for details
+        </div>
+
+        <div class="info-box" style="margin-top:12px;">
+          <strong>💾 Permanent Storage (paid, optional)</strong><br>
+          · Permanently preserves a generated app's URL (as long as the service operates)<br>
+          · Applicable to apps generated with both free and ticket versions<br>
+          · See the pricing page for details
+        </div>
+
+        <p style="margin-top:12px;">All paid services are optional. The free version provides full access to all core features.</p>
+        <p>Tickets and permanent storage purchases are non-refundable.</p>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">🎰 Article 5 - AI Modes and Probability</div>
+      <div class="section-title">🌡️ Article 5 - AI Effort Level</div>
       <div class="section-body">
-        <p>This service randomly selects one of three AI modes for each app generation (free version):</p>
+        <p>Each time you generate an app, the AI's "effort level" (model used) changes randomly.</p>
+        <p style="font-size:12px;color:#9a8d7c;margin-bottom:12px;">Honest reason: running Sonnet for every user every time would make the service unsustainable. So we randomize it. It's a way of turning a cost constraint into an enjoyable experience.</p>
 
         <div class="info-box">
-          <strong>🥋 Standard Mode (~84%)</strong><br>
-          Uses Claude Haiku model. Practical and simple app generation.<br>
+          <strong>🥋 Standard (~84%)</strong><br>
+          Uses Claude Haiku model. Quick and practical app generation.<br>
           Generated app URL is valid for <strong>30 days</strong>.<br><br>
 
-          <strong>⚡ Sensei Special Mode (~13%)</strong><br>
+          <strong>⚡ Sensei Special (~13%)</strong><br>
           Uses Claude Haiku model with enhanced prompting. Elevates UI quality and attention to detail.<br>
-          Loading screen turns blue. URL valid for <strong>60 days</strong>.<br><br>
+          Loading screen turns blue. URL valid for <strong>60 days</strong>.<br>
+          <strong>Feature Addition button</strong> appears — you can grow the app by adding features.<br><br>
 
-          <strong>🌟 Daimyojin Mode (~3%)</strong><br>
-          Uses Claude Sonnet model (higher tier). Top quality in both design and features.<br>
-          Loading screen turns gold. URL valid for <strong>90 days</strong>.
+          <strong>🌟 Sonnet Full Power (~3%)</strong><br>
+          Uses Claude Sonnet model. Top quality in both design and features.<br>
+          Loading screen turns gold. URL valid for <strong>90 days</strong>.<br>
+          <strong>Feature Addition button</strong> appears — you can grow the app by adding features.
         </div>
 
         <p>All modes are randomly selected with no additional charge to the user.</p>
 
+        <div class="info-box" style="margin-top:12px;">
+          <strong>✨ Feature Addition (Sensei Special & Sonnet Full Power only)</strong><br>
+          Apps generated in Sensei Special or Sonnet Full Power mode can have features added after generation.<br>
+          · Available as long as code fill rate is below 80%<br>
+          · Does not count toward the daily 3-generation limit<br>
+          · Free of charge (costs covered by the operator)
+        </div>
+
         <div class="warn-box">
           <strong>📝 Please Note</strong><br><br>
           · Probabilities may change without notice due to system adjustments<br>
-          · Even when a higher-tier mode is selected, the quality of generated content is not absolutely guaranteed<br>
+          · Even when a higher-effort mode is selected, quality is not absolutely guaranteed<br>
           · By the nature of AI, generation results inherently vary<br>
           · Repeated attempts are limited by the daily 3-generation cap<br>
           · Mode specifications and probabilities may be modified or discontinued without notice
@@ -298,31 +395,29 @@ body{background:#0a0a0a;color:#f0f0f0;font-family:'Hiragino Kaku Gothic ProN','N
     </div>
 
     <div class="section">
-      <div class="section-title">🧠 Article 6 - Intellectual Property & Commercial Use</div>
+      <div class="section-title">🧠 Article 6 - Intellectual Property & Usage</div>
       <div class="section-body">
         <p>The UI, design, code, text, and logos of this Service are owned by the operator. Users retain rights to their input ideas and answers.</p>
-        <p>Generated HTML code may be used freely for <strong>personal, non-commercial purposes</strong>.</p>
-
-        <div class="warn-box">
-          <strong>⚠️ The following are prohibited without a Commercial License:</strong><br><br>
-          · Selling generated apps on the App Store, Google Play, or any marketplace<br>
-          · Providing generated apps or code to third parties for payment<br>
-          · Using generated apps as deliverables for client work or freelance projects<br>
-          · Building a separate service on top of the generated code for commercial gain<br>
-          · Distributing generated apps for monetary compensation in any form
-        </div>
 
         <div class="info-box">
-          <strong>✅ The following are freely permitted (Free & Pro plans):</strong><br><br>
-          · Using the app personally in your daily life<br>
-          · Sharing with family, friends, or colleagues at no charge<br>
-          · Posting about your experience on social media (please credit the tool)<br>
-          · Writing about your use case on a blog or note
+          <strong>✅ Generated apps are yours — use them freely</strong><br><br>
+          HTML code and apps generated through this Service may be used freely for <strong>any purpose, commercial or non-commercial</strong>.<br><br>
+          · Use it yourself<br>
+          · Share it with family, friends, or coworkers<br>
+          · Distribute it or sell it<br>
+          · Build a business on top of it<br>
+          · Modify and redistribute it<br><br>
+          What you build is yours. No restrictions.
         </div>
 
-        <p>For commercial use (App Store sales, client deliverables, business use, etc.), a <strong>Commercial License (paid separately)</strong> is required. Please contact us via the comment section or social media.</p>
-        <p>Please do not remove the "Made with AI App Dojo 🥋" attribution from generated files.</p>
-        <p style="font-size:12px;color:#555;margin-top:8px">* Violations may result in account suspension and/or claims for damages.</p>
+        <p style="margin-top:12px;">However, please refrain from the following:</p>
+        <div class="warn-box">
+          · Copying, rebranding, or redistributing the Service itself (dojo.html code, UI, or brand)<br>
+          · Using the "AI App Dojo" name or logo without permission<br>
+          · Intentionally misrepresenting AI-generated content as entirely human-made when selling or distributing
+        </div>
+
+        <p style="margin-top:12px; font-size:12px; color:#9a8d7c;">※ If your generated HTML includes a "Made with AI App Dojo 🥋" credit, we'd appreciate you keeping it — but it's not required.</p>
       </div>
     </div>
 
