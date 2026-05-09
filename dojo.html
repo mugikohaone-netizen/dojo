@@ -641,6 +641,8 @@ html,body {
     <div id="hdr-right">
       <button id="back-btn" onclick="showArticle()"></button>
       <button id="lang-btn" onclick="toggleLang()">EN</button>
+      <span id="training-badge" style="display:none;background:#7ec9a8;color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:0.5px;cursor:pointer;" onclick="clearTrainingMode()">研修中 ✕</span>
+      <button id="training-btn" onclick="showTrainingInput()" title="研修コード入力" style="background:transparent;border:none;font-size:18px;cursor:pointer;padding:4px;opacity:0.4;line-height:1;">🔑</button>
       <span class="badge">BETA</span>
     </div>
   </div>
@@ -1047,15 +1049,45 @@ function getUserToken() {
 }
 // テスト用：1日30回まで（公開時は1〜3に戻す）
 // パパさんの開発時は window.resetDojoRate() で即リセット可能
-var RATE_LIMIT_PER_DAY = 30;
+var RATE_LIMIT_PER_DAY = 3;
+var TRAINING_KEY = 'dojo_training'; // 研修モード保存キー
+
+// 研修モードの状態を取得
+function getTrainingMode() {
+  try {
+    var d = JSON.parse(localStorage.getItem(TRAINING_KEY) || 'null');
+    if (!d) return null;
+    var today = new Date().toISOString().slice(0, 10);
+    // 期限チェック（expiryがあれば）
+    if (d.expiry && d.expiry < today) {
+      localStorage.removeItem(TRAINING_KEY);
+      return null;
+    }
+    return d; // { name, expiry, limit }
+  } catch(e) { return null; }
+}
 
 function checkRate() {
+  var training = getTrainingMode();
+  if (training) {
+    // 研修モード：limitまで許可（999=無制限）
+    if (training.limit >= 999) return false; // 無制限
+    var today = new Date().toISOString().slice(0, 10);
+    try {
+      var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}');
+      return (d.date === today && d.count >= training.limit);
+    } catch(e) { return false; }
+  }
   var today = new Date().toISOString().slice(0, 10);
   try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); return (d.date === today && d.count >= RATE_LIMIT_PER_DAY); } catch(e) { return false; }
 }
 function incRate() {
   var today = new Date().toISOString().slice(0, 10);
   try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); var c = (d.date === today ? d.count : 0) + 1; localStorage.setItem(RATE_KEY, JSON.stringify({ date: today, count: c })); } catch(e) {}
+}
+function getRateCount() {
+  var today = new Date().toISOString().slice(0, 10);
+  try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); return d.date === today ? d.count : 0; } catch(e) { return 0; }
 }
 // 開発用：レート制限と保存を全部リセット
 window.resetDojoRate = function() {
@@ -1310,6 +1342,21 @@ function showDojo() {
 }
 
 function render() {
+  // 研修モードバッジを更新
+  var training = getTrainingMode();
+  var badge = document.getElementById('training-badge');
+  var btn = document.getElementById('training-btn');
+  if (badge) {
+    if (training) {
+      badge.style.display = 'inline-block';
+      badge.textContent = (lang === 'ja' ? '研修中 ✕' : 'Training ✕');
+      badge.title = training.name + (training.expiry ? ' (' + training.expiry + 'まで)' : '');
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  if (btn) btn.style.opacity = training ? '0' : '0.4';
+
   var c = document.getElementById('content');
   if (view === 'article') { c.innerHTML = renderArticle(); bindArticle(); return; }
   if (phase === 'welcome') { c.innerHTML = renderWelcome(); return; }
@@ -2247,6 +2294,15 @@ function handleApiSuccess(spec) {
   if (spec.status === 'hold') { holdMsg = spec.hold_reason || ''; phase = 'hold'; render(); return; }
   if (spec.status === 'blocked') { holdMsg = spec.blocked_reason || ''; phase = 'blocked'; render(); return; }
   genApp = spec;
+
+  // expiry日を計算してgenAppに保存
+  if (genApp.app_url && !genApp.app_expiry) {
+    var days = genApp.storage_days || 30;
+    var expiry = new Date();
+    expiry.setDate(expiry.getDate() + days);
+    genApp.app_expiry = expiry.toISOString().slice(0, 10);
+  }
+
   saveProgress({ stage:'result', answers:answers, app:spec });
   checkedItems = {};
   phase = 'result';
@@ -2254,6 +2310,8 @@ function handleApiSuccess(spec) {
   // 師範直伝・大明神の場合は充填率ゲージを表示
   setTimeout(function() {
     updateFillRateUI(genApp.html, genApp.rarity);
+    // 期限通知チェック（前回生成済みのアプリを再表示した場合）
+    checkExpiryWarning(genApp);
   }, 300);
 }
 
@@ -2829,6 +2887,180 @@ function backToInterview() {
   saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
   phase = 'interview';
   render();
+}
+
+// ===== 研修モード =====
+
+// 研修コードを認証してlocalStorageに保存
+async function verifyTrainingCode(code) {
+  try {
+    var res = await fetch(BACKEND_URL + 'verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code.trim().toUpperCase() })
+    });
+    if (!res.ok) throw new Error('NETWORK_ERROR');
+    return await res.json();
+  } catch(e) {
+    console.error('verifyTrainingCode error:', e);
+    return { valid: false, error: 'NETWORK_ERROR' };
+  }
+}
+
+// 研修モードUIを表示
+function showTrainingInput() {
+  var isJa = (lang === 'ja');
+  var modal = document.getElementById('training-modal');
+  if (modal) { modal.style.display = 'flex'; return; }
+
+  var el = document.createElement('div');
+  el.id = 'training-modal';
+  el.style.cssText = 'display:flex;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.5);align-items:flex-end;justify-content:center;';
+  el.innerHTML =
+    '<div style="background:#fff;border-radius:24px 24px 0 0;padding:24px 20px 48px;width:100%;max-width:480px;">' +
+    '<div style="width:40px;height:4px;background:#e8e2d5;border-radius:2px;margin:0 auto 20px;"></div>' +
+    '<div style="font-size:17px;font-weight:700;margin-bottom:6px;color:#3d3529;">🔑 ' + (isJa ? '研修・イベントコード' : 'Training / Event Code') + '</div>' +
+    '<div style="font-size:12px;color:#9a8d7c;margin-bottom:20px;">' + (isJa ? '主催者から配布されたコードを入力してください。認証するとレート制限が撤廃されます。' : 'Enter the code provided by the organizer to remove the daily limit.') + '</div>' +
+    '<input id="training-code-input" type="text" placeholder="例：DOJO2026" ' +
+    'style="width:100%;box-sizing:border-box;padding:14px;border:1.5px solid #e8e2d5;border-radius:12px;font-size:16px;font-family:inherit;outline:none;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:12px;" />' +
+    '<div id="training-code-error" style="font-size:12px;color:#ff7e67;margin-bottom:12px;min-height:18px;"></div>' +
+    '<button id="training-verify-btn" onclick="doVerifyTrainingCode()" ' +
+    'style="width:100%;padding:15px;border:none;border-radius:14px;background:#ff7e67;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">' +
+    (isJa ? '🔑 認証する' : '🔑 Verify') + '</button>' +
+    '<button onclick="closeTrainingModal()" ' +
+    'style="width:100%;padding:13px;border:1.5px solid #e8e2d5;border-radius:14px;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;margin-top:10px;color:#6b5d4c;">' +
+    (isJa ? 'キャンセル' : 'Cancel') + '</button>' +
+    '</div>';
+  document.body.appendChild(el);
+
+  // Enterキーで認証
+  var inp = document.getElementById('training-code-input');
+  if (inp) inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doVerifyTrainingCode();
+  });
+}
+
+function closeTrainingModal() {
+  var modal = document.getElementById('training-modal');
+  if (modal) modal.remove();
+}
+
+async function doVerifyTrainingCode() {
+  var isJa = (lang === 'ja');
+  var inp = document.getElementById('training-code-input');
+  var errEl = document.getElementById('training-code-error');
+  var btn = document.getElementById('training-verify-btn');
+  if (!inp) return;
+
+  var code = inp.value.trim();
+  if (!code) { if (errEl) errEl.textContent = isJa ? 'コードを入力してください' : 'Please enter a code'; return; }
+
+  if (btn) { btn.textContent = isJa ? '確認中...' : 'Verifying...'; btn.disabled = true; }
+  if (errEl) errEl.textContent = '';
+
+  var result = await verifyTrainingCode(code);
+
+  if (result.valid) {
+    // localStorageに研修モードを保存
+    try {
+      localStorage.setItem(TRAINING_KEY, JSON.stringify({
+        name: result.name,
+        expiry: result.expiry,
+        limit: result.limit || 999
+      }));
+    } catch(e) {}
+    closeTrainingModal();
+    // アプリを再描画して研修モード表示
+    render();
+    alert(
+      (isJa ? '✅ 認証完了！\n\n' : '✅ Verified!\n\n') +
+      (isJa ? '研修名：' : 'Event: ') + result.name + '\n' +
+      (result.expiry ? (isJa ? '有効期限：' : 'Expiry: ') + result.expiry + '\n' : '') +
+      (isJa ? '\n1日の生成制限が撤廃されました。押忍🥋' : '\nDaily limit removed. Osu! 🥋')
+    );
+  } else {
+    var msg = isJa ? '❌ コードが無効か期限切れです。' : '❌ Invalid or expired code.';
+    if (result.error === 'NETWORK_ERROR') msg = isJa ? '❌ 通信エラー。もう一度お試しください。' : '❌ Network error. Please try again.';
+    if (errEl) errEl.textContent = msg;
+    if (btn) { btn.textContent = isJa ? '🔑 認証する' : '🔑 Verify'; btn.disabled = false; }
+  }
+}
+
+// 研修モード解除
+function clearTrainingMode() {
+  var isJa = (lang === 'ja');
+  if (confirm(isJa ? '研修モードを解除しますか？' : 'Deactivate training mode?')) {
+    try { localStorage.removeItem(TRAINING_KEY); } catch(e) {}
+    render();
+  }
+}
+
+
+
+// ===== 期限通知バナー =====
+
+var EXPIRY_WARNING_DAYS = 7;
+
+function checkExpiryWarning(app) {
+  if (!app || !app.app_url || !app.app_expiry) return;
+  var today = new Date();
+  var expiry = new Date(app.app_expiry);
+  var daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+  if (daysLeft <= EXPIRY_WARNING_DAYS && daysLeft >= -30) {
+    showExpiryBanner(app, daysLeft);
+  }
+}
+
+function showExpiryBanner(app, daysLeft) {
+  var isJa = (lang === 'ja');
+  var existing = document.getElementById('expiry-banner');
+  if (existing) return;
+
+  var isExpired = daysLeft <= 0;
+  var bannerColor = isExpired ? '#ff7e67' : '#d4af37';
+  var bgColor     = isExpired ? '#fff5f0' : '#fffbea';
+  var borderColor = isExpired ? '#ffa38d' : '#f4d77a';
+
+  var titleText = isExpired
+    ? (isJa ? '⏰ このアプリのURLは期限切れです' : '⏰ This app URL has expired')
+    : (isJa ? '⏰ URLの期限まであと' + daysLeft + '日' : '⏰ ' + daysLeft + ' days until URL expires');
+
+  var descText = isExpired
+    ? (isJa ? 'URLにアクセスできなくなりました。期限切れのデータは復元できません。次回は期限内に永続保存をご利用ください。' : 'This URL is no longer accessible. Expired data cannot be restored. Use permanent storage next time before it expires.')
+    : (isJa ? 'ホーム画面追加済みのアプリは引き続き使えます。URLを残したい場合は期限内に永続保存をご検討ください。' : 'Your home screen app still works. Consider permanent storage before it expires to keep the URL.');
+
+  var actionBtn = isExpired
+    ? '<button onclick="resetAll();document.getElementById(\'expiry-banner\').remove()" style="flex:1;padding:10px;border:none;border-radius:10px;background:' + bannerColor + ';color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">🎲 ' + (isJa ? '作り直す（無料）' : 'Rebuild (free)') + '</button>'
+    : '<button onclick="openPermanentStorageInfo()" style="flex:1;padding:10px;border:none;border-radius:10px;background:' + bannerColor + ';color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">💾 ' + (isJa ? '永続保存について' : 'About Permanent Storage') + '</button>';
+
+  var banner = document.createElement('div');
+  banner.id = 'expiry-banner';
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:150;padding:12px;animation:slideUp 0.4s ease;';
+  banner.innerHTML =
+    '<div style="max-width:480px;margin:0 auto;background:' + bgColor + ';border:1.5px solid ' + borderColor + ';border-radius:16px;padding:14px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);">' +
+    '<div style="display:flex;align-items:flex-start;gap:10px;">' +
+    '<div style="flex:1;">' +
+    '<div style="font-size:13px;font-weight:700;color:' + bannerColor + ';margin-bottom:4px;">' + titleText + '</div>' +
+    '<div style="font-size:11.5px;color:#6b5d4c;line-height:1.6;">' + descText + '</div>' +
+    '</div>' +
+    '<button onclick="document.getElementById(\'expiry-banner\').remove()" style="background:transparent;border:none;color:#9a8d7c;font-size:18px;cursor:pointer;padding:0 4px;flex-shrink:0;">✕</button>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:12px;">' +
+    actionBtn +
+    '<button onclick="document.getElementById(\'expiry-banner\').remove()" style="padding:10px 14px;border:1.5px solid #e8e2d5;border-radius:10px;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;color:#6b5d4c;">' + (isJa ? 'あとで' : 'Later') + '</button>' +
+    '</div>' +
+    '</div>';
+  document.body.appendChild(banner);
+}
+
+function openPermanentStorageInfo() {
+  var isJa = (lang === 'ja');
+  alert(
+    (isJa ? '💾 永続保存について\n\n' : '💾 About Permanent Storage\n\n') +
+    (isJa
+      ? '料金：500円（買い切り）\n\nこのアプリのURLをサービス存続の限り永続保存します。\n\n現在、購入方法を準備中です。\nnoteの記事またはDMで詳細をお知らせします。\n\nしばらくお待ちください 🙇'
+      : 'Price: ¥500 (one-time)\n\nYour app URL will be preserved as long as the service runs.\n\nPurchase method coming soon.\nDetails will be announced on note or via DM.\n\nThank you for your patience 🙇')
+  );
 }
 
 // ===== 機能追加システム =====
