@@ -375,6 +375,28 @@ html,body {
   border-color:var(--gold) !important;
   box-shadow:0 6px 20px rgba(91,155,213,0.2) !important;
 }
+
+/* 代替案・複数選択肢スタイル */
+.alt-options-block { flex:1; display:flex; flex-direction:column; gap:6px; }
+.alt-option {
+  background:#f5f1ea; border:1px solid #e8e2d5; border-radius:8px;
+  padding:8px 10px; font-size:12px; line-height:1.6; color:var(--washi2);
+  display:flex; align-items:flex-start; gap:6px;
+}
+.alt-option-rec {
+  background:#edf7f2; border-color:#7ec9a8;
+}
+.alt-label { font-weight:700; color:var(--gold); flex-shrink:0; font-size:11px; }
+.alt-option-rec .alt-label { color:#4a9e7a; }
+.alt-text { flex:1; }
+.alt-rec-badge {
+  display:inline-block; background:#7ec9a8; color:#fff;
+  font-size:9px; font-weight:700; padding:1px 6px; border-radius:8px;
+  margin-left:4px; letter-spacing:0.5px; vertical-align:middle;
+}
+.alt-example { font-size:11px; color:var(--washi3); padding-left:16px; line-height:1.6; }
+.alt-note { font-size:11px; color:var(--washi3); padding-left:4px; line-height:1.6; font-style:italic; }
+.alt-plain { font-size:12px; color:var(--washi2); line-height:1.6; }
 .sensei-banner {
   background:linear-gradient(135deg, #e8f4ff 0%, var(--gold-lt) 50%, #e8f4ff 100%);
   background-size:200% 200%;
@@ -1310,13 +1332,15 @@ function renderArticle() {
     { icon:'⚡', title:'Just 4 questions',   desc:'No prompt writing. Just answer, get an app.' },
     { icon:'🔰', title:'Zero coding',        desc:'If you can answer in plain words, you can build an app.' },
     { icon:'💾', title:'Works offline',      desc:'Downloaded HTML runs right on your phone. No server.' },
-    { icon:'🎁', title:'Free to try',        desc:'No sign-up. No credit card. Just build.' }
+    { icon:'🎁', title:'Free to try',        desc:'No sign-up. No credit card. Just build.' },
+    { icon:'🌡️', title:"AI's effort changes every time", desc:"Standard (84%): quick & practical. Sensei (13%): detailed & polished. Sonnet (3%): full power. It's honest: we can't afford Sonnet for everyone, every time." }
   ] : [
     { icon:'📱', title:'スマホ1台で完結',    desc:'PC不要。全部スマホの中で完結します。' },
     { icon:'⚡', title:'4問答えるだけ',       desc:'プロンプトを書く必要なし。質問に答えればアプリが作れる。' },
     { icon:'🔰', title:'プログラミング知識ゼロ', desc:'自分の言葉で答えられれば、誰でもアプリを作れます。' },
     { icon:'💾', title:'オフラインで動く',    desc:'ダウンロードしたHTMLはスマホだけで動きます。サーバー不要。' },
-    { icon:'🎁', title:'無料で始められる',    desc:'登録不要・クレジットカード不要。今すぐ始められます。' }
+    { icon:'🎁', title:'無料で始められる',    desc:'登録不要・クレジットカード不要。今すぐ始められます。' },
+    { icon:'🌡️', title:'AIの本気度が毎回変わる', desc:'通常(84%)：手早く実用的。師範(13%)：丁寧な仕上がり。Sonnet(3%)：全力。正直に言うと、全員毎回Sonnetにするとコストが続かない。だからランダムにしています。' }
   ];
 
   var strengthsHTML = strengths.map(function(s, i) {
@@ -1659,6 +1683,63 @@ function confirmGoHome() {
   showArticle();
 }
 
+// 結果画面の「トップに戻る」→ 師範・大明神は確認
+function tryGoTopFromResult() {
+  var isJa = (lang === 'ja');
+  var rarity = genApp ? genApp.rarity : 'normal';
+
+  if (!genApp || rarity === 'normal') {
+    showArticle();
+    return;
+  }
+
+  var rarityName = rarity === 'daimyojin'
+    ? (isJa ? '🌟 大明神' : '🌟 Daimyojin')
+    : (isJa ? '⚡ 師範直伝' : '⚡ Sensei Special');
+
+  var addBtnLabel = isJa ? '✨ 機能を追加する' : '✨ Add Feature';
+
+  var msg = isJa
+    ? rarityName + 'を手放しますか？\n\n1回振り直すより、育てた方が良いものになります。\n💡「' + addBtnLabel + '」ボタンで機能を足していきましょう！'
+    : 'Leave ' + rarityName + '?\n\nGrowing this app beats rolling again.\n💡 Try the "' + addBtnLabel + '" button to add features!';
+
+  var confirmed = confirm(msg + '\n\n[OK] トップに戻る　　[キャンセル] このアプリを育てる');
+  if (confirmed) showArticle();
+}
+
+// 「もう一回振る」ボタン → 師範・大明神なら確認ダイアログ
+function tryRollAgain() {
+  var isJa = (lang === 'ja');
+  var rarity = genApp ? genApp.rarity : 'normal';
+
+  // 通常レアは確認なしで即振り直し
+  if (!genApp || rarity === 'normal') {
+    resetAll();
+    return;
+  }
+
+  // 師範直伝・大明神は確認ダイアログ
+  var rarityName = rarity === 'daimyojin'
+    ? (isJa ? '🌟 大明神' : '🌟 Daimyojin')
+    : (isJa ? '⚡ 師範直伝' : '⚡ Sensei Special');
+
+  var addBtnLabel = isJa ? '✨ 機能を追加する' : '✨ Add Feature';
+
+  var msg = isJa
+    ? rarityName + 'を手放しますか？\n\n1回振り直すより、育てた方が良いものになります。\n💡「' + addBtnLabel + '」ボタンで\n機能を足していく方がお得です！'
+    : 'Leave ' + rarityName + '?\n\nGrowing this app beats rolling again.\n💡 Try the "' + addBtnLabel + '" button\nto add features and make it better!';
+
+  // confirm: キャンセル=「このアプリを育てる」, OK=「振り直す」
+  var confirmed = confirm(msg + '\n\n[OK] 振り直す　　[キャンセル] このアプリを育てる');
+
+  if (confirmed) {
+    resetAll();
+  }
+  // キャンセルなら何もしない（結果画面に留まる）
+}
+
+
+
 // 1つ前の質問に戻る
 function goBackQuestion() {
   if (qIndex <= 0) return;
@@ -1933,110 +2014,111 @@ function detectUnsupportedFeatures(ans) {
   var isJa = (lang === 'ja');
   var warnings = [];
 
-  // ① プッシュ通知（アプリ閉じてても通知）
-  if (/プッシュ通知|閉じ(て|ていて).*(通知|アラート|お知らせ)|バックグラウンド.*通知|push notification|background notif/i.test(all) ||
-      (/(通知|アラーム|リマインド|お知らせ|アラート|rem(ind|inder)|alarm|notify)/i.test(all) &&
+  // ① プッシュ通知（検出条件を大幅拡大）
+  if (/プッシュ通知|閉じ(て|ていて).*(通知|アラート|お知らせ)|バックグラウンド.*通知|push.?notif|background.?notif/i.test(all) ||
+      /通知(機能|して|したい|がほしい)|リマインド(したい|機能|して)|お知らせ(したい|機能)|アラーム(機能|をつけ)|remind(er)?|alarm.*(feature|set)/i.test(all) ||
+      (/(通知|アラーム|リマインド|お知らせ|アラート|notify|alarm)/i.test(all) &&
        /毎朝|毎日|定時|毎週|every\s*(day|morning|week)|at\s*\d/i.test(all))) {
     warnings.push({
       type: 'push_notification',
-      cantDoJa: 'アプリを閉じていても自動で通知を送る',
-      cantDoEn: 'Send notifications while the app is closed',
-      replaceJa: 'アプリを開いた時に残り日数や状態を大きく表示し、少なくなったら画面が赤くなって警告',
-      replaceEn: 'Show remaining days prominently when you open the app, with red warning when low',
+      cantDoJa: 'アプリを閉じていても自動で通知・アラームを送る',
+      cantDoEn: 'Send notifications or alarms while the app is closed',
+      replaceJa: '【A】アプリを開いた時に状態を大きく表示して視覚的に知らせる\n　例：残り3日以下で画面が赤くなる・「⚠️ 期限が近い！」バナー表示\n【B】起動時に自動で計算して「今日やることリスト」を表示\n【C】道場アプリ自体の通知設定（Android版）からリマインダーを設定',
+      replaceEn: '[A] Show status prominently when opened: red warning when days are low\n[B] Auto-calculate on launch and show "today\'s task list"\n[C] Use the Dojo app\'s own notification settings (Android) for reminders',
       canReplace: true
     });
   }
 
   // ② 複数人共有・チーム機能
-  if (/みんなで|複数人|他人と|グループで|チーム|共有|シェア|家族と|友達と|multi.user|share.*(with|between)|team|group/i.test(all)) {
+  if (/みんなで|複数人|他人と|グループで|チーム|家族と.*使|友達と.*使|multi.?user|share.*(with|between)|team\s*(feature|use)|group/i.test(all)) {
     warnings.push({
       type: 'multi_user',
-      cantDoJa: 'みんなでデータを共有する、チームで使う',
-      cantDoEn: 'Share data between users, team features',
-      replaceJa: '一人用のアプリとして作成します（データはあなたのスマホだけに保存）',
-      replaceEn: 'Build as a solo app (data saved only on your phone)',
+      cantDoJa: '複数人でリアルタイムにデータを共有する',
+      cantDoEn: 'Share data with multiple users in real time',
+      replaceJa: '【A】→ CSV・テキストでエクスポートしてLINE/メールで共有（おすすめ）\n【B】共有URLを送って閲覧だけ可能にする（編集は一人）\n【C】一人用として作り、手動でデータをコピーして渡す',
+      replaceEn: '[A] → Export as CSV/text and share via LINE/email (recommended)\n[B] Share a view-only URL (one editor)\n[C] Build as solo app, manually copy data to share',
       canReplace: true
     });
   }
 
   // ③ 位置情報・GPS
-  if (/位置情報|gps|現在地|地図で|マップで|どこに.*いる|location|map.*track/i.test(all)) {
+  if (/位置情報|gps|現在地|地図で.*自動|マップで.*自動|location.*(auto|detect|track)|gps.*(get|use)/i.test(all)) {
     warnings.push({
       type: 'gps',
-      cantDoJa: '位置情報やGPSで場所を自動取得する',
-      cantDoEn: 'Auto-detect location via GPS',
-      replaceJa: '場所は手動で入力する形にします',
-      replaceEn: 'Location will be entered manually',
+      cantDoJa: '現在地をGPSで自動取得する',
+      cantDoEn: 'Auto-detect current location via GPS',
+      replaceJa: '【A】→ GoogleマップのURLを生成して住所からワンタップ確認（おすすめ）\n【B】よく使う場所を事前登録してタップで選ぶ\n【C】郵便番号・住所を手動入力して表示',
+      replaceEn: '[A] → Generate Google Maps URL from address (recommended)\n[B] Pre-register frequently used locations\n[C] Manual address/zip code input',
       canReplace: true
     });
   }
 
-  // ④ カメラ・OCR・画像認識
-  if (/カメラで.*読み取|写真.*認識|ocr|バーコード|qrコード.*読|画像.*分析|image.*recogn|scan.*(photo|image|code)/i.test(all)) {
+  // ④ カメラ・OCR・バーコード・QR読み取り
+  if (/カメラで.*読み取|写真.*認識|ocr|バーコード|qrコード.*読|画像.*分析|image.*recogn|scan.*(photo|image|barcode|qr)/i.test(all)) {
     warnings.push({
       type: 'camera_ocr',
-      cantDoJa: 'カメラで文字や画像を自動認識する',
-      cantDoEn: 'Auto-recognize text or images via camera',
-      replaceJa: '文字や情報は手入力する形にします',
-      replaceEn: 'Text and info will be entered manually',
+      cantDoJa: 'カメラで文字・バーコード・QRを自動認識する',
+      cantDoEn: 'Auto-recognize text, barcodes, or QR via camera',
+      replaceJa: '【A】手動でテキスト入力（コピー&ペーストで高速化）\n【B】よく使う項目をリストに登録してタップで選ぶ\n【C】→ QRコードは数字列を手入力でも代替可能（おすすめ）',
+      replaceEn: '[A] Manual text input (with copy & paste)\n[B] Pre-register common items as a tap-to-select list\n[C] → QR codes can be replaced by manual number entry (recommended)',
       canReplace: true
     });
   }
 
   // ⑤ 音声認識・音声入力
-  if (/音声.*(入力|認識|読み上げ|録音)|声で|しゃべ(って|る)|voice.*(input|recog)|speech.*to.*text|record.*audio/i.test(all)) {
+  if (/音声.*(入力|認識|読み上げ|録音)|声で.*(入力|操作)|しゃべ(って|る).*(入力|操作)|voice.*(input|recog|command)|speech.*to.*text|record.*audio/i.test(all)) {
     warnings.push({
       type: 'voice',
-      cantDoJa: '音声認識や音声入力',
-      cantDoEn: 'Voice recognition or voice input',
-      replaceJa: '文字での入力にします',
-      replaceEn: 'Use text input instead',
+      cantDoJa: '音声認識・音声入力（しゃべって入力）',
+      cantDoEn: 'Voice recognition or speech-to-text input',
+      replaceJa: '【A】キーボードの音声入力ボタン（🎤）をそのまま活用する設計\n【B】入力した文字を大きく表示して入力ミスを減らす\n【C】頻出項目をタップ選択にしてタイプ量を最小化',
+      replaceEn: '[A] Use keyboard\'s built-in voice input (🎤 button)\n[B] Large text display to minimize typos\n[C] Tap-to-select options for common entries',
       canReplace: true
     });
   }
 
   // ⑥ クラウド保存・他端末同期
-  if (/クラウド|他の.*(端末|スマホ|機器).*同期|複数.*端末.*共有|cloud.*save|sync.*(device|phone)/i.test(all)) {
+  if (/クラウド.*保存|他の.*(端末|スマホ|機器).*同期|複数.*端末.*共有|cloud.*(save|sync|storage)|sync.*(device|phone|cross)/i.test(all)) {
     warnings.push({
       type: 'cloud',
-      cantDoJa: 'クラウド保存や他の端末との同期',
-      cantDoEn: 'Cloud storage or sync with other devices',
-      replaceJa: 'このスマホの中だけにデータを保存します',
-      replaceEn: 'Data will be saved only on this phone',
+      cantDoJa: 'クラウド保存や複数端末の同期',
+      cantDoEn: 'Cloud storage or multi-device sync',
+      replaceJa: '【A】→ CSVエクスポートでPCや他アプリに移行可能（おすすめ）\n【B】JSONでデータをエクスポート・インポートできるボタンを設置\n【C】このスマホだけに保存（最もシンプル）',
+      replaceEn: '[A] → CSV export to move data to PC or other apps (recommended)\n[B] Add JSON export/import buttons\n[C] Save only on this phone (simplest)',
       canReplace: true
     });
   }
 
   // ⑦ メール/SMS/LINE 送信
-  if (/(メール|sms|line|ライン).*(送信|送る|飛ばす)|send.*(mail|sms|message)/i.test(all)) {
+  if (/(メール|mail|email).*(送信|送る|自動)|sms.*(送信|送る)|line.*(自動.*送信|bot)|send.*(email|sms|line.*auto)/i.test(all)) {
     warnings.push({
       type: 'messaging',
-      cantDoJa: 'メールやSMS、LINEを自動で送信する',
-      cantDoEn: 'Send emails, SMS, or messages automatically',
-      replaceJa: '画面に表示するだけになります（手動でコピーして送ってください）',
-      replaceEn: 'Will display on screen only (copy manually to send)',
+      cantDoJa: 'メール・SMS・LINEを自動で送信する',
+      cantDoEn: 'Automatically send emails, SMS, or LINE messages',
+      replaceJa: '【A】→ mailtoリンクでメールアプリを開いて送信できます（ほぼ自動、おすすめ）\n　例：「送信」ボタン → メールアプリが開いて宛先・件名・本文が入力済み\n【B】テキストを画面に表示してLINEにコピー&ペースト\n【C】共有ボタンでOSの共有シートから任意のアプリに送る',
+      replaceEn: '[A] → mailto link opens email app with pre-filled fields (nearly automatic, recommended)\n[B] Display text on screen for LINE copy & paste\n[C] Use OS share sheet to send via any app',
       canReplace: true
     });
   }
 
-  // ⑧ 外部API連携（天気・地図など）
-  if (/天気.*(取得|表示|自動)|リアルタイム.*(株価|為替|ニュース)|外部.*(api|サービス).*連携|weather.*(api|auto)|real.*time.*(stock|news)/i.test(all)) {
+  // ⑧ 外部API連携（天気・株価など）
+  if (/天気.*(取得|表示|自動|api)|リアルタイム.*(株価|為替|ニュース)|外部.*(api|サービス).*自動.*連携|weather.*(api|auto|fetch)|real.*time.*(stock|news|data)/i.test(all)) {
     warnings.push({
       type: 'external_api',
       cantDoJa: '天気・株価・ニュースなど外部サービスの自動取得',
-      cantDoEn: 'Auto-fetch weather, stocks, news from external services',
-      replaceJa: '情報は手動で入力する形にします',
-      replaceEn: 'Info will be entered manually',
+      cantDoEn: 'Auto-fetch weather, stocks, or news from external services',
+      replaceJa: '【A】情報は手動で入力して記録・管理する\n【B】外部サイトへのリンクボタンを設置してワンタップで確認\n【C】天気ならアイコン選択（晴れ・曇り・雨など）で手動記録',
+      replaceEn: '[A] Manually enter and track information\n[B] Add link buttons to external sites for quick access\n[C] For weather: icon selection (sun/cloud/rain) for manual logging',
       canReplace: true
     });
   }
 
-  // ⑨ 課金・決済（完全NG、代替不可）
-  if (/課金|決済|クレジットカード|サブスク|定期購入|payment|subscribe|credit.*card/i.test(all)) {
+  // ⑨ 課金・決済（完全NG）
+  if (/課金|決済|クレジットカード|サブスク.*自動|定期購入|payment|subscribe.*auto|credit.*card.*charge/i.test(all)) {
     warnings.push({
       type: 'payment',
-      cantDoJa: 'アプリ内での課金や決済',
-      cantDoEn: 'In-app payment or subscription',
+      cantDoJa: 'アプリ内での課金・決済・クレジットカード処理',
+      cantDoEn: 'In-app payment, subscription, or credit card processing',
       replaceJa: '',
       replaceEn: '',
       canReplace: false
@@ -2044,49 +2126,61 @@ function detectUnsupportedFeatures(ans) {
   }
 
   // ⑩ PDF生成・Excel出力・印刷
-  if (/pdf.*(生成|出力|作成)|excel.*出力|印刷|プリント|pdf.*(export|generate)|excel.*export|print/i.test(all)) {
+  if (/pdf.*(生成|出力|作成|export)|excel.*(出力|export)|印刷|プリント|pdf.*(export|generate|create)|print.*(document|page)/i.test(all)) {
     warnings.push({
       type: 'file_export',
-      cantDoJa: 'PDFやExcelの生成、印刷',
-      cantDoEn: 'PDF/Excel generation, printing',
-      replaceJa: '画面に表示する形にします（スクリーンショットで保存できます）',
-      replaceEn: 'Will display on screen (save via screenshot)',
+      cantDoJa: 'PDFやExcelファイルの生成・印刷',
+      cantDoEn: 'PDF/Excel generation or printing',
+      replaceJa: '【A】→ ブラウザの「印刷」→「PDFに保存」で簡単にPDF化できます（おすすめ）\n【B】→ CSV形式でダウンロードしてExcelで開く（表データに最適）\n【C】テキストコピーボタンでメモ帳・メール・Excelに貼り付け',
+      replaceEn: '[A] → Browser "Print" → "Save as PDF" works easily (recommended)\n[B] → CSV download, open in Excel (great for table data)\n[C] Copy text button to paste into any app',
       canReplace: true
     });
   }
 
   // ⑪ バックグラウンド処理・自動実行
-  if (/(アプリを?閉じ(た|て).*(後|も)|バックグラウンド).*自動|毎日.*自動(実行|処理)|auto.*(run|execute).*background/i.test(all)) {
+  if (/(アプリを?閉じ(た|て).*(後|も)|バックグラウンド).*自動|毎日.*自動(実行|処理|起動)|auto.*(run|execute|start).*background/i.test(all)) {
     warnings.push({
       type: 'background',
       cantDoJa: 'アプリを閉じた後も自動で動き続ける',
-      cantDoEn: 'Keep running after the app is closed',
-      replaceJa: 'アプリを開いた時に日時から自動計算する形にします',
-      replaceEn: 'Auto-calculate based on time when you open the app',
+      cantDoEn: 'Keep running automatically after the app is closed',
+      replaceJa: '【A】起動した瞬間に日時から自動計算して結果を大きく表示\n　例：「今日で◯日目」「あと◯日」を開いた瞬間に表示\n【B】最後に使った日からの経過日数を自動で表示\n【C】定期実行が必要な処理はAndroid側のリマインダーと組み合わせる',
+      replaceEn: '[A] Auto-calculate from date/time on launch and display result prominently\n[B] Show days elapsed since last use automatically\n[C] For scheduled tasks, combine with Android reminders',
       canReplace: true
     });
   }
 
   // ⑫ 生体認証・Face ID
-  if (/指紋|顔認証|face.*id|touch.*id|生体認証|biometric/i.test(all)) {
+  if (/指紋|顔認証|face.?id|touch.?id|生体認証|biometric/i.test(all)) {
     warnings.push({
       type: 'biometric',
-      cantDoJa: '指紋認証や顔認証',
-      cantDoEn: 'Fingerprint or face authentication',
-      replaceJa: 'パスコード入力での保護にします（またはロックなし）',
-      replaceEn: 'Use passcode protection (or no lock)',
+      cantDoJa: '指紋認証・顔認証（Face ID / Touch ID）',
+      cantDoEn: 'Fingerprint or face authentication (Face ID / Touch ID)',
+      replaceJa: '【A】4桁の数字パスコード入力で保護（シンプル）\n【B】任意の合言葉・キーワードで保護\n【C】保護なし（自分専用の気軽な使い方）',
+      replaceEn: '[A] 4-digit passcode protection (simple)\n[B] Custom keyword/phrase protection\n[C] No lock (casual personal use)',
       canReplace: true
     });
   }
 
   // ⑬ 健康データ・歩数計連携
-  if (/歩数|心拍|睡眠.*(データ|記録)|健康.*(アプリ|データ).*連携|health.*data|step.*count/i.test(all)) {
+  if (/歩数.*(自動|連携)|心拍.*(自動|連携)|睡眠.*(データ|記録).*(自動|連携)|健康.*(アプリ|データ).*(自動|連携)|health.*data.*(auto|sync)|step.*count.*(auto|sync)/i.test(all)) {
     warnings.push({
       type: 'health_data',
-      cantDoJa: '歩数計や健康アプリのデータを自動取得',
-      cantDoEn: 'Auto-fetch health/step data from other apps',
-      replaceJa: '歩数や健康データは手動で記録する形にします',
-      replaceEn: 'Record health data manually',
+      cantDoJa: '歩数計・心拍・健康アプリからのデータ自動取得',
+      cantDoEn: 'Auto-fetch step count, heart rate, or health data from other apps',
+      replaceJa: '【A】歩数・体重などを手動で記録してグラフで見える化\n【B】健康アプリの数値をコピーして貼り付ける記録形式\n【C】「今日の目標達成！」ボタンを押すだけのシンプル習慣管理',
+      replaceEn: '[A] Manually log steps/weight and visualize with a chart\n[B] Paste values from health apps as records\n[C] Simple habit tracker with a "Done for today!" button',
+      canReplace: true
+    });
+  }
+
+  // ⑭ 音声ファイル・MP3・BGM（新規追加）
+  if (/mp3|bgm|音楽.*(再生|流す|ファイル)|音声.*(ファイル|再生|流す)|wav|ogg|audio.*(file|play|mp3)|music.*(play|file)/i.test(all)) {
+    warnings.push({
+      type: 'audio_file',
+      cantDoJa: 'MP3・WAVなど外部音声ファイルの読み込み・再生',
+      cantDoEn: 'Load and play external audio files (MP3, WAV, etc.)',
+      replaceJa: '【A】→ 効果音（ピッ・ポーン・ブー）はWeb Audio APIで完全再現できます（おすすめ）\n　決定音・完了音・警告音・カウントダウン音など実用的な音は全て作れます\n【B】シンプルなメロディ：音の高さと長さを組み合わせて自動生成\n【C】音量・速度・音の種類（sin波・矩形波）も調整可能\n※ BGM・人の声・歌は作れませんが、アプリの効果音なら外部ファイル不要で十分です',
+      replaceEn: '[A] → Sound effects (beep, ding, buzz) fully recreatable with Web Audio API (recommended)\n   Decision sounds, completion chimes, warning beeps, countdown bleeps — all possible\n[B] Simple melody: generate from pitch and duration combinations\n[C] Adjustable volume, speed, and wave type (sine/square)\n※ BGM, voice, and songs need MP3 files, but app sound effects need no external files',
       canReplace: true
     });
   }
@@ -2157,6 +2251,10 @@ function handleApiSuccess(spec) {
   checkedItems = {};
   phase = 'result';
   render();
+  // 師範直伝・大明神の場合は充填率ゲージを表示
+  setTimeout(function() {
+    updateFillRateUI(genApp.html, genApp.rarity);
+  }, 300);
 }
 
 function handleApiError(e) {
@@ -2189,11 +2287,11 @@ function renderLoading() {
   var subText = t().loadingSub;
 
   if (isDaimyojin) {
-    overlay = '<div class="loading-premium-overlay">🥋 ' + (isJa ? 'クロード大明神 本気モード' : 'Claude Daimyojin: Serious Mode') + ' 🥋</div>';
-    subText = isJa ? '✨ 本日のあなたは特別。最高品質で作っています ✨' : '✨ Today is special. Crafting at top quality ✨';
+    overlay = '<div class="loading-premium-overlay">🌟 ' + (isJa ? 'Sonnetが本気を出しています' : 'Sonnet is going all out') + ' 🌟</div>';
+    subText = isJa ? '⚡ 今日はAIがフル稼働。機能も仕上がりも丁寧に作ります。' : '⚡ AI is running at full power today. Crafting every detail with care.';
   } else if (isSensei) {
-    overlay = '<div class="loading-sensei-overlay">⚡ ' + (isJa ? '師範直伝モード' : 'Sensei Mode') + ' ⚡</div>';
-    subText = isJa ? '⚡ 師範が腕を振るっています...' : '⚡ Sensei is crafting with care...';
+    overlay = '<div class="loading-sensei-overlay">⚡ ' + (isJa ? '今日は師範がフル稼働！' : 'Sensei is at full power today!') + ' ⚡</div>';
+    subText = isJa ? '✨ 今日のHaikuは細部まで気を配って作ります。' : '✨ Today\'s Haiku is crafting with extra care and detail.';
   }
 
   return '<div id="loading" class="' + premiumClass.trim() + '"><div id="loading-inner">' +
@@ -2222,7 +2320,38 @@ function renderConfirm() {
   var replaceHTML = featureWarnings
     .filter(function(w) { return w.canReplace; })
     .map(function(w) {
-      return '<div class="confirm-item confirm-ok"><span class="confirm-check">✅</span><span>' + (isJa ? w.replaceJa : w.replaceEn) + '</span></div>';
+      var raw = (isJa ? w.replaceJa : w.replaceEn) || '';
+      // 【A】【B】【C】形式 or →おすすめ形式を複数選択肢カードに変換
+      var lines = raw.split('\n').filter(function(l) { return l.trim(); });
+      var rendered = lines.map(function(line) {
+        var t = line.trim();
+        // 【A】【B】【C】の選択肢行
+        var optMatch = t.match(/^【([A-C])】(→\s*)?(.*)/);
+        if (optMatch) {
+          var isRec = t.indexOf('おすすめ') !== -1 || t.indexOf('recommended') !== -1 || optMatch[2];
+          return '<div class="alt-option' + (isRec ? ' alt-option-rec' : '') + '">' +
+            '<span class="alt-label">【' + optMatch[1] + '】</span>' +
+            '<span class="alt-text">' + escapeHtml(optMatch[3]) +
+            (isRec ? ' <span class="alt-rec-badge">' + (isJa ? 'おすすめ' : 'recommended') + '</span>' : '') +
+            '</span>' +
+            '</div>';
+        }
+        // 字下げ行（例文）
+        if (t.startsWith('　') || t.startsWith('  ') || t.startsWith('例：') || t.startsWith('e.g.')) {
+          return '<div class="alt-example">' + escapeHtml(t.replace(/^[　\s]+/, '')) + '</div>';
+        }
+        // ※注釈行
+        if (t.startsWith('※')) {
+          return '<div class="alt-note">' + escapeHtml(t) + '</div>';
+        }
+        // 通常テキスト
+        return '<div class="alt-plain">' + escapeHtml(t) + '</div>';
+      }).join('');
+
+      return '<div class="confirm-item confirm-ok">' +
+        '<span class="confirm-check">✅</span>' +
+        '<div class="alt-options-block">' + rendered + '</div>' +
+        '</div>';
     }).join('');
 
   // 2. AI助言セクション（中以上のみ）
@@ -2422,16 +2551,16 @@ function renderResult() {
     rarityBanner =
       '<div class="premium-banner">' +
       '<div class="premium-sparkle">✨🌟✨</div>' +
-      '<div class="premium-title">' + (isJa2 ? '🥋 クロード大明神 降臨 🥋' : '🥋 Claude Daimyojin Descended 🥋') + '</div>' +
-      '<div class="premium-sub">' + (isJa2 ? '本日のあなたは特別。最上位AIが本気で作りました。' : 'Today is special. Top-tier AI gave its all.') + '</div>' +
-      '<div class="premium-badge">🌟 大明神特製 / ' + storageDays + (isJa2 ? '日間保存' : '-day save') + '</div>' +
+      '<div class="premium-title">' + (isJa2 ? '🌟 Sonnetが本気で作りました 🌟' : '🌟 Built by Sonnet at Full Power 🌟') + '</div>' +
+      '<div class="premium-sub">' + (isJa2 ? '機能を追加しながら育てましょう 🌱' : 'Add features and grow this app 🌱') + '</div>' +
+      '<div class="premium-badge">Sonnet / ' + storageDays + (isJa2 ? '日間保存' : '-day save') + '</div>' +
       '</div>';
   } else if (isSensei) {
     rarityBanner =
       '<div class="sensei-banner">' +
-      '<div class="sensei-banner-title">' + (isJa2 ? '⚡ 師範直伝 ⚡' : '⚡ Sensei Special ⚡') + '</div>' +
-      '<div class="sensei-banner-sub">' + (isJa2 ? '師範が腕を振るった一品です。' : 'Crafted with extra care by the sensei.') + '</div>' +
-      '<div class="sensei-banner-badge">⚡ 師範直伝 / ' + storageDays + (isJa2 ? '日間保存' : '-day save') + '</div>' +
+      '<div class="sensei-banner-title">' + (isJa2 ? '⚡ 師範が丁寧に作りました ⚡' : '⚡ Crafted Carefully by Sensei ⚡') + '</div>' +
+      '<div class="sensei-banner-sub">' + (isJa2 ? '機能を追加しながら育てましょう 🌱' : 'Add features and grow this app 🌱') + '</div>' +
+      '<div class="sensei-banner-badge">Haiku強化 / ' + storageDays + (isJa2 ? '日間保存' : '-day save') + '</div>' +
       '</div>';
   }
 
@@ -2471,6 +2600,26 @@ function renderResult() {
     '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
     '</div>' +
     homeUrlCard +
+    '<div id="fill-rate-section" style="display:none;margin:16px 18px 0;">' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+    '<span id="fill-rate-emoji">🟢</span>' +
+    '<span id="fill-rate-label" style="font-size:12px;color:#6b5d4c;flex:1;"></span>' +
+    '<span id="fill-rate-percent" style="font-size:12px;font-weight:700;color:#9a8d7c;"></span>' +
+    '</div>' +
+    '<div style="height:6px;background:#e8e2d5;border-radius:3px;overflow:hidden;">' +
+    '<div id="fill-rate-bar" style="height:100%;border-radius:3px;transition:width 0.5s ease;width:0%;"></div>' +
+    '</div>' +
+    '</div>' +
+    '<div id="add-feature-section" style="display:none;margin:12px 18px 0;">' +
+    '<button id="add-feature-btn" onclick="openAddFeatureModal()" style="width:100%;padding:14px;border-radius:14px;border:1.5px solid #d4af37;background:rgba(212,175,55,0.07);cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;display:flex;align-items:center;gap:12px;color:#8b6914;">' +
+    '<span style="font-size:22px;">✨</span>' +
+    '<div style="flex:1;text-align:left;">' +
+    '<div id="add-feature-btn-title">' + (isJa2 ? '機能を追加する' : 'Add Feature') + '</div>' +
+    '<div style="font-size:11px;color:#9a8d7c;font-weight:400;">' + (isJa2 ? 'レート制限にカウントされません' : 'Does not count toward daily limit') + '</div>' +
+    '</div>' +
+    '<span style="font-size:14px;">›</span>' +
+    '</button>' +
+    '</div>' +
     '<div class="preview-frame">' +
     '<div class="preview-label">📱 ' + (isJa2 ? 'プレビュー' : 'Preview') + '</div>' +
     '<iframe id="app-preview" sandbox="allow-scripts allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
@@ -2481,8 +2630,8 @@ function renderResult() {
     '<button class="btn-g" onclick="copyHtmlToClipboard()">📋 ' + (isJa2 ? 'コードをコピー' : 'Copy Code') + '</button>' +
     '</div>' +
     '<div class="result-actions">' +
-    '<button class="btn-g" onclick="resetAll()">🎲 ' + (isJa2 ? 'もう一回振る' : 'Roll again') + '</button>' +
-    '<button class="btn-g" style="font-size:12px" onclick="showArticle()">← ' + (isJa2 ? 'トップに戻る' : 'Back to top') + '</button>' +
+    '<button class="btn-g" onclick="tryRollAgain()">🎲 ' + (isJa2 ? 'もう一回振る' : 'Roll again') + '</button>' +
+    '<button class="btn-g" style="font-size:12px" onclick="tryGoTopFromResult()">← ' + (isJa2 ? 'トップに戻る' : 'Back to top') + '</button>' +
     '</div>' +
     '</div>';
 }
@@ -2682,6 +2831,199 @@ function backToInterview() {
   render();
 }
 
+// ===== 機能追加システム =====
+
+var MAX_CAPACITY = 60000;
+var ADD_FEATURE_LIMIT = 0.80;
+
+function calcFillRate(html) {
+  if (!html) return 0;
+  return Math.min(html.length / MAX_CAPACITY, 1.0);
+}
+
+function canAddFeature(html, isPremiumRarity) {
+  if (!isPremiumRarity) return false;
+  return calcFillRate(html) < ADD_FEATURE_LIMIT;
+}
+
+function getFillRateLabel(html) {
+  var rate = calcFillRate(html);
+  var remaining = Math.round((1.0 - rate) * 100);
+  var isJa = (lang === 'ja');
+  if (remaining <= 0) return isJa ? 'コードが充実しています！' : 'Code is fully packed!';
+  if (remaining <= 20) return isJa ? 'あと少し追加できます（残り約' + remaining + '%）' : 'A bit more room left (~' + remaining + '% remaining)';
+  return isJa ? '機能追加の余地があります（残り約' + remaining + '%）' : 'Room for more features (~' + remaining + '% remaining)';
+}
+
+function updateFillRateUI(html, rarity) {
+  var isPremiumRarity = rarity === 'sensei' || rarity === 'daimyojin';
+  if (!isPremiumRarity) return;
+
+  var rate = calcFillRate(html);
+  var percent = Math.round(rate * 100);
+  var isJa = (lang === 'ja');
+
+  var section = document.getElementById('fill-rate-section');
+  if (section) {
+    section.style.display = 'block';
+    var pct = document.getElementById('fill-rate-percent');
+    var lbl = document.getElementById('fill-rate-label');
+    var emoji = document.getElementById('fill-rate-emoji');
+    var bar = document.getElementById('fill-rate-bar');
+    if (pct) pct.textContent = percent + (isJa ? '% 使用中' : '% used');
+    if (lbl) lbl.textContent = getFillRateLabel(html);
+    if (emoji) emoji.textContent = rate >= 0.8 ? '🟠' : rate >= 0.5 ? '🟡' : '🟢';
+    if (bar) {
+      bar.style.width = percent + '%';
+      bar.style.background = rate >= 0.8 ? '#ff7e67' : rate >= 0.5 ? '#d4af37' : '#7ec9a8';
+    }
+  }
+
+  var addSection = document.getElementById('add-feature-section');
+  if (addSection) {
+    addSection.style.display = canAddFeature(html, isPremiumRarity) ? 'block' : 'none';
+    var btn = document.getElementById('add-feature-btn');
+    var title = document.getElementById('add-feature-btn-title');
+    if (btn && title) {
+      if (rarity === 'daimyojin') {
+        btn.style.borderColor = '#d4af37';
+        btn.style.background = 'rgba(212,175,55,0.07)';
+        btn.style.color = '#8b6914';
+        title.textContent = isJa ? '🌟 機能を追加する（大明神の特権）' : '🌟 Add Feature (Daimyojin privilege)';
+      } else {
+        btn.style.borderColor = '#1a3a5c';
+        btn.style.background = 'rgba(26,58,92,0.05)';
+        btn.style.color = '#1a3a5c';
+        title.textContent = isJa ? '⚡ 機能を追加する（師範直伝の特権）' : '⚡ Add Feature (Sensei privilege)';
+      }
+    }
+  }
+}
+
+var FEATURE_SUGGESTIONS_JA = [
+  '📊 データをグラフで表示',
+  '📋 履歴・ログ一覧を追加',
+  '🌙 ダークモード切り替え',
+  '📤 データをテキストでLINEに共有',
+  '🔄 データのリセット機能',
+  '⏱️ タイマー機能を追加',
+  '📅 日付・カレンダー表示',
+  '🔔 画面上部に通知バナーを表示',
+];
+var FEATURE_SUGGESTIONS_EN = [
+  '📊 Add a chart/graph view',
+  '📋 Add history/log list',
+  '🌙 Dark mode toggle',
+  '📤 Share data as text',
+  '🔄 Reset data button',
+  '⏱️ Add a timer',
+  '📅 Calendar/date display',
+  '🔔 In-app notification banner',
+];
+
+function openAddFeatureModal() {
+  var isJa = (lang === 'ja');
+  var suggestions = isJa ? FEATURE_SUGGESTIONS_JA : FEATURE_SUGGESTIONS_EN;
+  var container = document.getElementById('feature-suggestions');
+  if (container) {
+    container.innerHTML = suggestions.map(function(s) {
+      var label = s.substring(2);
+      return '<span onclick="setFeatureSuggestion(\'' + escapeHtml(label) + '\')" style="padding:6px 10px;background:#faf8f4;border:1px solid #e8e2d5;border-radius:20px;font-size:12px;cursor:pointer;display:inline-block;">' + s + '</span>';
+    }).join('');
+  }
+
+  var rate = calcFillRate(genApp ? genApp.html : '');
+  var percent = Math.round(rate * 100);
+  var gauge = document.getElementById('modal-fill-gauge');
+  if (gauge) {
+    gauge.innerHTML =
+      '<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b5d4c;margin-bottom:5px;">' +
+      '<span>' + getFillRateLabel(genApp ? genApp.html : '') + '</span>' +
+      '<span style="font-weight:700;">' + percent + (isJa ? '% 使用中' : '% used') + '</span>' +
+      '</div>' +
+      '<div style="height:6px;background:#e8e2d5;border-radius:3px;overflow:hidden;">' +
+      '<div style="height:100%;width:' + percent + '%;border-radius:3px;background:' +
+      (rate >= 0.8 ? '#ff7e67' : rate >= 0.5 ? '#d4af37' : '#7ec9a8') + ';"></div>' +
+      '</div>';
+  }
+
+  var modal = document.getElementById('add-feature-modal');
+  if (modal) modal.style.display = 'flex';
+  var inp = document.getElementById('feature-input');
+  if (inp) { inp.value = ''; inp.placeholder = isJa ? '例：残り日数が少なくなったら色を赤くする\n　　データをCSVでダウンロードできるボタンを追加' : 'e.g. Turn red when days are low\n     Add a CSV download button'; }
+  updateAddFeatureBtn();
+}
+
+function closeAddFeatureModal() {
+  var modal = document.getElementById('add-feature-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function setFeatureSuggestion(text) {
+  var inp = document.getElementById('feature-input');
+  if (inp) inp.value = text;
+  updateAddFeatureBtn();
+}
+
+function updateAddFeatureBtn() {
+  var val = (document.getElementById('feature-input') || {}).value || '';
+  var btn = document.getElementById('do-add-feature-btn');
+  if (!btn) return;
+  var empty = val.trim().length === 0;
+  btn.disabled = empty;
+  btn.style.opacity = empty ? '0.5' : '1';
+  btn.style.cursor = empty ? 'default' : 'pointer';
+}
+
+async function doAddFeature() {
+  var isJa = (lang === 'ja');
+  var request = (document.getElementById('feature-input') || {}).value || '';
+  request = request.trim();
+  if (!request || !genApp) return;
+
+  var btn = document.getElementById('do-add-feature-btn');
+  if (btn) { btn.textContent = isJa ? '✨ 機能を追加中...' : '✨ Adding feature...'; btn.disabled = true; }
+
+  try {
+    var res = await fetch(BACKEND_URL + 'add-feature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        existing_html: genApp.html,
+        feature_request: request,
+        app_name: genApp.app_name || 'マイアプリ',
+        app_id: genApp.app_id || null,
+        rarity: genApp.rarity || 'sensei',
+        userToken: getUserToken()
+      })
+    });
+
+    if (!res.ok) throw new Error('BACKEND_ERROR');
+    var data = await res.json();
+
+    if (data.status === 'ok' && data.html) {
+      genApp.html = data.html;
+      if (data.app_url) genApp.app_url = data.app_url;
+
+      closeAddFeatureModal();
+
+      // iframeプレビュー更新
+      var iframe = document.getElementById('app-preview');
+      if (iframe) iframe.srcdoc = data.html;
+
+      // 充填率UI更新
+      updateFillRateUI(genApp.html, genApp.rarity);
+
+      alert(isJa ? '✨ 機能を追加しました！プレビューを確認してください。' : '✨ Feature added! Check the preview.');
+    } else {
+      throw new Error(data.blocked_reason || (isJa ? '追加に失敗しました' : 'Addition failed'));
+    }
+  } catch (err) {
+    alert((lang === 'ja' ? '❌ 追加に失敗しました。もう一度試してください。\n' : '❌ Failed. Please try again.\n') + err.message);
+    if (btn) { btn.textContent = lang === 'ja' ? '✨ 追加して再生成' : '✨ Add & Regenerate'; btn.disabled = false; }
+  }
+}
+
 function resetAll() {
   clearProgress();
   qIndex = 0; answers = {}; messages = [];
@@ -2750,5 +3092,31 @@ function closeInstallBanner() {
 
 setTimeout(checkInstallPrompt, 1500);
 </script>
+
+<!-- 機能追加モーダル -->
+<div id="add-feature-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 48px;max-height:85vh;overflow-y:auto;width:100%;max-width:480px;">
+    <div style="width:40px;height:4px;background:#e8e2d5;border-radius:2px;margin:0 auto 16px;"></div>
+    <div style="font-size:17px;font-weight:700;margin-bottom:4px;color:#3d3529;">✨ 機能を追加する</div>
+    <div style="font-size:12px;color:#9a8d7c;margin-bottom:16px;">充填率80%未満の間、追加できます（レート制限なし）</div>
+    <div id="modal-fill-gauge" style="margin-bottom:16px;"></div>
+    <div style="font-size:12px;font-weight:700;color:#9a8d7c;margin-bottom:8px;">よく使われる追加機能：</div>
+    <div id="feature-suggestions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
+    <textarea id="feature-input"
+      rows="3"
+      style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #e8e2d5;border-radius:12px;font-family:inherit;font-size:14px;line-height:1.6;resize:vertical;outline:none;min-height:88px;"
+      oninput="updateAddFeatureBtn()"></textarea>
+    <div style="font-size:10px;color:#9a8d7c;margin:6px 0 14px;">※ 1日3回のレート制限にカウントされません</div>
+    <button id="do-add-feature-btn" onclick="doAddFeature()" disabled
+      style="width:100%;padding:15px;border:none;border-radius:14px;background:#ff7e67;color:#fff;font-size:15px;font-weight:700;cursor:default;font-family:inherit;opacity:0.5;">
+      ✨ 追加して再生成
+    </button>
+    <button onclick="closeAddFeatureModal()"
+      style="width:100%;padding:13px;border:1.5px solid #e8e2d5;border-radius:14px;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;margin-top:10px;color:#6b5d4c;">
+      キャンセル
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
