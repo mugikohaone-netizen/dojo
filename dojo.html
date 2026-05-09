@@ -375,6 +375,11 @@ html,body {
   border-color:var(--gold) !important;
   box-shadow:0 6px 20px rgba(91,155,213,0.2) !important;
 }
+/* 機能多すぎエラー画面 */
+.overload-box { background:#faf8f4; border:1px solid #e8e2d5; border-radius:12px; padding:14px; margin:16px 0; text-align:left; }
+.overload-label { font-size:11.5px; font-weight:700; color:#9a8d7c; margin-bottom:10px; }
+.overload-tip { font-size:12.5px; color:#3d3529; padding:7px 0; border-bottom:1px solid #f0ece4; line-height:1.6; }
+.overload-tip:last-child { border-bottom:none; padding-bottom:0; }
 
 /* 代替案・複数選択肢スタイル */
 .alt-options-block { flex:1; display:flex; flex-direction:column; gap:6px; }
@@ -1367,6 +1372,7 @@ function render() {
   if (phase === 'hold') { c.innerHTML = renderHold(); return; }
   if (phase === 'blocked') { c.innerHTML = renderBlocked(); return; }
   if (phase === 'rateLimit') { c.innerHTML = renderRateLimit(); return; }
+  if (phase === 'errorOverload') { c.innerHTML = renderErrorOverload(); return; }
   c.innerHTML = renderError();
 }
 
@@ -2316,10 +2322,17 @@ function handleApiSuccess(spec) {
 }
 
 function handleApiError(e) {
-  // エラー時も回答を残すために interview ステージとして保存
   saveProgress({ stage:'interview', qIndex:qIndex, answers:answers, messages:messages, extraQuestions:extraQuestions });
   if (e.message === 'RATE_LIMIT' || e.message === 'RATE_LIMIT_USER') phase = 'rateLimit';
-  else phase = 'error';
+  else {
+    // 機能が多すぎたかどうかを判定
+    var complexity = calcComplexity(answers);
+    if (complexity >= 3 || e.message === 'BACKEND_ERROR') {
+      phase = 'errorOverload'; // 機能多すぎ専用エラー画面
+    } else {
+      phase = 'error';
+    }
+  }
   render();
 }
 
@@ -2846,6 +2859,68 @@ function renderError() {
     '<div class="err-desc">' + t().errorDesc.replace('\n', '<br>') + '</div>' +
     '<button class="btn-p" onclick="retryGenerate()">' + (isJa ? '🔄 もう一度生成する' : '🔄 Try generating again') + '</button>' +
     '<button class="btn-g" style="margin-top:10px" onclick="backToInterview()">' + (isJa ? '← 回答を見直す' : '← Review answers') + '</button>' +
+    '<button class="btn-g" style="margin-top:10px;font-size:11.5px;color:var(--washi3)" onclick="resetAll()">' + (isJa ? '最初からやり直す' : 'Start over') + '</button>' +
+    '</div></div>';
+}
+
+// 機能が多すぎた時専用のエラー画面
+function renderErrorOverload() {
+  var isJa = (lang === 'ja');
+
+  // 回答から「削れそうな機能」を提案
+  var all = Object.values(answers || {}).join(' ');
+  var suggestions = [];
+
+  if (isJa) {
+    if (/グラフ|チャート|chart|graph/i.test(all))
+      suggestions.push('📊 グラフ表示 → まず数字の記録だけにする');
+    if (/通知|アラート|リマインド/i.test(all))
+      suggestions.push('🔔 通知機能 → 開いた時に色で知らせる形に');
+    if (/タブ|ページ|複数.*画面|メニュー/i.test(all))
+      suggestions.push('📑 複数タブ → 1画面に絞る');
+    if (/検索|フィルター|filter|search/i.test(all))
+      suggestions.push('🔍 検索・フィルター → 一覧表示だけにする');
+    if (/カレンダー|calendar|月.*表示/i.test(all))
+      suggestions.push('📅 カレンダー表示 → リスト形式にする');
+    if (/csv|エクスポート|export|ダウンロード/i.test(all))
+      suggestions.push('📤 CSV出力 → まずは画面表示だけにする');
+    if (suggestions.length === 0) {
+      suggestions.push('🎯 機能を1〜2つに絞る');
+      suggestions.push('✏️ 「やりたいこと」を一番重要な1つだけに書き直す');
+    }
+  } else {
+    if (/graph|chart/i.test(all))
+      suggestions.push('📊 Chart → just record numbers first');
+    if (/notif|remind|alert/i.test(all))
+      suggestions.push('🔔 Notifications → show colors when opened instead');
+    if (/tab|page|menu|screen/i.test(all))
+      suggestions.push('📑 Multiple tabs → simplify to 1 screen');
+    if (/search|filter/i.test(all))
+      suggestions.push('🔍 Search/filter → just show a list');
+    if (/csv|export|download/i.test(all))
+      suggestions.push('📤 CSV export → display on screen only first');
+    if (suggestions.length === 0) {
+      suggestions.push('🎯 Limit to 1-2 features');
+      suggestions.push('✏️ Rewrite your request focusing on the single most important thing');
+    }
+  }
+
+  var suggestHTML = suggestions.map(function(s) {
+    return '<div class="overload-tip">' + escapeHtml(s) + '</div>';
+  }).join('');
+
+  return '<div class="err-screen"><div class="err-card">' +
+    '<div class="err-emoji">🏋️</div>' +
+    '<div class="err-title">' + (isJa ? '機能が少し多かったようです' : 'Too many features at once') + '</div>' +
+    '<div class="err-desc">' + (isJa
+      ? 'AIが一度に作れる量を超えてしまいました。\n機能を絞ると確実に動くアプリが作れます。'
+      : 'The AI hit its limit. Trimming the features will make a working app.') + '</div>' +
+    '<div class="overload-box">' +
+    '<div class="overload-label">' + (isJa ? '💡 削ってみると良さそうな機能：' : '💡 Try removing one of these:') + '</div>' +
+    suggestHTML +
+    '</div>' +
+    '<button class="btn-p" onclick="openModifyMode()">' + (isJa ? '✏️ 機能を絞って作り直す' : '✏️ Simplify and retry') + '</button>' +
+    '<button class="btn-g" style="margin-top:10px" onclick="retryGenerate()">' + (isJa ? '🔄 そのまま再挑戦する' : '🔄 Retry as-is') + '</button>' +
     '<button class="btn-g" style="margin-top:10px;font-size:11.5px;color:var(--washi3)" onclick="resetAll()">' + (isJa ? '最初からやり直す' : 'Start over') + '</button>' +
     '</div></div>';
 }
