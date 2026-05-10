@@ -2301,6 +2301,17 @@ function handleApiSuccess(spec) {
   if (spec.status === 'blocked') { holdMsg = spec.blocked_reason || ''; phase = 'blocked'; render(); return; }
   genApp = spec;
 
+  // rarityをpendingRarityから確実に補完（Workerが返さない場合のフォールバック）
+  if (!genApp.rarity || genApp.rarity === 'normal') {
+    genApp.rarity = pendingRarity || RARITY.NORMAL;
+  }
+
+  // storage_daysもrarityから補完
+  if (!genApp.storage_days) {
+    var daysMap = { 'daimyojin': 90, 'sensei': 60, 'normal': 30 };
+    genApp.storage_days = daysMap[genApp.rarity] || 30;
+  }
+
   // expiry日を計算してgenAppに保存
   if (genApp.app_url && !genApp.app_expiry) {
     var days = genApp.storage_days || 30;
@@ -2309,14 +2320,12 @@ function handleApiSuccess(spec) {
     genApp.app_expiry = expiry.toISOString().slice(0, 10);
   }
 
-  saveProgress({ stage:'result', answers:answers, app:spec });
+  saveProgress({ stage:'result', answers:answers, app:genApp });
   checkedItems = {};
   phase = 'result';
   render();
-  // 師範直伝・大明神の場合は充填率ゲージを表示
   setTimeout(function() {
     updateFillRateUI(genApp.html, genApp.rarity);
-    // 期限通知チェック（前回生成済みのアプリを再表示した場合）
     checkExpiryWarning(genApp);
   }, 300);
 }
@@ -2638,6 +2647,8 @@ function renderResult() {
 
   // ホーム画面追加用URL
   var homeUrlCard = '';
+  var appIcon = (a.app_icon && (isDaimyojin || isSensei)) ? a.app_icon : '';
+
   if (a.app_url) {
     var guide = getInstallGuide();
     var urlCardClass = 'home-url-card' + (isDaimyojin ? ' home-url-premium' : isSensei ? ' home-url-sensei' : '');
@@ -2661,12 +2672,16 @@ function renderResult() {
   }
 
   var resultClass = isDaimyojin ? ' class="result-premium"' : isSensei ? ' class="result-sensei"' : '';
-  var resultEmoji = isDaimyojin ? '🌟' : isSensei ? '⚡' : '🎉';
+  var resultEmoji = appIcon || (isDaimyojin ? '🌟' : isSensei ? '⚡' : '🎉');
+  var iconBadge = appIcon
+    ? '<div style="font-size:10px;color:#9a8d7c;margin-top:2px;">' + (isJa2 ? 'AIが選んだアイコン' : 'AI-picked icon') + '</div>'
+    : '';
 
   return '<div id="result"' + resultClass + '>' +
     rarityBanner +
     '<div class="result-head">' +
     '<div class="result-emoji">' + resultEmoji + '</div>' +
+    iconBadge +
     '<div class="result-title">' + escapeHtml(a.app_name || 'My App') + '</div>' +
     '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
     '</div>' +
@@ -3213,9 +3228,9 @@ var FEATURE_SUGGESTIONS_JA = [
   '🌙 ダークモード切り替え',
   '📤 データをテキストでLINEに共有',
   '🔄 データのリセット機能',
-  '⏱️ タイマー機能を追加',
   '📅 日付・カレンダー表示',
-  '🔔 画面上部に通知バナーを表示',
+  '🔔 画面内バナーでお知らせ表示',
+  '🎨 テーマカラーを変える',
 ];
 var FEATURE_SUGGESTIONS_EN = [
   '📊 Add a chart/graph view',
@@ -3223,9 +3238,9 @@ var FEATURE_SUGGESTIONS_EN = [
   '🌙 Dark mode toggle',
   '📤 Share data as text',
   '🔄 Reset data button',
-  '⏱️ Add a timer',
   '📅 Calendar/date display',
   '🔔 In-app notification banner',
+  '🎨 Change theme color',
 ];
 
 function openAddFeatureModal() {
@@ -3410,8 +3425,8 @@ setTimeout(checkInstallPrompt, 1500);
     <div style="font-size:12px;font-weight:700;color:#9a8d7c;margin-bottom:8px;">よく使われる追加機能：</div>
     <div id="feature-suggestions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
     <textarea id="feature-input"
-      rows="3"
-      style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #e8e2d5;border-radius:12px;font-family:inherit;font-size:14px;line-height:1.6;resize:vertical;outline:none;min-height:88px;"
+      rows="4"
+      style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #e8e2d5;border-radius:12px;font-family:inherit;font-size:14px;line-height:1.6;resize:vertical;outline:none;min-height:120px;"
       oninput="updateAddFeatureBtn()"></textarea>
     <div style="font-size:10px;color:#9a8d7c;margin:6px 0 14px;">※ 1日3回のレート制限にカウントされません</div>
     <button id="do-add-feature-btn" onclick="doAddFeature()" disabled
