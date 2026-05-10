@@ -1316,6 +1316,19 @@ function showDojo() {
   var saved = loadProgress();
   if (saved && saved.stage === 'result' && saved.app) {
     genApp = saved.app; answers = saved.answers || {}; phase = 'result';
+
+    // 古いデータでrarityが入っていない場合の自動修復
+    if (!genApp.rarity) {
+      // storage_daysからrarityを推測
+      var days = genApp.storage_days || 30;
+      if (days >= 90) genApp.rarity = 'daimyojin';
+      else if (days >= 60) genApp.rarity = 'sensei';
+      else genApp.rarity = 'normal';
+    }
+    if (!genApp.storage_days) {
+      var daysMap2 = { 'daimyojin': 90, 'sensei': 60, 'normal': 30 };
+      genApp.storage_days = daysMap2[genApp.rarity] || 30;
+    }
   } else if (saved && saved.stage === 'interview' && saved.answers) {
     // 古い保存形式（messages不在）の場合は破棄して最初から
     if (!saved.messages || saved.messages.length === 0) {
