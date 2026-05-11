@@ -381,6 +381,38 @@ html,body {
 .overload-tip { font-size:12.5px; color:#3d3529; padding:7px 0; border-bottom:1px solid #f0ece4; line-height:1.6; }
 .overload-tip:last-child { border-bottom:none; padding-bottom:0; }
 
+/* オフライン保存・家族共有カード */
+.offline-share-card {
+  margin:16px 18px;
+  background:linear-gradient(135deg,#f0f8ff 0%,#e8f4fd 100%);
+  border:1.5px solid #b3d9f5;
+  border-radius:16px;
+  padding:16px;
+}
+.offline-share-title {
+  font-size:14px; font-weight:800; color:#1a3a5c; margin-bottom:6px;
+}
+.offline-share-desc {
+  font-size:12px; color:#4a6a8a; line-height:1.7; margin-bottom:14px;
+}
+.btn-offline-dl {
+  width:100%; padding:14px; border:none; border-radius:12px;
+  background:linear-gradient(135deg,#1a3a5c,#2d5a8a);
+  color:#fff; font-size:14px; font-weight:700;
+  cursor:pointer; font-family:inherit; margin-bottom:14px;
+}
+.offline-share-steps { display:flex; flex-direction:column; gap:8px; }
+.offline-step {
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:12px; color:#4a6a8a; line-height:1.6;
+}
+.offline-step-num {
+  background:#1a3a5c; color:#fff; border-radius:50%;
+  width:20px; height:20px; display:flex; align-items:center;
+  justify-content:center; font-size:11px; font-weight:700;
+  flex-shrink:0; margin-top:1px;
+}
+
 /* 代替案・複数選択肢スタイル */
 .alt-options-block { flex:1; display:flex; flex-direction:column; gap:6px; }
 .alt-option {
@@ -1763,13 +1795,11 @@ function tryGoTopFromResult() {
     ? (isJa ? '🌟 大明神' : '🌟 Daimyojin')
     : (isJa ? '⚡ 師範直伝' : '⚡ Sensei Special');
 
-  var addBtnLabel = isJa ? '✨ 機能を追加する' : '✨ Add Feature';
-
   var msg = isJa
-    ? rarityName + 'を手放しますか？\n\n1回振り直すより、育てた方が良いものになります。\n💡「' + addBtnLabel + '」ボタンで機能を足していきましょう！'
-    : 'Leave ' + rarityName + '?\n\nGrowing this app beats rolling again.\n💡 Try the "' + addBtnLabel + '" button to add features!';
+    ? rarityName + 'を手放しますか？\n\n当たりを引いた時は要望が最大限実装されています。\n振り直すと通常レアに戻る可能性があります。'
+    : 'Leave ' + rarityName + '?\n\nYour request was fully implemented with this roll.\nRolling again may result in Standard mode.';
 
-  var confirmed = confirm(msg + '\n\n[OK] トップに戻る　　[キャンセル] このアプリを育てる');
+  var confirmed = confirm(msg + '\n\n[OK] トップに戻る　　[キャンセル] このまま使う');
   if (confirmed) showArticle();
 }
 
@@ -1778,30 +1808,21 @@ function tryRollAgain() {
   var isJa = (lang === 'ja');
   var rarity = genApp ? genApp.rarity : 'normal';
 
-  // 通常レアは確認なしで即振り直し
   if (!genApp || rarity === 'normal') {
     resetAll();
     return;
   }
 
-  // 師範直伝・大明神は確認ダイアログ
   var rarityName = rarity === 'daimyojin'
     ? (isJa ? '🌟 大明神' : '🌟 Daimyojin')
     : (isJa ? '⚡ 師範直伝' : '⚡ Sensei Special');
 
-  var addBtnLabel = isJa ? '✨ 機能を追加する' : '✨ Add Feature';
-
   var msg = isJa
-    ? rarityName + 'を手放しますか？\n\n1回振り直すより、育てた方が良いものになります。\n💡「' + addBtnLabel + '」ボタンで\n機能を足していく方がお得です！'
-    : 'Leave ' + rarityName + '?\n\nGrowing this app beats rolling again.\n💡 Try the "' + addBtnLabel + '" button\nto add features and make it better!';
+    ? rarityName + 'を手放しますか？\n\n当たりを引いた時は要望が最大限実装されています。\n振り直すと通常レアに戻る可能性があります。'
+    : 'Leave ' + rarityName + '?\n\nYour request was fully implemented with this roll.\nRolling again may result in Standard mode.';
 
-  // confirm: キャンセル=「このアプリを育てる」, OK=「振り直す」
-  var confirmed = confirm(msg + '\n\n[OK] 振り直す　　[キャンセル] このアプリを育てる');
-
-  if (confirmed) {
-    resetAll();
-  }
-  // キャンセルなら何もしない（結果画面に留まる）
+  var confirmed = confirm(msg + '\n\n[OK] 振り直す　　[キャンセル] このまま使う');
+  if (confirmed) resetAll();
 }
 
 
@@ -2699,31 +2720,30 @@ function renderResult() {
     '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
     '</div>' +
     homeUrlCard +
-    '<div id="fill-rate-section" style="display:none;margin:16px 18px 0;">' +
-    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
-    '<span id="fill-rate-emoji">🟢</span>' +
-    '<span id="fill-rate-label" style="font-size:12px;color:#6b5d4c;flex:1;"></span>' +
-    '<span id="fill-rate-percent" style="font-size:12px;font-weight:700;color:#9a8d7c;"></span>' +
-    '</div>' +
-    '<div style="height:6px;background:#e8e2d5;border-radius:3px;overflow:hidden;">' +
-    '<div id="fill-rate-bar" style="height:100%;border-radius:3px;transition:width 0.5s ease;width:0%;"></div>' +
-    '</div>' +
-    '</div>' +
-    '<div id="add-feature-section" style="display:none;margin:12px 18px 0;">' +
-    '<button id="add-feature-btn" onclick="openAddFeatureModal()" style="width:100%;padding:14px;border-radius:14px;border:1.5px solid #d4af37;background:rgba(212,175,55,0.07);cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;display:flex;align-items:center;gap:12px;color:#8b6914;">' +
-    '<span style="font-size:22px;">✨</span>' +
-    '<div style="flex:1;text-align:left;">' +
-    '<div id="add-feature-btn-title">' + (isJa2 ? '機能を追加する' : 'Add Feature') + '</div>' +
-    '<div style="font-size:11px;color:#9a8d7c;font-weight:400;">' + (isJa2 ? 'レート制限にカウントされません' : 'Does not count toward daily limit') + '</div>' +
-    '</div>' +
-    '<span style="font-size:14px;">›</span>' +
-    '</button>' +
-    '</div>' +
+    '<div id="fill-rate-section" style="display:none;"></div>' +
+    '<div id="add-feature-section" style="display:none;"></div>' +
     '<div class="preview-frame">' +
     '<div class="preview-label">📱 ' + (isJa2 ? 'プレビュー' : 'Preview') + '</div>' +
     '<iframe id="app-preview" sandbox="allow-scripts allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
     '<div class="preview-tap-notice">💡 ' + (isJa2 ? 'プレビューは見本です。完全動作は上の「' + getInstallGuide().openLabel + '」から' : 'Preview only. Use "' + getInstallGuide().openLabel + '" above for full functionality') + '</div>' +
     '</div>' +
+
+    '<div class="offline-share-card">' +
+    '<div class="offline-share-title">💾 ' + (isJa2 ? 'オフライン永久保存・家族に配る' : 'Offline forever & share with family') + '</div>' +
+    '<div class="offline-share-desc">' + (isJa2
+      ? 'HTMLをダウンロードすればURLが消えても永久に使えます。家族にLINEで送ることもできます。'
+      : 'Download the HTML to use forever, even after the URL expires. You can also send it via LINE.') +
+    '</div>' +
+    '<button class="btn-offline-dl" onclick="downloadAndShowGuide()">' +
+    '📥 ' + (isJa2 ? 'HTMLをダウンロード（永久保存）' : 'Download HTML (keep forever)') +
+    '</button>' +
+    '<div class="offline-share-steps">' +
+    '<div class="offline-step"><span class="offline-step-num">1</span><span>' + (isJa2 ? 'ダウンロードしてファイルアプリに保存' : 'Download and save to Files app') + '</span></div>' +
+    '<div class="offline-step"><span class="offline-step-num">2</span><span>' + (isJa2 ? 'LINEやメールでそのまま家族に送信' : 'Send to family via LINE or email') + '</span></div>' +
+    '<div class="offline-step"><span class="offline-step-num">3</span><span>' + (isJa2 ? '受け取った人はSafari/Chromeで開いてホーム画面に追加' : 'Recipient opens in Safari/Chrome and adds to home screen') + '</span></div>' +
+    '</div>' +
+    '</div>' +
+
     '<div class="result-actions-v2">' +
     '<button class="btn-g" onclick="downloadGeneratedHtml()">📥 ' + (isJa2 ? 'ダウンロード' : 'Download') + '</button>' +
     '<button class="btn-g" onclick="copyHtmlToClipboard()">📋 ' + (isJa2 ? 'コードをコピー' : 'Copy Code') + '</button>' +
@@ -2770,6 +2790,35 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+// ダウンロード + 共有案内
+function downloadAndShowGuide() {
+  if (!genApp || !genApp.html) return;
+  var isJa = (lang === 'ja');
+  var platform = detectPlatform();
+
+  // まずダウンロード
+  downloadGeneratedHtml();
+
+  // 少し待ってから案内を表示
+  setTimeout(function() {
+    var msg = isJa
+      ? '📥 ダウンロード完了！\n\n' +
+        '【家族に送る方法】\n' +
+        (platform === 'ios'
+          ? '① ファイルアプリでHTMLを長押し\n② 「共有」→ LINEを選択\n③ 家族に送信\n\n家族は受け取ったファイルをSafariで開いて\n「共有 → ホーム画面に追加」でOK！'
+          : '① ダウンロードフォルダのHTMLをLINEで送信\n② 家族は受け取ったファイルをChromeで開いて\n「⋮ → ホーム画面に追加」でOK！') +
+        '\n\n💡 URLが期限切れになっても\n　ファイルがあれば永久に動きます！'
+      : '📥 Downloaded!\n\n' +
+        'To share with family:\n' +
+        '① Find the HTML file and share via LINE\n' +
+        '② Family opens it in Safari/Chrome\n' +
+        '③ "Share → Add to Home Screen"\n\n' +
+        '💡 Works forever even after the URL expires!';
+
+    alert(msg);
+  }, 500);
 }
 
 // 生成HTMLをダウンロード
@@ -3235,129 +3284,8 @@ function updateFillRateUI(html, rarity) {
   }
 }
 
-var FEATURE_SUGGESTIONS_JA = [
-  '📊 データをグラフで表示',
-  '📋 履歴・ログ一覧を追加',
-  '🌙 ダークモード切り替え',
-  '📤 データをテキストでLINEに共有',
-  '🔄 データのリセット機能',
-  '📅 日付・カレンダー表示',
-  '🔔 画面内バナーでお知らせ表示',
-  '🎨 テーマカラーを変える',
-];
-var FEATURE_SUGGESTIONS_EN = [
-  '📊 Add a chart/graph view',
-  '📋 Add history/log list',
-  '🌙 Dark mode toggle',
-  '📤 Share data as text',
-  '🔄 Reset data button',
-  '📅 Calendar/date display',
-  '🔔 In-app notification banner',
-  '🎨 Change theme color',
-];
-
-function openAddFeatureModal() {
-  var isJa = (lang === 'ja');
-  var suggestions = isJa ? FEATURE_SUGGESTIONS_JA : FEATURE_SUGGESTIONS_EN;
-  var container = document.getElementById('feature-suggestions');
-  if (container) {
-    container.innerHTML = suggestions.map(function(s) {
-      var label = s.substring(2);
-      return '<span onclick="setFeatureSuggestion(\'' + escapeHtml(label) + '\')" style="padding:6px 10px;background:#faf8f4;border:1px solid #e8e2d5;border-radius:20px;font-size:12px;cursor:pointer;display:inline-block;">' + s + '</span>';
-    }).join('');
-  }
-
-  var rate = calcFillRate(genApp ? genApp.html : '');
-  var percent = Math.round(rate * 100);
-  var gauge = document.getElementById('modal-fill-gauge');
-  if (gauge) {
-    gauge.innerHTML =
-      '<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b5d4c;margin-bottom:5px;">' +
-      '<span>' + getFillRateLabel(genApp ? genApp.html : '') + '</span>' +
-      '<span style="font-weight:700;">' + percent + (isJa ? '% 使用中' : '% used') + '</span>' +
-      '</div>' +
-      '<div style="height:6px;background:#e8e2d5;border-radius:3px;overflow:hidden;">' +
-      '<div style="height:100%;width:' + percent + '%;border-radius:3px;background:' +
-      (rate >= 0.8 ? '#ff7e67' : rate >= 0.5 ? '#d4af37' : '#7ec9a8') + ';"></div>' +
-      '</div>';
-  }
-
-  var modal = document.getElementById('add-feature-modal');
-  if (modal) modal.style.display = 'flex';
-  var inp = document.getElementById('feature-input');
-  if (inp) { inp.value = ''; inp.placeholder = isJa ? '例：残り日数が少なくなったら色を赤くする\n　　データをCSVでダウンロードできるボタンを追加' : 'e.g. Turn red when days are low\n     Add a CSV download button'; }
-  updateAddFeatureBtn();
-}
-
-function closeAddFeatureModal() {
-  var modal = document.getElementById('add-feature-modal');
-  if (modal) modal.style.display = 'none';
-}
-
-function setFeatureSuggestion(text) {
-  var inp = document.getElementById('feature-input');
-  if (inp) inp.value = text;
-  updateAddFeatureBtn();
-}
-
-function updateAddFeatureBtn() {
-  var val = (document.getElementById('feature-input') || {}).value || '';
-  var btn = document.getElementById('do-add-feature-btn');
-  if (!btn) return;
-  var empty = val.trim().length === 0;
-  btn.disabled = empty;
-  btn.style.opacity = empty ? '0.5' : '1';
-  btn.style.cursor = empty ? 'default' : 'pointer';
-}
-
-async function doAddFeature() {
-  var isJa = (lang === 'ja');
-  var request = (document.getElementById('feature-input') || {}).value || '';
-  request = request.trim();
-  if (!request || !genApp) return;
-
-  var btn = document.getElementById('do-add-feature-btn');
-  if (btn) { btn.textContent = isJa ? '✨ 機能を追加中...' : '✨ Adding feature...'; btn.disabled = true; }
-
-  try {
-    var res = await fetch(BACKEND_URL + 'add-feature', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        existing_html: genApp.html,
-        feature_request: request,
-        app_name: genApp.app_name || 'マイアプリ',
-        app_id: genApp.app_id || null,
-        rarity: genApp.rarity || 'sensei',
-        userToken: getUserToken()
-      })
-    });
-
-    if (!res.ok) throw new Error('BACKEND_ERROR');
-    var data = await res.json();
-
-    if (data.status === 'ok' && data.html) {
-      genApp.html = data.html;
-      if (data.app_url) genApp.app_url = data.app_url;
-
-      closeAddFeatureModal();
-
-      // iframeプレビュー更新
-      var iframe = document.getElementById('app-preview');
-      if (iframe) iframe.srcdoc = data.html;
-
-      // 充填率UI更新
-      updateFillRateUI(genApp.html, genApp.rarity);
-
-      alert(isJa ? '✨ 機能を追加しました！プレビューを確認してください。' : '✨ Feature added! Check the preview.');
-    } else {
-      throw new Error(data.blocked_reason || (isJa ? '追加に失敗しました' : 'Addition failed'));
-    }
-  } catch (err) {
-    alert((lang === 'ja' ? '❌ 追加に失敗しました。もう一度試してください。\n' : '❌ Failed. Please try again.\n') + err.message);
-    if (btn) { btn.textContent = lang === 'ja' ? '✨ 追加して再生成' : '✨ Add & Regenerate'; btn.disabled = false; }
-  }
-}
+// 機能追加システムは削除済み（v20から）
+// 代わりに師範直伝・大明神の初回生成品質を強化
 
 function resetAll() {
   clearProgress();
@@ -3428,30 +3356,7 @@ function closeInstallBanner() {
 setTimeout(checkInstallPrompt, 1500);
 </script>
 
-<!-- 機能追加モーダル -->
-<div id="add-feature-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 48px;max-height:85vh;overflow-y:auto;width:100%;max-width:480px;">
-    <div style="width:40px;height:4px;background:#e8e2d5;border-radius:2px;margin:0 auto 16px;"></div>
-    <div style="font-size:17px;font-weight:700;margin-bottom:4px;color:#3d3529;">✨ 機能を追加する</div>
-    <div style="font-size:12px;color:#9a8d7c;margin-bottom:16px;">充填率80%未満の間、追加できます（レート制限なし）</div>
-    <div id="modal-fill-gauge" style="margin-bottom:16px;"></div>
-    <div style="font-size:12px;font-weight:700;color:#9a8d7c;margin-bottom:8px;">よく使われる追加機能：</div>
-    <div id="feature-suggestions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
-    <textarea id="feature-input"
-      rows="4"
-      style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #e8e2d5;border-radius:12px;font-family:inherit;font-size:14px;line-height:1.6;resize:vertical;outline:none;min-height:120px;"
-      oninput="updateAddFeatureBtn()"></textarea>
-    <div style="font-size:10px;color:#9a8d7c;margin:6px 0 14px;">※ 1日3回のレート制限にカウントされません</div>
-    <button id="do-add-feature-btn" onclick="doAddFeature()" disabled
-      style="width:100%;padding:15px;border:none;border-radius:14px;background:#ff7e67;color:#fff;font-size:15px;font-weight:700;cursor:default;font-family:inherit;opacity:0.5;">
-      ✨ 追加して再生成
-    </button>
-    <button onclick="closeAddFeatureModal()"
-      style="width:100%;padding:13px;border:1.5px solid #e8e2d5;border-radius:14px;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;margin-top:10px;color:#6b5d4c;">
-      キャンセル
-    </button>
-  </div>
-</div>
+<!-- 機能追加モーダル：削除済み（v19から） -->
 
 </body>
 </html>
