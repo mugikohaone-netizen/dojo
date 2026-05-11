@@ -1,6 +1,6 @@
 // AI App Dojo - Service Worker
 // バージョンを変えるとキャッシュが更新される
-const CACHE_VERSION = 'dojo-v18'; // ← 更新するたびにここを変える
+const CACHE_VERSION = 'dojo-v20'; // ← 更新するたびにここを変える
 const ASSETS_TO_CACHE = [
   './',
   './dojo.html',
