@@ -434,6 +434,16 @@ html,body {
 .alt-example { font-size:11px; color:var(--washi3); padding-left:16px; line-height:1.6; }
 .alt-note { font-size:11px; color:var(--washi3); padding-left:4px; line-height:1.6; font-style:italic; }
 .alt-plain { font-size:12px; color:var(--washi2); line-height:1.6; }
+.alt-select-icon { margin-left:auto; font-size:14px; color:#9a8d7c; flex-shrink:0; }
+.alt-option-selected { background:#e8f4ed !important; border-color:#7ec9a8 !important; }
+.alt-option-selected .alt-label { color:#4a9e7a !important; }
+.alt-skip-btn {
+  margin-top:10px; padding:9px 12px;
+  background:transparent; border:1px dashed #e8e2d5;
+  border-radius:8px; font-size:12px; color:#9a8d7c;
+  cursor:pointer; text-align:center;
+}
+.alt-skip-btn:active { background:#faf8f4; }
 .sensei-banner {
   background:linear-gradient(135deg, #e8f4ff 0%, var(--gold-lt) 50%, #e8f4ff 100%);
   background-size:200% 200%;
@@ -679,6 +689,8 @@ html,body {
       <button id="back-btn" onclick="showArticle()"></button>
       <button id="lang-btn" onclick="toggleLang()">EN</button>
       <span id="training-badge" style="display:none;background:#7ec9a8;color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:0.5px;cursor:pointer;" onclick="clearTrainingMode()">研修中 ✕</span>
+      <span id="ticket-badge" style="display:none;background:linear-gradient(135deg,#d4af37,#f0c940);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:0.5px;cursor:pointer;" onclick="openTicketModal()">🎫 チケットあり</span>
+      <span id="dev-badge" style="display:none;background:#8b5cf6;color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:0.5px;cursor:pointer;" onclick="showDevPanel()">DEV ⚙️</span>
       <button id="training-btn" onclick="showTrainingInput()" title="研修コード入力" style="background:transparent;border:none;font-size:18px;cursor:pointer;padding:4px;opacity:0.4;line-height:1;">🔑</button>
       <span class="badge">BETA</span>
     </div>
@@ -1090,40 +1102,44 @@ var RATE_LIMIT_PER_DAY = 3;
 var TRAINING_KEY = 'dojo_training'; // 研修モード保存キー
 
 // 研修モードの状態を取得
+// 日本時間（JST）の今日の日付を返す（0時リセット）
+function getTodayJST() {
+  var jst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  return jst.toISOString().slice(0, 10);
+}
+
 function getTrainingMode() {
   try {
     var d = JSON.parse(localStorage.getItem(TRAINING_KEY) || 'null');
     if (!d) return null;
-    var today = new Date().toISOString().slice(0, 10);
-    // 期限チェック（expiryがあれば）
+    var today = getTodayJST();
     if (d.expiry && d.expiry < today) {
       localStorage.removeItem(TRAINING_KEY);
       return null;
     }
-    return d; // { name, expiry, limit }
+    return d;
   } catch(e) { return null; }
 }
 
 function checkRate() {
   var training = getTrainingMode();
   if (training) {
-    // 研修モード：limitまで許可（999=無制限）
-    if (training.limit >= 999) return false; // 無制限
-    var today = new Date().toISOString().slice(0, 10);
+    if (training.limit >= 999) return false;
+    var today = getTodayJST();
     try {
       var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}');
       return (d.date === today && d.count >= training.limit);
     } catch(e) { return false; }
   }
-  var today = new Date().toISOString().slice(0, 10);
+  var today = getTodayJST();
   try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); return (d.date === today && d.count >= RATE_LIMIT_PER_DAY); } catch(e) { return false; }
 }
 function incRate() {
-  var today = new Date().toISOString().slice(0, 10);
+  var today = getTodayJST();
   try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); var c = (d.date === today ? d.count : 0) + 1; localStorage.setItem(RATE_KEY, JSON.stringify({ date: today, count: c })); } catch(e) {}
 }
 function getRateCount() {
-  var today = new Date().toISOString().slice(0, 10);
+  var today = getTodayJST();
   try { var d = JSON.parse(localStorage.getItem(RATE_KEY) || '{}'); return d.date === today ? d.count : 0; } catch(e) { return 0; }
 }
 // 開発用：レート制限と保存を全部リセット
@@ -1177,9 +1193,55 @@ var RARITY = {
   DAIMYOJIN: 'daimyojin',
 };
 
+// ===== 開発者モード =====
+var DEV_MODE_KEY = 'dojo_dev';
+
+function getDevMode() {
+  try { return JSON.parse(localStorage.getItem(DEV_MODE_KEY) || 'null'); } catch(e) { return null; }
+}
+function isDevMode() { return !!getDevMode(); }
+
+window.enableDevMode = function(password) {
+  if (password !== 'karate-papa-dev-2026') { console.log('❌ パスワードが違います'); return; }
+  localStorage.setItem(DEV_MODE_KEY, JSON.stringify({ forceRarity: null, infiniteExpiry: false, enabled: true }));
+  console.log('✅ 開発者モードON！\n使い方:\n  setDevRarity("daimyojin")  // 大明神固定\n  setDevRarity("sensei")     // 師範固定\n  setDevRarity(null)         // ランダムに戻す\n  setDevInfinite(true)       // 期限を無限に\n  setDevInfinite(false)      // 通常の期限に戻す\n  disableDevMode()           // OFF');
+  render();
+};
+window.disableDevMode = function() {
+  localStorage.removeItem(DEV_MODE_KEY);
+  console.log('✅ 開発者モードOFF');
+  render();
+};
+window.setDevRarity = function(rarity) {
+  var dev = getDevMode();
+  if (!dev) { console.log('❌ 開発者モードOFFです'); return; }
+  dev.forceRarity = rarity;
+  localStorage.setItem(DEV_MODE_KEY, JSON.stringify(dev));
+  console.log('✅ ガチャ固定：' + (rarity || 'ランダム'));
+};
+window.setDevInfinite = function(bool) {
+  var dev = getDevMode();
+  if (!dev) { console.log('❌ 開発者モードOFFです'); return; }
+  dev.infiniteExpiry = bool;
+  localStorage.setItem(DEV_MODE_KEY, JSON.stringify(dev));
+  console.log('✅ 期限無限：' + bool);
+};
+
 // ガチャ抽選（無料版）
 // 大明神3% / 師範直伝13% / 通常84%
 function rollGacha() {
+  // チケットがある場合はSonnet確定
+  var ticket = getActiveTicket();
+  if (ticket) {
+    console.log('🎫 チケット使用：Sonnet確定');
+    return RARITY.DAIMYOJIN;
+  }
+  // 開発者モードで固定レアリティが設定されている場合
+  var dev = getDevMode();
+  if (dev && dev.forceRarity) {
+    console.log('🔧 [DEV] ガチャ固定：' + dev.forceRarity);
+    return dev.forceRarity;
+  }
   var r = Math.random() * 100;
   if (r < 3)        return RARITY.DAIMYOJIN; // 3%
   if (r < 3 + 13)   return RARITY.SENSEI;    // 13%
@@ -1392,7 +1454,26 @@ function showDojo() {
 }
 
 function render() {
-  // 研修モードバッジを更新
+  // チケットバッジを更新
+  var ticketBadge = document.getElementById('ticket-badge');
+  if (ticketBadge) {
+    ticketBadge.style.display = hasActiveTicket() ? 'inline-block' : 'none';
+  }
+
+  // 開発者モードバッジを更新
+  var devBadge = document.getElementById('dev-badge');
+  if (devBadge) {
+    var dev = getDevMode();
+    if (dev) {
+      devBadge.style.display = 'inline-block';
+      var devLabel = 'DEV';
+      if (dev.forceRarity) devLabel += ' ' + dev.forceRarity.toUpperCase().slice(0,3);
+      if (dev.infiniteExpiry) devLabel += ' ∞';
+      devBadge.textContent = devLabel + ' ⚙️';
+    } else {
+      devBadge.style.display = 'none';
+    }
+  }
   var training = getTrainingMode();
   var badge = document.getElementById('training-badge');
   var btn = document.getElementById('training-btn');
@@ -1703,6 +1784,11 @@ function renderWelcome() {
     '<div class="c-title">' + tl[0] + '<br>' + (tl[1] || '') + '</div>' +
     '<div class="c-desc">' + t().dojoDesc + '</div>' +
     '<button class="btn-p" onclick="startInterview()">' + t().startBtn + '</button>' +
+    (hasActiveTicket()
+      ? '<div style="margin-top:10px;background:linear-gradient(135deg,#fffbea,#fff8d6);border:1.5px solid #f4d77a;border-radius:12px;padding:10px 14px;font-size:12px;color:#8b6914;text-align:center;">🎫 Sonnet稽古チケットが使用可能です！<br>このまま「はじめる」を押すとSonnet確定で生成されます。</div>'
+      : (FEATURE_FLAGS.ticketSystem || isDevMode())
+        ? '<button class="btn-g" style="margin-top:10px;font-size:13px;" onclick="openTicketModal()">🎫 ' + (lang === 'en' ? 'Use Sonnet Ticket' : 'Sonnetチケットを使う') + '</button>'
+        : '') +
     '<button class="btn-g" style="margin-top:10px" onclick="showArticle()">' + t().backToArticle + '</button>' +
     '</div></div>';
 }
@@ -1747,6 +1833,7 @@ function renderInterview() {
   var isJa2 = (lang === 'ja');
   // ホームに戻る（中断確認付き）
   var homeBtnHTML = '<button class="home-q-btn" onclick="confirmGoHome()" title="' + (isJa2 ? 'ホームに戻る' : 'Back to home') + '">🏠 ' + (isJa2 ? 'ホーム' : 'Home') + '</button>';
+  var resetBtnHTML = '<button class="home-q-btn" onclick="confirmResetAll()" style="color:var(--shu);" title="' + (isJa2 ? '最初からやり直す' : 'Start over') + '">🔄 ' + (isJa2 ? 'やり直す' : 'Restart') + '</button>';
   // 前の質問に戻る（1問目以外）
   var canGoBack = (qIndex > 0);
   var backBtnHTML = canGoBack
@@ -1757,11 +1844,43 @@ function renderInterview() {
     '<div id="prog-bar"><div id="prog-fill" style="width:' + pct + '%"></div></div>' +
     '<div id="interview-top">' +
     homeBtnHTML +
-    '<div id="interview-top-right">' + backBtnHTML + '<div id="step-lbl">' + stepLbl + '</div></div>' +
+    '<div id="interview-top-right">' + resetBtnHTML + backBtnHTML + '<div id="step-lbl">' + stepLbl + '</div></div>' +
     '</div>' +
     '<div id="messages">' + msgsHTML + '<div id="msg-btm"></div></div>' +
     inputHTML +
     '</div>';
+}
+
+// 代替案を選択（タップでハイライト）
+function selectAltOption(el, optText, wIdx) {
+  // 同じグループの選択を解除
+  var block = el.closest('.alt-options-block');
+  if (block) {
+    block.querySelectorAll('.alt-option').forEach(function(opt) {
+      opt.classList.remove('alt-option-selected');
+      var icon = opt.querySelector('.alt-select-icon');
+      if (icon) icon.textContent = '○';
+    });
+  }
+  // 選択状態にする
+  el.classList.add('alt-option-selected');
+  var icon = el.querySelector('.alt-select-icon');
+  if (icon) icon.textContent = '✅';
+}
+
+// 「この機能なしで作る」→ featureWarningsから削除して画面更新
+function skipFeatureWarning(idx) {
+  featureWarnings.splice(idx, 1);
+  render(); // 確認画面を再描画
+}
+
+// 最初からやり直す確認
+function confirmResetAll() {
+  var isJa = (lang === 'ja');
+  var ok = confirm(isJa
+    ? '最初からやり直しますか？\n入力中の内容は消えます。'
+    : 'Start over? Your current input will be lost.');
+  if (ok) resetAll();
 }
 
 // ホームに戻る前に中断確認
@@ -2349,6 +2468,12 @@ function handleApiSuccess(spec) {
   // expiry日を計算してgenAppに保存
   if (genApp.app_url && !genApp.app_expiry) {
     var days = genApp.storage_days || 30;
+    // 開発者モードで期限無限の場合
+    var dev = getDevMode();
+    if (dev && dev.infiniteExpiry) {
+      days = 9999;
+      console.log('🔧 [DEV] 期限を無限に設定');
+    }
     var expiry = new Date();
     expiry.setDate(expiry.getDate() + days);
     genApp.app_expiry = expiry.toISOString().slice(0, 10);
@@ -2356,11 +2481,17 @@ function handleApiSuccess(spec) {
 
   saveProgress({ stage:'result', answers:answers, app:genApp });
   checkedItems = {};
+  // チケットを使用済みにする
+  if (hasActiveTicket()) {
+    consumeTicket();
+  }
   phase = 'result';
   render();
   setTimeout(function() {
-    updateFillRateUI(genApp.html, genApp.rarity);
+    updateFixRedoUI(genApp);
     checkExpiryWarning(genApp);
+    // 生成直後（初回のみ）永続保存バナーを表示
+    setTimeout(function() { showFreshSaveBanner(genApp); }, 2000);
   }, 300);
 }
 
@@ -2433,38 +2564,41 @@ function renderConfirm() {
 
   var replaceHTML = featureWarnings
     .filter(function(w) { return w.canReplace; })
-    .map(function(w) {
+    .map(function(w, wIdx) {
       var raw = (isJa ? w.replaceJa : w.replaceEn) || '';
-      // 【A】【B】【C】形式 or →おすすめ形式を複数選択肢カードに変換
       var lines = raw.split('\n').filter(function(l) { return l.trim(); });
       var rendered = lines.map(function(line) {
         var t = line.trim();
-        // 【A】【B】【C】の選択肢行
+        // 【A】【B】【C】の選択肢行 → タップで選択可能に
         var optMatch = t.match(/^【([A-C])】(→\s*)?(.*)/);
         if (optMatch) {
           var isRec = t.indexOf('おすすめ') !== -1 || t.indexOf('recommended') !== -1 || optMatch[2];
-          return '<div class="alt-option' + (isRec ? ' alt-option-rec' : '') + '">' +
+          var optText = optMatch[3].replace(/（おすすめ）|\(recommended\)/g, '').trim();
+          return '<div class="alt-option' + (isRec ? ' alt-option-rec' : '') + '" onclick="selectAltOption(this, \'' + escapeHtml(optText) + '\', ' + wIdx + ')" style="cursor:pointer;">' +
             '<span class="alt-label">【' + optMatch[1] + '】</span>' +
             '<span class="alt-text">' + escapeHtml(optMatch[3]) +
             (isRec ? ' <span class="alt-rec-badge">' + (isJa ? 'おすすめ' : 'recommended') + '</span>' : '') +
             '</span>' +
+            '<span class="alt-select-icon">○</span>' +
             '</div>';
         }
-        // 字下げ行（例文）
         if (t.startsWith('　') || t.startsWith('  ') || t.startsWith('例：') || t.startsWith('e.g.')) {
           return '<div class="alt-example">' + escapeHtml(t.replace(/^[　\s]+/, '')) + '</div>';
         }
-        // ※注釈行
         if (t.startsWith('※')) {
           return '<div class="alt-note">' + escapeHtml(t) + '</div>';
         }
-        // 通常テキスト
         return '<div class="alt-plain">' + escapeHtml(t) + '</div>';
       }).join('');
 
-      return '<div class="confirm-item confirm-ok">' +
+      // 「この機能なしで作る」ボタンを追加
+      var skipBtn = '<div class="alt-skip-btn" onclick="skipFeatureWarning(' + wIdx + ')">' +
+        (isJa ? '🗑️ この機能なしで作る' : '🗑️ Build without this feature') +
+        '</div>';
+
+      return '<div class="confirm-item confirm-ok" data-warning-idx="' + wIdx + '">' +
         '<span class="confirm-check">✅</span>' +
-        '<div class="alt-options-block">' + rendered + '</div>' +
+        '<div class="alt-options-block">' + rendered + skipBtn + '</div>' +
         '</div>';
     }).join('');
 
@@ -2666,14 +2800,14 @@ function renderResult() {
       '<div class="premium-banner">' +
       '<div class="premium-sparkle">✨🌟✨</div>' +
       '<div class="premium-title">' + (isJa2 ? '🌟 Sonnetが本気で作りました 🌟' : '🌟 Built by Sonnet at Full Power 🌟') + '</div>' +
-      '<div class="premium-sub">' + (isJa2 ? '機能を追加しながら育てましょう 🌱' : 'Add features and grow this app 🌱') + '</div>' +
+      '<div class="premium-sub">' + (isJa2 ? '最高品質で作りました' : 'Crafted at full power') + '</div>' +
       '<div class="premium-badge">Sonnet / ' + storageDays + (isJa2 ? '日間保存' : '-day save') + '</div>' +
       '</div>';
   } else if (isSensei) {
     rarityBanner =
       '<div class="sensei-banner">' +
       '<div class="sensei-banner-title">' + (isJa2 ? '⚡ 師範が丁寧に作りました ⚡' : '⚡ Crafted Carefully by Sensei ⚡') + '</div>' +
-      '<div class="sensei-banner-sub">' + (isJa2 ? '機能を追加しながら育てましょう 🌱' : 'Add features and grow this app 🌱') + '</div>' +
+      '<div class="sensei-banner-sub">' + (isJa2 ? '丁寧に作りました' : 'Crafted with care') + '</div>' +
       '<div class="sensei-banner-badge">Haiku強化 / ' + storageDays + (isJa2 ? '日間保存' : '-day save') + '</div>' +
       '</div>';
   }
@@ -2720,8 +2854,7 @@ function renderResult() {
     '<div class="result-desc">' + escapeHtml(a.one_liner || '') + '</div>' +
     '</div>' +
     homeUrlCard +
-    '<div id="fill-rate-section" style="display:none;"></div>' +
-    '<div id="add-feature-section" style="display:none;"></div>' +
+    '<div id="fix-redo-section" style="display:none;margin:12px 18px 0;"></div>' +
     '<div class="preview-frame">' +
     '<div class="preview-label">📱 ' + (isJa2 ? 'プレビュー' : 'Preview') + '</div>' +
     '<iframe id="app-preview" sandbox="allow-scripts allow-forms allow-modals allow-popups" srcdoc="' + escapeHtml(a.html) + '"></iframe>' +
@@ -3043,6 +3176,206 @@ function backToInterview() {
 
 // ===== 研修モード =====
 
+// 開発者パネルをスマホから操作
+function showDevPanel() {
+  var dev = getDevMode();
+  if (!dev) return;
+  var isJa = (lang === 'ja');
+  var existing = document.getElementById('dev-panel');
+  if (existing) { existing.remove(); return; }
+
+  var el = document.createElement('div');
+  el.id = 'dev-panel';
+  el.style.cssText = 'position:fixed;top:60px;right:12px;z-index:400;background:#1e1b2e;border-radius:14px;padding:16px;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,0.4);';
+  el.innerHTML =
+    '<div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:12px;">⚙️ 開発者モード</div>' +
+
+    '<div style="font-size:11px;color:#9ca3af;margin-bottom:6px;">ガチャ固定</div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">' +
+    ['ランダム:null', '通常:normal', '師範直伝:sensei', '大明神:daimyojin'].map(function(s) {
+      var parts = s.split(':');
+      var label = parts[0];
+      var val = parts[1] === 'null' ? null : parts[1];
+      var active = (dev.forceRarity || null) === val;
+      return '<button onclick="setDevRarity(' + (val ? '"' + val + '"' : 'null') + ');document.getElementById(\'dev-panel\').remove();showDevPanel();" ' +
+        'style="padding:7px 10px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;' +
+        'background:' + (active ? '#7c3aed' : '#374151') + ';color:#fff;">' + label + '</button>';
+    }).join('') +
+    '</div>' +
+
+    '<div style="font-size:11px;color:#9ca3af;margin-bottom:6px;">期限</div>' +
+    '<div style="display:flex;gap:6px;margin-bottom:14px;">' +
+    '<button onclick="setDevInfinite(true);document.getElementById(\'dev-panel\').remove();showDevPanel();" style="flex:1;padding:7px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:' + (dev.infiniteExpiry ? '#7c3aed' : '#374151') + ';color:#fff;">∞ 無限</button>' +
+    '<button onclick="setDevInfinite(false);document.getElementById(\'dev-panel\').remove();showDevPanel();" style="flex:1;padding:7px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:' + (!dev.infiniteExpiry ? '#7c3aed' : '#374151') + ';color:#fff;">通常</button>' +
+    '</div>' +
+
+    '<button onclick="disableDevMode();document.getElementById(\'dev-panel\').remove();" style="width:100%;padding:8px;border-radius:8px;border:none;cursor:pointer;font-size:12px;background:#dc2626;color:#fff;font-weight:700;">DEVモードOFF</button>' +
+
+    '<div style="margin-top:12px;padding-top:10px;border-top:1px solid #374151;">' +
+    '<div style="font-size:11px;color:#9ca3af;margin-bottom:6px;">本番機能フラグ</div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px;">' +
+    ['fixRedoButtons:🔧修正・作り直し', 'ticketSystem:🎫チケットUI', 'expiryBanner:⏰期限バナー'].map(function(s) {
+      var parts = s.split(':');
+      var key = parts[0];
+      var label = parts[1];
+      var isOn = key === 'expiryBanner' ? EXPIRY_BANNER_ENABLED : (FEATURE_FLAGS[key] || false);
+      return '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="font-size:11px;color:#d1d5db;">' + label + '</span>' +
+        '<span style="font-size:11px;color:' + (isOn ? '#4ade80' : '#9ca3af') + ';">' +
+        (isOn ? '✅ ON' : '⬜ OFF') + '</span>' +
+        '</div>';
+    }).join('') +
+    '</div>' +
+    '<div style="font-size:10px;color:#6b7280;margin-top:6px;">ONにするにはdojo.htmlを編集してください</div>' +
+    '</div>';
+
+  document.body.appendChild(el);
+  // 外側タップで閉じる
+  setTimeout(function() {
+    document.addEventListener('click', function handler(e) {
+      if (!el.contains(e.target) && e.target.id !== 'dev-badge') {
+        el.remove();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 100);
+}
+
+// ===== Sonnetチケットシステム =====
+var TICKET_KEY = 'dojo_ticket';
+
+function getActiveTicket() {
+  try {
+    var t = JSON.parse(localStorage.getItem(TICKET_KEY) || 'null');
+    if (!t) return null;
+    // 使用済みチェック
+    if (t.used) { localStorage.removeItem(TICKET_KEY); return null; }
+    return t;
+  } catch(e) { return null; }
+}
+
+function hasActiveTicket() { return !!getActiveTicket(); }
+
+// チケット入力モーダルを開く
+function openTicketModal() {
+  var isJa = (lang === 'ja');
+  var existing = document.getElementById('ticket-modal');
+  if (existing) { existing.style.display = 'flex'; return; }
+
+  var el = document.createElement('div');
+  el.id = 'ticket-modal';
+  el.style.cssText = 'display:flex;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.5);align-items:flex-end;justify-content:center;';
+  el.innerHTML =
+    '<div style="background:#fff;border-radius:24px 24px 0 0;padding:24px 20px 48px;width:100%;max-width:480px;">' +
+    '<div style="width:40px;height:4px;background:#e8e2d5;border-radius:2px;margin:0 auto 20px;"></div>' +
+    '<div style="font-size:20px;font-weight:800;margin-bottom:4px;color:#3d3529;">🥋 Sonnet稽古チケット</div>' +
+    '<div style="font-size:12px;color:#9a8d7c;margin-bottom:6px;">' +
+    (isJa ? 'noteのサポートで受け取ったコードを入力してください。' : 'Enter the code you received via note support.') +
+    '</div>' +
+    '<div style="background:#faf8f4;border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:#6b5d4c;line-height:1.7;">' +
+    '✅ Sonnet確定生成（ガチャなし）<br>' +
+    '✅ 修正3回・作り直し1回<br>' +
+    '✅ URL 90日間保存' +
+    '</div>' +
+    '<input id="ticket-code-input" type="text" placeholder="例：SENSEI-XXXX-XXXX" ' +
+    'style="width:100%;box-sizing:border-box;padding:14px;border:1.5px solid #e8e2d5;border-radius:12px;font-size:16px;font-family:inherit;outline:none;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:10px;" />' +
+    '<div id="ticket-code-error" style="font-size:12px;color:#ff7e67;margin-bottom:12px;min-height:18px;"></div>' +
+    '<button id="ticket-verify-btn" onclick="doVerifyTicket()" ' +
+    'style="width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#d4af37,#f0c940);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">' +
+    '🥋 ' + (isJa ? 'チケットを使う' : 'Use Ticket') + '</button>' +
+    '<button onclick="closeTicketModal()" ' +
+    'style="width:100%;padding:13px;border:1.5px solid #e8e2d5;border-radius:14px;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;margin-top:10px;color:#6b5d4c;">' +
+    (isJa ? 'キャンセル' : 'Cancel') + '</button>' +
+    '<div style="margin-top:14px;text-align:center;font-size:11px;color:#9a8d7c;">' +
+    (isJa ? 'チケットの購入はnoteのサポート機能から。押忍🥋' : 'Purchase via note support. Osu! 🥋') +
+    '</div>' +
+    '</div>';
+  document.body.appendChild(el);
+
+  var inp = document.getElementById('ticket-code-input');
+  if (inp) inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doVerifyTicket();
+  });
+}
+
+function closeTicketModal() {
+  var modal = document.getElementById('ticket-modal');
+  if (modal) modal.remove();
+}
+
+async function doVerifyTicket() {
+  var isJa = (lang === 'ja');
+  var inp = document.getElementById('ticket-code-input');
+  var errEl = document.getElementById('ticket-code-error');
+  var btn = document.getElementById('ticket-verify-btn');
+  if (!inp) return;
+
+  var code = inp.value.trim();
+  if (!code) {
+    if (errEl) errEl.textContent = isJa ? 'コードを入力してください' : 'Please enter a code';
+    return;
+  }
+
+  if (btn) { btn.textContent = isJa ? '確認中...' : 'Verifying...'; btn.disabled = true; }
+  if (errEl) errEl.textContent = '';
+
+  try {
+    var res = await fetch(BACKEND_URL + 'verify-ticket', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code.trim().toUpperCase() })
+    });
+    var data = await res.json();
+
+    if (data.valid) {
+      // チケットをlocalStorageに保存
+      try {
+        localStorage.setItem(TICKET_KEY, JSON.stringify({
+          code: code.trim().toUpperCase(),
+          rarity: data.rarity || 'daimyojin',
+          storage_days: data.storage_days || 90,
+          fix_limit: data.fix_limit || 3,
+          redo_limit: data.redo_limit || 1,
+          used: false
+        }));
+      } catch(e) {}
+
+      closeTicketModal();
+      render();
+      alert(
+        (isJa ? '✅ チケット認証完了！\n\n' : '✅ Ticket verified!\n\n') +
+        '🌟 Sonnet確定生成\n' +
+        '🔧 修正3回\n' +
+        '🔄 作り直し1回\n' +
+        '💾 URL 90日間保存\n\n' +
+        (isJa ? '次の生成に自動で適用されます。押忍🥋' : 'Will be applied to your next generation. Osu! 🥋')
+      );
+    } else {
+      var msg = {
+        'INVALID_OR_USED': isJa ? '❌ コードが無効か使用済みです' : '❌ Invalid or already used',
+        'EXPIRED': isJa ? '❌ コードの有効期限が切れています' : '❌ Code has expired',
+        'NETWORK_ERROR': isJa ? '❌ 通信エラー。もう一度お試しください' : '❌ Network error. Please try again'
+      }[data.error] || (isJa ? '❌ 無効なコードです' : '❌ Invalid code');
+      if (errEl) errEl.textContent = msg;
+      if (btn) { btn.textContent = isJa ? '🥋 チケットを使う' : '🥋 Use Ticket'; btn.disabled = false; }
+    }
+  } catch(e) {
+    if (errEl) errEl.textContent = isJa ? '❌ 通信エラー。もう一度お試しください' : '❌ Network error';
+    if (btn) { btn.textContent = isJa ? '🥋 チケットを使う' : '🥋 Use Ticket'; btn.disabled = false; }
+  }
+}
+
+// チケット使用済みにする（生成完了後に呼ぶ）
+function consumeTicket() {
+  try {
+    var t = getActiveTicket();
+    if (t) {
+      t.used = true;
+      localStorage.setItem(TICKET_KEY, JSON.stringify(t));
+    }
+  } catch(e) {}
+}
+
 // 研修コードを認証してlocalStorageに保存
 async function verifyTrainingCode(code) {
   try {
@@ -3151,16 +3484,63 @@ function clearTrainingMode() {
 
 // ===== 期限通知バナー =====
 
-var EXPIRY_WARNING_DAYS = 7;
+var EXPIRY_BANNER_KEY = 'dojo_expiry_shown'; // 表示済み記録キー
+var EXPIRY_BANNER_ENABLED = false; // パパさんが準備できたらtrueに変える
+
+// ===== 機能フラグ（テスト完了後にtrueに変える）=====
+var FEATURE_FLAGS = {
+  fixRedoButtons: false,   // 🔧修正・🔄作り直しボタン
+  ticketSystem:   false,   // 🎫チケット入力UI
+};
+
+// バナー表示済みかチェック
+function wasExpiryBannerShown(appId, daysLeft) {
+  try {
+    var shown = JSON.parse(localStorage.getItem(EXPIRY_BANNER_KEY) || '{}');
+    var today = new Date().toISOString().slice(0, 10);
+    var key = appId + '_' + (daysLeft <= 1 ? today : daysLeft <= 3 ? 'under3' : '7day');
+    return !!shown[key];
+  } catch(e) { return false; }
+}
+
+function markExpiryBannerShown(appId, daysLeft) {
+  try {
+    var shown = JSON.parse(localStorage.getItem(EXPIRY_BANNER_KEY) || '{}');
+    var today = new Date().toISOString().slice(0, 10);
+    var key = appId + '_' + (daysLeft <= 1 ? today : daysLeft <= 3 ? 'under3' : '7day');
+    shown[key] = true;
+    localStorage.setItem(EXPIRY_BANNER_KEY, JSON.stringify(shown));
+  } catch(e) {}
+}
 
 function checkExpiryWarning(app) {
+  if (!EXPIRY_BANNER_ENABLED) return; // 課金準備完了まで表示しない
   if (!app || !app.app_url || !app.app_expiry) return;
   var today = new Date();
   var expiry = new Date(app.app_expiry);
   var daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-  if (daysLeft <= EXPIRY_WARNING_DAYS && daysLeft >= -30) {
-    showExpiryBanner(app, daysLeft);
+
+  // 期限切れ後は表示しない
+  if (daysLeft <= 0) return;
+
+  // 表示条件：
+  // 7日前：1回だけ
+  // 3〜2日前：毎日
+  // 1日前：毎日
+  var shouldShow = false;
+  if (daysLeft <= 1) shouldShow = true;                          // 1日前：毎日
+  else if (daysLeft <= 3) shouldShow = true;                     // 3日前：毎日
+  else if (daysLeft === 7) shouldShow = true;                    // 7日前：1回だけ
+  // 4〜6日前は出さない（しつこくない）
+
+  if (!shouldShow) return;
+
+  // 7日前は1回だけ（表示済みなら出さない）
+  if (daysLeft >= 4) {
+    if (wasExpiryBannerShown(app.app_id || app.app_url, daysLeft)) return;
   }
+
+  showExpiryBanner(app, daysLeft);
 }
 
 function showExpiryBanner(app, daysLeft) {
@@ -3168,22 +3548,24 @@ function showExpiryBanner(app, daysLeft) {
   var existing = document.getElementById('expiry-banner');
   if (existing) return;
 
-  var isExpired = daysLeft <= 0;
-  var bannerColor = isExpired ? '#ff7e67' : '#d4af37';
-  var bgColor     = isExpired ? '#fff5f0' : '#fffbea';
-  var borderColor = isExpired ? '#ffa38d' : '#f4d77a';
+  // 7日前バナーは表示済みとしてマーク
+  if (daysLeft >= 4) {
+    markExpiryBannerShown(app.app_id || app.app_url, daysLeft);
+  }
 
-  var titleText = isExpired
-    ? (isJa ? '⏰ このアプリのURLは期限切れです' : '⏰ This app URL has expired')
+  // 残り日数に応じた色
+  var isUrgent = daysLeft <= 1;
+  var bannerColor = isUrgent ? '#ff7e67' : '#d4af37';
+  var bgColor     = isUrgent ? '#fff5f0' : '#fffbea';
+  var borderColor = isUrgent ? '#ffa38d' : '#f4d77a';
+
+  var titleText = daysLeft === 1
+    ? (isJa ? '⏰ URLの期限まで明日まで！' : '⏰ URL expires tomorrow!')
     : (isJa ? '⏰ URLの期限まであと' + daysLeft + '日' : '⏰ ' + daysLeft + ' days until URL expires');
 
-  var descText = isExpired
-    ? (isJa ? 'URLにアクセスできなくなりました。期限切れのデータは復元できません。次回は期限内に永続保存をご利用ください。' : 'This URL is no longer accessible. Expired data cannot be restored. Use permanent storage next time before it expires.')
-    : (isJa ? 'ホーム画面追加済みのアプリは引き続き使えます。URLを残したい場合は期限内に永続保存をご検討ください。' : 'Your home screen app still works. Consider permanent storage before it expires to keep the URL.');
-
-  var actionBtn = isExpired
-    ? '<button onclick="resetAll();document.getElementById(\'expiry-banner\').remove()" style="flex:1;padding:10px;border:none;border-radius:10px;background:' + bannerColor + ';color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">🎲 ' + (isJa ? '作り直す（無料）' : 'Rebuild (free)') + '</button>'
-    : '<button onclick="openPermanentStorageInfo()" style="flex:1;padding:10px;border:none;border-radius:10px;background:' + bannerColor + ';color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">💾 ' + (isJa ? '永続保存について' : 'About Permanent Storage') + '</button>';
+  var descText = isJa
+    ? 'ホーム画面追加済みのアプリは引き続き使えます。URLを残したい場合は期限内に永続保存（準備中）をご検討ください。'
+    : 'Your home screen app still works. Consider permanent storage before it expires.';
 
   var banner = document.createElement('div');
   banner.id = 'expiry-banner';
@@ -3198,8 +3580,45 @@ function showExpiryBanner(app, daysLeft) {
     '<button onclick="document.getElementById(\'expiry-banner\').remove()" style="background:transparent;border:none;color:#9a8d7c;font-size:18px;cursor:pointer;padding:0 4px;flex-shrink:0;">✕</button>' +
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:12px;">' +
-    actionBtn +
+    '<button onclick="openPermanentStorageInfo()" style="flex:1;padding:10px;border:none;border-radius:10px;background:' + bannerColor + ';color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">💾 ' + (isJa ? '永続保存について' : 'About Permanent Storage') + '</button>' +
     '<button onclick="document.getElementById(\'expiry-banner\').remove()" style="padding:10px 14px;border:1.5px solid #e8e2d5;border-radius:10px;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;color:#6b5d4c;">' + (isJa ? 'あとで' : 'Later') + '</button>' +
+    '</div>' +
+    '</div>';
+  document.body.appendChild(banner);
+}
+
+// 生成直後の「今すぐ永続保存？」バナー（熱量が一番高い瞬間）
+function showFreshSaveBanner(app) {
+  if (!EXPIRY_BANNER_ENABLED) return; // 課金準備完了まで表示しない
+  if (!app || !app.app_url) return;
+  var isJa = (lang === 'ja');
+  var existing = document.getElementById('fresh-save-banner');
+  if (existing) return;
+
+  // 1回だけ表示
+  var shownKey = 'fresh_save_' + (app.app_id || '');
+  try {
+    if (localStorage.getItem(shownKey)) return;
+    localStorage.setItem(shownKey, '1');
+  } catch(e) {}
+
+  var banner = document.createElement('div');
+  banner.id = 'fresh-save-banner';
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:150;padding:12px;animation:slideUp 0.4s ease;';
+  banner.innerHTML =
+    '<div style="max-width:480px;margin:0 auto;background:#f0f8ff;border:1.5px solid #b3d9f5;border-radius:16px;padding:14px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);">' +
+    '<div style="display:flex;align-items:flex-start;gap:10px;">' +
+    '<div style="flex:1;">' +
+    '<div style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:4px;">💾 ' + (isJa ? 'このアプリを永続保存しますか？' : 'Save this app permanently?') + '</div>' +
+    '<div style="font-size:11.5px;color:#4a6a8a;line-height:1.6;">' +
+    (isJa ? 'URLは' + (app.storage_days || 30) + '日で期限切れになります。500円で永続保存すればずっと使えます。' : 'URL expires in ' + (app.storage_days || 30) + ' days. ¥500 to keep it forever.') +
+    '</div>' +
+    '</div>' +
+    '<button onclick="document.getElementById(\'fresh-save-banner\').remove()" style="background:transparent;border:none;color:#9a8d7c;font-size:18px;cursor:pointer;padding:0 4px;flex-shrink:0;">✕</button>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:12px;">' +
+    '<button onclick="openPermanentStorageInfo();document.getElementById(\'fresh-save-banner\').remove()" style="flex:1;padding:10px;border:none;border-radius:10px;background:#1a3a5c;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">💾 ' + (isJa ? '500円で永続保存する' : 'Save forever for ¥500') + '</button>' +
+    '<button onclick="document.getElementById(\'fresh-save-banner\').remove()" style="padding:10px 14px;border:1.5px solid #e8e2d5;border-radius:10px;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;color:#6b5d4c;">' + (isJa ? 'あとで' : 'Later') + '</button>' +
     '</div>' +
     '</div>';
   document.body.appendChild(banner);
@@ -3239,53 +3658,231 @@ function getFillRateLabel(html) {
   return isJa ? '機能追加の余地があります（残り約' + remaining + '%）' : 'Room for more features (~' + remaining + '% remaining)';
 }
 
-function updateFillRateUI(html, rarity) {
-  var isPremiumRarity = rarity === 'sensei' || rarity === 'daimyojin';
-  if (!isPremiumRarity) return;
+// ===== 修正・作り直しシステム =====
+// 修正上限：師範1回、大明神3回
+// 作り直し上限：大明神1回のみ
 
-  var rate = calcFillRate(html);
-  var percent = Math.round(rate * 100);
+var FIX_LIMIT = { normal: 0, sensei: 1, daimyojin: 3 };
+var REDO_LIMIT = { normal: 0, sensei: 0, daimyojin: 1 };
+
+function getFixCount(app) { return app ? (app.fixCount || 0) : 0; }
+function getRedoCount(app) { return app ? (app.redoCount || 0) : 0; }
+function canFix(app) {
+  if (!app) return false;
+  var limit = FIX_LIMIT[app.rarity] || 0;
+  return limit > 0 && getFixCount(app) < limit;
+}
+function canRedo(app) {
+  if (!app) return false;
+  var limit = REDO_LIMIT[app.rarity] || 0;
+  return limit > 0 && getRedoCount(app) < limit;
+}
+
+function updateFixRedoUI(app) {
+  var section = document.getElementById('fix-redo-section');
+  if (!section || !app) return;
+
+  // 開発者モードまたはフラグONの場合のみ表示
+  if (!FEATURE_FLAGS.fixRedoButtons && !isDevMode()) {
+    section.style.display = 'none';
+    return;
+  }
   var isJa = (lang === 'ja');
+  var rarity = app.rarity || 'normal';
+  if (rarity === 'normal') { section.style.display = 'none'; return; }
 
-  var section = document.getElementById('fill-rate-section');
-  if (section) {
-    section.style.display = 'block';
-    var pct = document.getElementById('fill-rate-percent');
-    var lbl = document.getElementById('fill-rate-label');
-    var emoji = document.getElementById('fill-rate-emoji');
-    var bar = document.getElementById('fill-rate-bar');
-    if (pct) pct.textContent = percent + (isJa ? '% 使用中' : '% used');
-    if (lbl) lbl.textContent = getFillRateLabel(html);
-    if (emoji) emoji.textContent = rate >= 0.8 ? '🟠' : rate >= 0.5 ? '🟡' : '🟢';
-    if (bar) {
-      bar.style.width = percent + '%';
-      bar.style.background = rate >= 0.8 ? '#ff7e67' : rate >= 0.5 ? '#d4af37' : '#7ec9a8';
-    }
+  var fixCount = getFixCount(app);
+  var redoCount = getRedoCount(app);
+  var fixLimit = FIX_LIMIT[rarity] || 0;
+  var redoLimit = REDO_LIMIT[rarity] || 0;
+  var fixLeft = fixLimit - fixCount;
+  var redoLeft = redoLimit - redoCount;
+  var rarityColor = rarity === 'daimyojin' ? '#d4af37' : '#1a3a5c';
+  var rarityBg = rarity === 'daimyojin' ? 'rgba(212,175,55,0.07)' : 'rgba(26,58,92,0.05)';
+
+  var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+
+  // 修正ボタン
+  if (fixLimit > 0) {
+    var fixDisabled = fixLeft <= 0;
+    html += '<button onclick="openFixModal()" ' +
+      (fixDisabled ? 'disabled ' : '') +
+      'style="width:100%;padding:13px;border-radius:14px;border:1.5px solid ' + (fixDisabled ? '#e8e2d5' : rarityColor) + ';' +
+      'background:' + (fixDisabled ? '#faf8f4' : rarityBg) + ';cursor:' + (fixDisabled ? 'default' : 'pointer') + ';' +
+      'font-family:inherit;font-size:14px;font-weight:700;color:' + (fixDisabled ? '#9a8d7c' : rarityColor) + ';' +
+      'display:flex;align-items:center;gap:10px;opacity:' + (fixDisabled ? '0.6' : '1') + ';">' +
+      '<span style="font-size:20px;">🔧</span>' +
+      '<div style="flex:1;text-align:left;">' +
+      '<div>' + (isJa ? 'バグ修正・削除する' : 'Fix bugs / remove features') + '</div>' +
+      '<div style="font-size:11px;color:#9a8d7c;font-weight:400;">' +
+      (fixDisabled
+        ? (isJa ? '修正回数の上限に達しました' : 'Fix limit reached')
+        : (isJa ? '残り' + fixLeft + '回・レート制限なし' : fixLeft + ' fix(es) remaining · no rate limit')) +
+      '</div></div></button>';
   }
 
-  var addSection = document.getElementById('add-feature-section');
-  if (addSection) {
-    addSection.style.display = canAddFeature(html, isPremiumRarity) ? 'block' : 'none';
-    var btn = document.getElementById('add-feature-btn');
-    var title = document.getElementById('add-feature-btn-title');
-    if (btn && title) {
-      if (rarity === 'daimyojin') {
-        btn.style.borderColor = '#d4af37';
-        btn.style.background = 'rgba(212,175,55,0.07)';
-        btn.style.color = '#8b6914';
-        title.textContent = isJa ? '🌟 機能を追加する（大明神の特権）' : '🌟 Add Feature (Daimyojin privilege)';
-      } else {
-        btn.style.borderColor = '#1a3a5c';
-        btn.style.background = 'rgba(26,58,92,0.05)';
-        btn.style.color = '#1a3a5c';
-        title.textContent = isJa ? '⚡ 機能を追加する（師範直伝の特権）' : '⚡ Add Feature (Sensei privilege)';
-      }
+  // 作り直しボタン（大明神のみ）
+  if (redoLimit > 0) {
+    var redoDisabled = redoLeft <= 0;
+    html += '<button onclick="doRedoApp()" ' +
+      (redoDisabled ? 'disabled ' : '') +
+      'style="width:100%;padding:13px;border-radius:14px;border:1.5px solid ' + (redoDisabled ? '#e8e2d5' : '#d4af37') + ';' +
+      'background:' + (redoDisabled ? '#faf8f4' : 'rgba(212,175,55,0.07)') + ';cursor:' + (redoDisabled ? 'default' : 'pointer') + ';' +
+      'font-family:inherit;font-size:14px;font-weight:700;color:' + (redoDisabled ? '#9a8d7c' : '#8b6914') + ';' +
+      'display:flex;align-items:center;gap:10px;opacity:' + (redoDisabled ? '0.6' : '1') + ';">' +
+      '<span style="font-size:20px;">🔄</span>' +
+      '<div style="flex:1;text-align:left;">' +
+      '<div>' + (isJa ? '同じ内容で作り直す（別デザイン）' : 'Rebuild with same content (new design)') + '</div>' +
+      '<div style="font-size:11px;color:#9a8d7c;font-weight:400;">' +
+      (redoDisabled
+        ? (isJa ? '作り直し回数の上限に達しました' : 'Redo limit reached')
+        : (isJa ? '残り' + redoLeft + '回・前回と異なるデザインで生成' : redoLeft + ' redo remaining · different design')) +
+      '</div></div></button>';
+  }
+
+  html += '</div>';
+  section.innerHTML = html;
+  section.style.display = 'block';
+}
+
+// 修正モーダルを開く
+function openFixModal() {
+  if (!canFix(genApp)) return;
+  var isJa = (lang === 'ja');
+  var existing = document.getElementById('fix-modal');
+  if (existing) { existing.style.display = 'flex'; return; }
+
+  var el = document.createElement('div');
+  el.id = 'fix-modal';
+  el.style.cssText = 'display:flex;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-end;justify-content:center;';
+  el.innerHTML =
+    '<div style="background:#fff;border-radius:24px 24px 0 0;padding:24px 20px 48px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">' +
+    '<div style="width:40px;height:4px;background:#e8e2d5;border-radius:2px;margin:0 auto 20px;"></div>' +
+    '<div style="font-size:17px;font-weight:700;margin-bottom:4px;color:#3d3529;">🔧 ' + (isJa ? 'バグ修正・削除' : 'Fix / Remove') + '</div>' +
+    '<div style="font-size:12px;color:#9a8d7c;margin-bottom:6px;">' +
+    (isJa ? '動かないボタン・いらない機能・表示崩れなどを修正できます。' : 'Fix broken buttons, remove unwanted features, or fix layout issues.') +
+    '</div>' +
+    '<div style="font-size:11px;color:#ff7e67;margin-bottom:16px;background:#fff5f0;padding:8px 10px;border-radius:8px;">' +
+    '⚠️ ' + (isJa ? '新機能の追加には対応していません（修正・削除専用）' : 'For fixes and removals only — not for adding new features') +
+    '</div>' +
+    '<textarea id="fix-input" rows="4" ' +
+    'placeholder="' + (isJa ? '例：保存ボタンが反応しない\n　　グラフの部分を削除して\n　　下部のナビゲーションが崩れている' : 'e.g. Save button not working\n     Remove the chart section\n     Bottom navigation is broken') + '" ' +
+    'style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #e8e2d5;border-radius:12px;font-family:inherit;font-size:14px;line-height:1.6;resize:vertical;min-height:120px;outline:none;" ' +
+    'oninput="updateFixBtn()"></textarea>' +
+    '<div style="font-size:10px;color:#9a8d7c;margin:6px 0 14px;">※ ' + (isJa ? '1日3回のレート制限にカウントされません' : 'Does not count toward daily limit') + '</div>' +
+    '<button id="do-fix-btn" onclick="doFixApp()" disabled ' +
+    'style="width:100%;padding:15px;border:none;border-radius:14px;background:#5b9bd5;color:#fff;font-size:15px;font-weight:700;cursor:default;font-family:inherit;opacity:0.5;">' +
+    '🔧 ' + (isJa ? '修正して再生成' : 'Fix & Regenerate') +
+    '</button>' +
+    '<button onclick="closeFixModal()" ' +
+    'style="width:100%;padding:13px;border:1.5px solid #e8e2d5;border-radius:14px;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;margin-top:10px;color:#6b5d4c;">' +
+    (isJa ? 'キャンセル' : 'Cancel') +
+    '</button></div>';
+  document.body.appendChild(el);
+}
+
+function closeFixModal() {
+  var m = document.getElementById('fix-modal');
+  if (m) m.remove();
+}
+
+function updateFixBtn() {
+  var val = (document.getElementById('fix-input') || {}).value || '';
+  var btn = document.getElementById('do-fix-btn');
+  if (!btn) return;
+  var empty = val.trim().length === 0;
+  btn.disabled = empty;
+  btn.style.opacity = empty ? '0.5' : '1';
+  btn.style.cursor = empty ? 'default' : 'pointer';
+}
+
+async function doFixApp() {
+  var isJa = (lang === 'ja');
+  var request = (document.getElementById('fix-input') || {}).value || '';
+  request = request.trim();
+  if (!request || !genApp || !canFix(genApp)) return;
+
+  var btn = document.getElementById('do-fix-btn');
+  if (btn) { btn.textContent = isJa ? '🔧 修正中...' : '🔧 Fixing...'; btn.disabled = true; }
+
+  try {
+    var res = await fetch(BACKEND_URL + 'fix-app', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        existing_html: genApp.html,
+        fix_request: request,
+        app_name: genApp.app_name || 'マイアプリ',
+        app_id: genApp.app_id || null,
+        rarity: genApp.rarity || 'sensei',
+        userToken: getUserToken()
+      })
+    });
+    if (!res.ok) throw new Error('BACKEND_ERROR');
+    var data = await res.json();
+    if (data.status === 'ok' && data.html) {
+      genApp.html = data.html;
+      genApp.fixCount = (genApp.fixCount || 0) + 1;
+      if (data.app_url) genApp.app_url = data.app_url;
+      saveProgress({ stage:'result', answers:answers, app:genApp });
+      closeFixModal();
+      var iframe = document.getElementById('app-preview');
+      if (iframe) iframe.srcdoc = data.html;
+      updateFixRedoUI(genApp);
+      alert(isJa ? '🔧 修正しました！プレビューを確認してください。' : '🔧 Fixed! Check the preview.');
+    } else {
+      throw new Error(data.blocked_reason || (isJa ? '修正に失敗しました' : 'Fix failed'));
     }
+  } catch (err) {
+    alert((isJa ? '❌ 修正に失敗しました。\n' : '❌ Fix failed.\n') + err.message);
+    if (btn) { btn.textContent = isJa ? '🔧 修正して再生成' : '🔧 Fix & Regenerate'; btn.disabled = false; }
+  }
+}
+
+// 作り直し（大明神のみ・異なるデザインで再生成）
+async function doRedoApp() {
+  var isJa = (lang === 'ja');
+  if (!canRedo(genApp)) return;
+
+  var ok = confirm(isJa
+    ? '同じ内容で作り直しますか？\n前回とは異なるデザイン・レイアウトで生成します。\n（URLは新しくなります）'
+    : 'Rebuild with the same content?\nWill use a different design and layout.\n(A new URL will be generated)');
+  if (!ok) return;
+
+  // 作り直し回数を記録
+  genApp.redoCount = (genApp.redoCount || 0) + 1;
+  saveProgress({ stage:'result', answers:answers, app:genApp });
+
+  // 同じanswersでtemperature高めで再生成
+  phase = 'loading';
+  loadStep = 0;
+  render();
+  startLoading();
+
+  try {
+    var ans = Object.assign({}, answers, {
+      _redo_instruction: '前回とは異なるデザインアプローチ・レイアウト・配色で作ること。同じ機能でも見た目や操作感を意図的に変えてください。'
+    });
+    var res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        answers: ans,
+        userToken: getUserToken(),
+        rarity: 'daimyojin' // 大明神で再生成
+      })
+    });
+    if (!res.ok) throw new Error('BACKEND_ERROR');
+    var data = await res.json();
+    // 作り直し回数を引き継ぐ
+    if (data.status === 'ok') data.redoCount = genApp.redoCount;
+    handleApiSuccess(data);
+  } catch (err) {
+    handleApiError(err);
   }
 }
 
 // 機能追加システムは削除済み（v20から）
-// 代わりに師範直伝・大明神の初回生成品質を強化
 
 function resetAll() {
   clearProgress();
