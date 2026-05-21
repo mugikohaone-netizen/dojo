@@ -3898,6 +3898,28 @@ function resetAll() {
   bugPhase = 'idle'; phase = 'welcome'; render();
 }
 
+// URLパラメータで開発者モードを自動起動
+// 使い方: dojo.html?dev=karate-papa-dev-2026
+(function() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var devParam = params.get('dev');
+    if (devParam) {
+      var DEV_PASSWORD = 'karate-papa-dev-2026';
+      if (devParam === DEV_PASSWORD) {
+        if (!getDevMode()) {
+          localStorage.setItem(DEV_MODE_KEY, JSON.stringify({
+            forceRarity: null, infiniteExpiry: false, enabled: true
+          }));
+          console.log('✅ 開発者モードON（URLパラメータ）');
+        }
+        // パスワードをURLから消す（セキュリティ）
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  } catch(e) {}
+})();
+
 render();
 
 // Service Worker 登録（PWA化）
